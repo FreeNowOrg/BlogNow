@@ -32,8 +32,8 @@ async function logout(token: string): Promise<boolean> {
 
 async function register(request: any): Promise<number> {
   const { username, password } = request
-  const dbData = await dbFind('users', {}, {}, 'uid', 1)
-  const uid = +dbData[dbData.length - 1].uid + 1
+  const dbData = await dbFind('users', {}, {}, 'uid', -1)
+  const uid = +dbData[0].uid + 1
   const hash = crypto.createHmac('sha256', uid.toString()).update(password).digest('hex')
   await dbInsertOne('users', { uid: uid, username: username, passwordHash: hash, registrationTime: Date.now() })
   return uid
