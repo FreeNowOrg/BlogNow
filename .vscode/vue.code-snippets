@@ -35,11 +35,9 @@
       "</template>",
       "",
       "<script lang=\"ts\">",
-      "import { defineComponent } from 'vue'",
-      "",
-      "export default defineComponent({",
+      "export default {",
       "  setup() {},",
-      "})",
+      "}",
       "</script>",
       "",
       "<style scoped lang=\"stylus\"></style>"

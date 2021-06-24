@@ -1,0 +1,14 @@
+{
+  "Init": {
+    "scope": "typescript",
+    "prefix": "init",
+    "description": "Init serverless module",
+    "body": [
+      "import { VercelRequest, VercelResponse } from '@vercel/node'",
+      "",
+      "export default async (req: VercelRequest, res: VercelResponse) => {",
+      "  $0",
+      "}"
+    ]
+  }
+}

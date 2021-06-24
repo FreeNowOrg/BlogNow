@@ -16,30 +16,23 @@ router.addRoute({
 router.addRoute({
   path: '/post/:pid',
   alias: ['/p/:pid'],
-  name: 'post-view',
-  component: () => import('./view/post/view.vue'),
+  name: 'post',
+  component: () => import('./view/post.vue'),
 })
 
 // User
-router.addRoute({
-  path: '/user/:uid',
-  name: 'users',
-  component: () => import('./view/user.vue'),
-})
+// router.addRoute({
+//   path: '/user/:uid',
+//   name: 'users',
+//   component: () => import('./view/user.vue'),
+// })
 
 // Search
-router.addRoute({
-  path: '/search',
-  name: 'search-index-redirect',
-  component: () => import('./view/search.vue'),
-})
-
-// About
-router.addRoute({
-  path: '/about',
-  name: 'about-us',
-  component: () => import('./view/about.vue'),
-})
+// router.addRoute({
+//   path: '/search',
+//   name: 'search-index-redirect',
+//   component: () => import('./view/search.vue'),
+// })
 
 // 404
 router.addRoute({

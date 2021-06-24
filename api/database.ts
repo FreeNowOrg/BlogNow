@@ -2,7 +2,6 @@ import {
   MongoClient,
   Db,
   Collection,
-  FilterQuery,
   UpdateWriteOpResult,
   DeleteWriteOpResultObject,
   InsertOneWriteOpResult,
@@ -19,7 +18,7 @@ declare module 'mongodb' {
   }
 }
 
-function dbConnect(): Promise<Db> {
+export function dbConnect(): Promise<Db> {
   return new Promise((next, reject) => {
     const client = new MongoClient(uri, {
       useNewUrlParser: true,
@@ -37,7 +36,7 @@ function dbConnect(): Promise<Db> {
   })
 }
 
-function dbCollection(collection: string): Promise<Collection> {
+export function dbCollection(collection: string): Promise<Collection> {
   return new Promise(async (next, reject) => {
     const db = await dbConnect()
     db.collection(collection, async (error, col) => {
@@ -51,7 +50,7 @@ function dbCollection(collection: string): Promise<Collection> {
   })
 }
 
-function dbFind(
+export function dbFind(
   colName: string,
   find = {},
   project = {},
@@ -75,7 +74,7 @@ function dbFind(
   })
 }
 
-function dbInsertOne(
+export function dbInsertOne(
   colName: string,
   doc: any
 ): Promise<InsertOneWriteOpResult<any>> {
@@ -92,7 +91,7 @@ function dbInsertOne(
   })
 }
 
-function dbUpdateOne(
+export function dbUpdateOne(
   colName: string,
   filter = {},
   update = {}
@@ -110,7 +109,7 @@ function dbUpdateOne(
   })
 }
 
-function dbDeleteOne(
+export function dbDeleteOne(
   colName: string,
   filter = {}
 ): Promise<DeleteWriteOpResultObject> {
@@ -127,11 +126,20 @@ function dbDeleteOne(
   })
 }
 
-export {
-  dbConnect,
-  dbCollection,
-  dbFind,
-  dbInsertOne,
-  dbUpdateOne,
-  dbDeleteOne,
+export function createFilter(query: string[]) {
+  const filter = {}
+  for (const key in query) {
+    const value = query[key]
+    if (!value.length) return
+    filter[key] = { $in: value }
+  }
+  return filter
+}
+
+export function createProjection(query: string[]) {
+  const filter = {}
+  for (const val of query) {
+    filter[val] = 1
+  }
+  return filter
 }

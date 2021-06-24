@@ -19,7 +19,6 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^3.0.0-4",
     "axios": "^0.21.1",
-    "jsonwebtoken": "^8.5.1",
     "nprogress": "^0.2.0",
     "vue": "^3.0.4",
     "vue-router": "^4.0.9"
@@ -35,6 +34,7 @@
     "@vuedx/typecheck": "^0.3.1-insiders-1606311019.0",
     "@vuedx/typescript-plugin-vue": "^0.3.1-insiders-1606311019.0",
     "mongodb": "^3.6.9",
+    "jsonwebtoken": "^8.5.1",
     "prettier": "^2.3.1",
     "pug": "^3.0.2",
     "stylus": "^0.54.8",

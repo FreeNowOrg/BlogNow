@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import axios from 'axios'
-import ErrorPage from '../../components/ErrorPage.vue'
+import ErrorPage from '../components/ErrorPage.vue'
 
 export default {
   components: {

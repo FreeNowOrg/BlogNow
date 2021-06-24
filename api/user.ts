@@ -60,14 +60,14 @@ export async function logout(token: string): Promise<boolean> {
 export async function register(request: any): Promise<number> {
   const { username, password } = request
   const dbData = await dbFind('users', {}, {}, 'uid', -1)
-  const uid = +dbData[0].uid + 1
+  const uid = dbData.length > 0 ? +dbData[0].uid + 1 : 1
   const hash = crypto
     .createHmac('sha256', uid.toString())
     .update(password)
     .digest('hex')
   await dbInsertOne('users', {
-    uid: uid,
-    username: username,
+    uid,
+    username,
     passwordHash: hash,
     registrationTime: Date.now(),
   })
@@ -198,8 +198,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     'modify',
   ]
   const { query, headers, body } = req
+
+  console.log(body)
+
   if (
-    postRequiredActions.includes(query.action.toString()) &&
+    postRequiredActions.includes(query.action?.toString()) &&
     req.method !== 'POST'
   ) {
     res
