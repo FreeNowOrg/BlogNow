@@ -55,14 +55,15 @@ function dbFind(
   colName: string,
   find = {},
   project = {},
-  sort = {}
+  sort = {},
+  sortDir = 1
 ): Promise<any[]> {
   return new Promise(async (next, reject) => {
     const col = await dbCollection(colName)
     col
       .find(find)
       .project(project)
-      .sort(sort)
+      .sort(sort, sortDir)
       .toArray(async (error, docs) => {
         if (error) {
           await col._client.close()
@@ -76,12 +77,12 @@ function dbFind(
 
 function dbInsertOne(
   colName: string,
-  docName: string
+  doc: any
 ): Promise<InsertOneWriteOpResult<any>> {
   return new Promise(async (next, reject) => {
     const col = await dbCollection(colName)
     try {
-      const res = await col.insertOne(docName)
+      const res = await col.insertOne(doc)
       await col._client.close()
       next(res)
     } catch (err) {

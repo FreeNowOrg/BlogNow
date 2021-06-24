@@ -1,10 +1,14 @@
 // User
 export interface DatabaseUser {
   _id: string
-  uid: string
+  uid: number
   username: string
   passwordHash: string
+  registrationTime: number
   userGroups: UserGroup[]
+  postNumber: number
+  lastActiveTime: number
+  lastTokenJti: string
 }
 
 export type UserGroup = '*' | 'member' | 'moderator' | 'admin'
@@ -23,7 +27,7 @@ export interface DatabasePost {
   }
   categories: string[]
   contentHistory: {
-    latest?: true
+    latest?: boolean
     title: string
     content: string
     editor: string

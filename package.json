@@ -18,12 +18,14 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^3.0.0-4",
     "axios": "^0.21.1",
+    "jsonwebtoken": "^8.5.1",
     "nprogress": "^0.2.0",
     "vue": "^3.0.4",
     "vue-router": "^4.0.9"
   },
   "devDependencies": {
     "@dragon-fish/bump": "^0.0.15",
+    "@types/jsonwebtoken": "^8.5.2",
     "@types/mongodb": "^3.6.18",
     "@types/nprogress": "^0.2.0",
     "@vercel/node": "^1.11.1",
