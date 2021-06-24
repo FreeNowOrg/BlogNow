@@ -6,16 +6,17 @@ import { DatabaseUser } from './types'
 
 async function login(request: any): Promise<number> {
   const { username, password } = request
-  if (username && password) {
-    const dbData = await dbFind('users', { $or: [{ username: username }, { uid: parseInt(username) }] })
-    if (dbData.length < 1) return -1
-    dbData.forEach((value: DatabaseUser) => {
-      if (authPassword(value.uid, password, value.passwordHash)) return value.uid
-    })
-    return -1
-  } else {
+  if (!(username && password)) {
     return -1
   }
+  const dbData = await dbFind('users', { $or: [{ username: username }, { uid: parseInt(username) }] })
+  if (dbData.length < 1) {
+    return -1
+  }
+  dbData.forEach((value: DatabaseUser) => {
+    if (authPassword(value.uid, password, value.passwordHash)) return value.uid
+  })
+  return -1
 }
 
 function authPassword(uid: number, password: string, desiredHash: string): boolean {
