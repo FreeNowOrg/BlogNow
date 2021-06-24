@@ -49,30 +49,36 @@ async function modify(request: any, token: string): Promise<boolean> {
     }
     return true
   }
-  const dbData = await dbFind('users', { uid: request.uid })[0]
-  const tokenUid = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii')).aud
-  switch (request.modify) {
-    case 'username':
-      if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
+  try {
+    const secret = (await dbFind('config', { name: 'secret' }))[0].value
+    const dbData = await dbFind('users', { uid: request.uid })[0]
+    const decoded: any = jwt.verify(token, secret)
+    const tokenUid = decoded.aud
+    switch (request.modify) {
+      case 'username':
+        if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
+          return false
+        }
+        if (request.newUsername === dbData.username) {
+          return false
+        }
+        await dbUpdateOne('users', { uid: tokenUid }, { username: request.newUsername })
+        return true
+      case 'password':
+        if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
+          return false
+        }
+        const newHash = crypto.createHmac('sha256', tokenUid.toString()).update(request.newPassword).digest('hex')
+        if (newHash === dbData.passwordHash) {
+          return false
+        }
+        await dbUpdateOne('users', { uid: tokenUid }, { passwordHash: newHash })
+        return true
+      default:
         return false
-      }
-      if (request.newUsername === dbData.username) {
-        return false
-      }
-      await dbUpdateOne('users', { uid: tokenUid }, { username: request.newUsername })
-      return true
-    case 'password':
-      if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
-        return false
-      }
-      const newHash = crypto.createHmac('sha256', tokenUid.toString()).update(request.newPassword).digest('hex')
-      if (newHash === dbData.passwordHash) {
-        return false
-      }
-      await dbUpdateOne('users', { uid: tokenUid }, { passwordHash: newHash })
-      return true
-    default:
-      return false
+    }
+  } catch (error) {
+    return false
   }
 }
 
@@ -84,8 +90,8 @@ async function issueToken(uid: number): Promise<string> {
 }
 
 async function verifyToken(token: string): Promise<boolean> {
-  const secret = (await dbFind('config', { name: 'secret' }))[0].value
   try {
+    const secret = (await dbFind('config', { name: 'secret' }))[0].value
     const decoded: any = jwt.verify(token, secret)
     const dbData = await dbFind('users', { uid: decoded.aud })
     if (dbData.length < 1) {
@@ -162,22 +168,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       }
       break
     case 'modify':
-      token = getTokenFromHeader(headers.authorization || '')
-      if (!await verifyToken(token)) {
+      if (await modify(body, token)) {
+        await logout(token)
         res
-          .status(403)
-          .json({ code: 403, message: 'Bad token received.' })
-      } else {
-        if (await modify(body, token)) {
-          await logout(token)
-          res
-            .status(200)
-            .json({ code: 200, message: 'Modification successful. You need to login again.' })
-        } else {
-          res
-            .status(403)
-            .json({ code: 403, message: 'Permission denied.' })
-        }
+          .status(200)
+          .json({ code: 200, message: 'Modification successful. You need to login again.' })
       }
       break
     default:
