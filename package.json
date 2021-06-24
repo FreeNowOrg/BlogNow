@@ -10,6 +10,7 @@
     "start": "vite",
     "serve": "vercel dev",
     "build": "vuedx-typecheck ./src && vite build",
+    "pretty": "prettier --write ./src ./api",
     "preview": "vercel deploy",
     "bump": "bump --nopublish"
   },
@@ -34,6 +35,7 @@
     "@vuedx/typecheck": "^0.3.1-insiders-1606311019.0",
     "@vuedx/typescript-plugin-vue": "^0.3.1-insiders-1606311019.0",
     "mongodb": "^3.6.9",
+    "prettier": "^2.3.1",
     "pug": "^3.0.2",
     "stylus": "^0.54.8",
     "typescript": "^4.1.2",

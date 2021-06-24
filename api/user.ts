@@ -2,14 +2,30 @@ import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { dbFind, dbInsertOne, dbUpdateOne } from './database'
-import { DatabaseUser } from './types'
 
-async function login(request: any): Promise<number> {
+// Types
+export interface DatabaseUser {
+  _id: string
+  uid: number
+  username: string
+  passwordHash: string
+  registrationTime: number
+  userGroups: UserGroup[]
+  postNumber: number
+  lastActiveTime: number
+  lastTokenJti: string
+}
+
+export type UserGroup = '*' | 'member' | 'moderator' | 'admin'
+
+export async function login(request: any): Promise<number> {
   const { username, password } = request
   if (!(username && password)) {
     return -1
   }
-  const dbData = await dbFind('users', { $or: [{ username: username }, { uid: parseInt(username) }] })
+  const dbData = await dbFind('users', {
+    $or: [{ username: username }, { uid: parseInt(username) }],
+  })
   if (dbData.length < 1) {
     return -1
   }
@@ -19,28 +35,52 @@ async function login(request: any): Promise<number> {
   return -1
 }
 
-function authPassword(uid: number, password: string, desiredHash: string): boolean {
-  const hash = crypto.createHmac('sha256', uid.toString()).update(password).digest('hex')
+export function authPassword(
+  uid: number,
+  password: string,
+  desiredHash: string
+): boolean {
+  const hash = crypto
+    .createHmac('sha256', uid.toString())
+    .update(password)
+    .digest('hex')
   return hash === desiredHash
 }
 
-async function logout(token: string): Promise<boolean> {
+export async function logout(token: string): Promise<boolean> {
   const body = JSON.parse(Buffer.from(token.split('.')[1]).toString('ascii'))
-  await dbUpdateOne('users', { uid: body.aud }, { $set: { lastTokenJti: '', lastActiveTime: Date.now() } })
+  await dbUpdateOne(
+    'users',
+    { uid: body.aud },
+    { $set: { lastTokenJti: '', lastActiveTime: Date.now() } }
+  )
   return true
 }
 
-async function register(request: any): Promise<number> {
+export async function register(request: any): Promise<number> {
   const { username, password } = request
   const dbData = await dbFind('users', {}, {}, 'uid', -1)
   const uid = +dbData[0].uid + 1
-  const hash = crypto.createHmac('sha256', uid.toString()).update(password).digest('hex')
-  await dbInsertOne('users', { uid: uid, username: username, passwordHash: hash, registrationTime: Date.now() })
+  const hash = crypto
+    .createHmac('sha256', uid.toString())
+    .update(password)
+    .digest('hex')
+  await dbInsertOne('users', {
+    uid: uid,
+    username: username,
+    passwordHash: hash,
+    registrationTime: Date.now(),
+  })
   return uid
 }
 
-async function modify(request: any, token: string): Promise<boolean> {
-  const secondAuth = (tokenUid: number, requestUid: number, password: string, passwordHash: string) => {
+export async function modify(request: any, token: string): Promise<boolean> {
+  const secondAuth = (
+    tokenUid: number,
+    requestUid: number,
+    password: string,
+    passwordHash: string
+  ) => {
     if (tokenUid !== requestUid) {
       return false
     }
@@ -56,19 +96,40 @@ async function modify(request: any, token: string): Promise<boolean> {
     const tokenUid = decoded.aud
     switch (request.modify) {
       case 'username':
-        if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
+        if (
+          !secondAuth(
+            tokenUid,
+            request.uid,
+            request.password,
+            dbData.passwordHash
+          )
+        ) {
           return false
         }
         if (request.newUsername === dbData.username) {
           return false
         }
-        await dbUpdateOne('users', { uid: tokenUid }, { username: request.newUsername })
+        await dbUpdateOne(
+          'users',
+          { uid: tokenUid },
+          { username: request.newUsername }
+        )
         return true
       case 'password':
-        if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
+        if (
+          !secondAuth(
+            tokenUid,
+            request.uid,
+            request.password,
+            dbData.passwordHash
+          )
+        ) {
           return false
         }
-        const newHash = crypto.createHmac('sha256', tokenUid.toString()).update(request.newPassword).digest('hex')
+        const newHash = crypto
+          .createHmac('sha256', tokenUid.toString())
+          .update(request.newPassword)
+          .digest('hex')
         if (newHash === dbData.passwordHash) {
           return false
         }
@@ -82,14 +143,22 @@ async function modify(request: any, token: string): Promise<boolean> {
   }
 }
 
-async function issueToken(uid: number): Promise<string> {
+export async function issueToken(uid: number): Promise<string> {
   const random = crypto.randomBytes(16).toString('hex')
   const secret = (await dbFind('config', { name: 'secret' }))[0].value
-  await dbUpdateOne('users', { uid: uid }, { $set: { lastTokenJti: random, lastActiveTime: Date.now() } })
-  return jwt.sign({}, secret, { audience: uid.toString(), expiresIn: '3d', jwtid: random })
+  await dbUpdateOne(
+    'users',
+    { uid: uid },
+    { $set: { lastTokenJti: random, lastActiveTime: Date.now() } }
+  )
+  return jwt.sign({}, secret, {
+    audience: uid.toString(),
+    expiresIn: '3d',
+    jwtid: random,
+  })
 }
 
-async function verifyToken(token: string): Promise<boolean> {
+export async function verifyToken(token: string): Promise<boolean> {
   try {
     const secret = (await dbFind('config', { name: 'secret' }))[0].value
     const decoded: any = jwt.verify(token, secret)
@@ -106,12 +175,14 @@ async function verifyToken(token: string): Promise<boolean> {
   }
 }
 
-async function renewToken(token: string): Promise<string> {
-  const body = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii'))
+export async function renewToken(token: string): Promise<string> {
+  const body = JSON.parse(
+    Buffer.from(token.split('.')[1], 'base64').toString('ascii')
+  )
   return issueToken(body.aud)
 }
 
-function getTokenFromHeader(header: string): string {
+export function getTokenFromHeader(header: string): string {
   if (!header.startsWith('Bearer ')) {
     return ''
   }
@@ -119,9 +190,18 @@ function getTokenFromHeader(header: string): string {
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-  const postRequiredActions = ['login', 'logout', 'register', 'verify', 'modify']
+  const postRequiredActions = [
+    'login',
+    'logout',
+    'register',
+    'verify',
+    'modify',
+  ]
   const { query, headers, body } = req
-  if (postRequiredActions.includes(query.action.toString()) && req.method !== 'POST') {
+  if (
+    postRequiredActions.includes(query.action.toString()) &&
+    req.method !== 'POST'
+  ) {
     res
       .status(405)
       .setHeader('allow', 'POST')
@@ -133,52 +213,53 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     case 'login':
       uid = await login({ username: body.username, password: body.password })
       if (uid !== -1) {
-        res
-          .status(200)
-          .json({ code: 200, message: 'Login successful.', token: await issueToken(uid) })
+        res.status(200).json({
+          code: 200,
+          message: 'Login successful.',
+          token: await issueToken(uid),
+        })
       }
       break
     case 'register':
       uid = await register({ username: body.username, password: body.password })
       if (uid !== -1) {
-        res
-          .status(200)
-          .json({ code: 200, message: 'Registration successful.', token: await issueToken(uid) })
+        res.status(200).json({
+          code: 200,
+          message: 'Registration successful.',
+          token: await issueToken(uid),
+        })
       }
       break
     case 'logout':
       token = getTokenFromHeader(headers.authorization || '')
       if (await verifyToken(token)) {
         await logout(token)
-        res
-          .status(200)
-          .json({ code: 200, message: 'Logout successful.' })
+        res.status(200).json({ code: 200, message: 'Logout successful.' })
       }
       break
     case 'verify':
       token = getTokenFromHeader(headers.authorization || '')
-      if (!await verifyToken(token)) {
-        res
-          .status(403)
-          .json({ code: 403, message: 'Bad token received.' })
+      if (!(await verifyToken(token))) {
+        res.status(403).json({ code: 403, message: 'Bad token received.' })
       } else {
-        res
-          .status(200)
-          .json({ code: 200, message: 'Verification successful.', token: await renewToken(token) })
+        res.status(200).json({
+          code: 200,
+          message: 'Verification successful.',
+          token: await renewToken(token),
+        })
       }
       break
     case 'modify':
       if (await modify(body, token)) {
         await logout(token)
-        res
-          .status(200)
-          .json({ code: 200, message: 'Modification successful. You need to login again.' })
+        res.status(200).json({
+          code: 200,
+          message: 'Modification successful. You need to login again.',
+        })
       }
       break
     default:
-      res
-        .status(400)
-        .json({ code: 400, message: 'Unknown action.' })
+      res.status(400).json({ code: 400, message: 'Unknown action.' })
       break
   }
 }
