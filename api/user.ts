@@ -50,7 +50,7 @@ async function modify(request: any, token: string): Promise<boolean> {
     return true
   }
   const dbData = await dbFind('users', { uid: request.uid })[0]
-  const tokenUid = JSON.parse(Buffer.from(token.split('.')[1]).toString('ascii')).aud
+  const tokenUid = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii')).aud
   switch (request.modify) {
     case 'username':
       if (!secondAuth(tokenUid, request.uid, request.password, dbData.passwordHash)) {
@@ -101,12 +101,12 @@ async function verifyToken(token: string): Promise<boolean> {
 }
 
 async function renewToken(token: string): Promise<string> {
-  const body = JSON.parse(Buffer.from(token.split('.')[1]).toString('ascii'))
+  const body = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii'))
   return issueToken(body.aud)
 }
 
 function getTokenFromHeader(header: string): string {
-  if (!header.startsWith('Bearer')) {
+  if (!header.startsWith('Bearer ')) {
     return ''
   }
   return header.replace(/^Bearer /g, '')
