@@ -33,10 +33,10 @@ async function logout(token: string): Promise<boolean> {
 async function register(request: any): Promise<number> {
   const { username, password } = request
   const dbData = await dbFind('users', {}, {}, 'uid', 1)
-  const maxUid = +dbData[dbData.length - 1].uid + 1
-  const hash = crypto.createHmac('sha256', maxUid.toString()).update(password).digest('hex')
-  await dbInsertOne('users', { uid: maxUid, username: username, passwordHash: hash, registrationTime: Date.now() })
-  return maxUid
+  const uid = +dbData[dbData.length - 1].uid + 1
+  const hash = crypto.createHmac('sha256', uid.toString()).update(password).digest('hex')
+  await dbInsertOne('users', { uid: uid, username: username, passwordHash: hash, registrationTime: Date.now() })
+  return uid
 }
 
 async function modify(request: any, token: string): Promise<boolean> {
