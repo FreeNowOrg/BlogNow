@@ -212,9 +212,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     'modify',
   ]
   const { query, headers, body } = req
-
-  console.log(body)
-
   if (
     postRequiredActions.includes(query.action?.toString()) &&
     req.method !== 'POST'
