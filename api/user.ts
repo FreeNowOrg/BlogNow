@@ -36,7 +36,7 @@ export async function login(request: UserUpdateParams): Promise<string> {
     $or: [{ username: username }, { nickname: username }],
   })
   if (dbData.length < 1) {
-    throw new Error('No user found')
+    throw new Error('No such user')
   }
   for (const value of dbData) {
     if (authPassword(value.uuid, password, value.passwordHash))
@@ -114,10 +114,7 @@ export function authPassword(
   return hash === desiredHash
 }
 
-export function secondAuth(
-  request: UserUpdateParams,
-  dbData: DatabaseUser
-) {
+export function secondAuth(request: UserUpdateParams, dbData: DatabaseUser) {
   if (dbData.uuid !== request.uuid) {
     return false
   }
@@ -127,7 +124,10 @@ export function secondAuth(
   return true
 }
 
-export async function modifyNickname(oldName: string, request: UserUpdateParams) {
+export async function modifyNickname(
+  oldName: string,
+  request: UserUpdateParams
+) {
   if (request.newName === oldName) {
     throw new Error('New nickname is the same as the old one')
   }
@@ -138,7 +138,10 @@ export async function modifyNickname(oldName: string, request: UserUpdateParams)
   )
 }
 
-export async function modifyUsername(oldName: string, request: UserUpdateParams) {
+export async function modifyUsername(
+  oldName: string,
+  request: UserUpdateParams
+) {
   if (request.newName === oldName) {
     throw new Error('New username is the same as the old one')
   }
@@ -149,7 +152,10 @@ export async function modifyUsername(oldName: string, request: UserUpdateParams)
   )
 }
 
-export async function modifyPassword(oldHash: string, request: UserUpdateParams) {
+export async function modifyPassword(
+  oldHash: string,
+  request: UserUpdateParams
+) {
   const newHash = crypto
     .createHmac('sha256', request.uuid)
     .update(request.newPassword)
@@ -167,7 +173,12 @@ export async function issueToken(uuid: string): Promise<string> {
   await dbUpdateOne(
     'users',
     { uuid },
-    { $set: { lastTokenJti: random, lastActiveTime: new Date(iat).toISOString() } }
+    {
+      $set: {
+        lastTokenJti: random,
+        lastActiveTime: new Date(iat).toISOString(),
+      },
+    }
   )
   return jwt.sign({ iat: Math.floor(iat / 1000) }, secret, {
     audience: uuid,
@@ -236,7 +247,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           password: body.password,
         })
         res.status(200).json({
-          code: 0,
           message: 'Registration successful.',
           uuid,
           token: await issueToken(uuid),
@@ -246,12 +256,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         await logout(body, token)
         res
           .status(200)
-          .json({ code: 0, message: 'Logout successful.', uuid: body.uuid })
+          .json({ message: 'Logout successful.', uuid: body.uuid })
         break
       case 'verify':
         await verifyToken(body, token)
         res.status(200).json({
-          code: 0,
           message: 'Verification successful.',
           uuid: body.uuid,
           token: await issueToken(body.uuid),
@@ -260,7 +269,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       case 'modify':
         await modify(body, token)
         const response = {
-          code: 0,
           message: 'Modification successful.',
           uuid: body.uuid,
         }
@@ -278,9 +286,30 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         throw new Error('Unknown action')
     }
   } catch (error) {
-    res.status(500).json({
-      code: 1,
-      message: `Server error: ${error.message}`,
+    // all error handled here
+    switch (error.message) {
+      case 'No such user':
+      case 'Invalid username or password':
+      case 'Empty username or password':
+      case 'A user with this name already exists':
+      case 'No such modify action':
+      case 'New nickname is the same as the old one':
+      case 'New username is the same as the old one':
+      case 'New password is the same as the old one':
+        res.status(400)
+        break
+      case 'Permission denied':
+        res.status(403)
+        break
+      case 'This action only accepts POST method':
+        res.setHeader('allow', 'POST').status(405)
+        break
+      default:
+        res.status(500)
+        break
+    }
+    res.json({
+      message: error.message,
     })
     throw error
   }
