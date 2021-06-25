@@ -203,7 +203,10 @@ export async function verifyToken(
 }
 
 // this helper function helps to renew token in one step
-export async function renewToken(request: UserUpdateParams, token: string): Promise<string> {
+export async function renewToken(
+  request: UserUpdateParams,
+  token: string
+): Promise<string> {
   await verifyToken(request, token)
   const newToken = await issueToken(request.uuid)
   return newToken
@@ -216,6 +219,7 @@ export function getTokenFromHeader(header: string): string {
   return header.replace(/^Bearer /g, '')
 }
 
+// API notice: please send 'Authorization' header to check token validity
 export default async (req: VercelRequest, res: VercelResponse) => {
   try {
     const postRequiredActions = [
@@ -261,9 +265,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         break
       case 'logout':
         await logout(body, token)
-        res
-          .status(200)
-          .json({ message: 'Logout successful.', uuid: body.uuid })
+        res.status(200).json({ message: 'Logout successful.', uuid: body.uuid })
         break
       case 'verify':
         await verifyToken(body, token)
