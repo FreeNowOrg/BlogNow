@@ -28,7 +28,7 @@ export default defineComponent({
           username: this.username,
           password: this.password,
         })
-        .then(alert, alert)
+        .then(console.log, console.error)
     },
     register() {
       axios
@@ -36,7 +36,7 @@ export default defineComponent({
           username: this.username,
           password: this.password,
         })
-        .then(alert, alert)
+        .then(console.log, console.error)
     },
   },
 })

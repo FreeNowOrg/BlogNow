@@ -1,7 +1,9 @@
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
+import { v4 as uuidv4 } from 'uuid'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { dbFind, dbInsertOne, dbUpdateOne } from './database'
+import { getConfig } from './config'
 
 // Types
 export interface DatabaseUser {
@@ -10,10 +12,10 @@ export interface DatabaseUser {
   uuid: string
   username: string
   passwordHash: string
-  registrationTime: number
   userGroups: UserGroup[]
-  postNumber: number
-  lastActiveTime: number
+  // postNumber: number
+  registrationTime: string
+  lastActiveTime: string
   lastTokenJti: string
 }
 
@@ -60,7 +62,7 @@ export async function logout(token: string): Promise<boolean> {
   await dbUpdateOne(
     'users',
     { uuid: body.aud },
-    { $set: { lastTokenJti: '', lastActiveTime: Date.now() } }
+    { $set: { lastTokenJti: '', lastActiveTime: new Date().toISOString() } }
   )
   return true
 }
@@ -69,14 +71,14 @@ export async function register(request: UserRequest): Promise<string> {
   const { username, password } = request
   const dbData = await dbFind('users', {}, {}, 'uid', -1)
   const uid = dbData.length > 0 ? +dbData[0].uid + 1 : 1
-  const uuid = crypto.randomUUID()
+  const uuid = uuidv4()
   const hash = crypto.createHmac('sha256', uuid).update(password).digest('hex')
   await dbInsertOne('users', {
     uid,
     uuid,
     username,
     passwordHash: hash,
-    registrationTime: Date.now(),
+    registrationTime: new Date().toISOString(),
   })
   return uuid
 }
@@ -159,11 +161,11 @@ export async function modify(
 
 export async function issueToken(uuid: string): Promise<string> {
   const random = crypto.randomBytes(16).toString('hex')
-  const secret = (await dbFind('config', { name: 'secret' }))[0].value
+  const secret = await getConfig('secret')
   await dbUpdateOne(
     'users',
     { uuid: uuid },
-    { $set: { lastTokenJti: random, lastActiveTime: Date.now() } }
+    { $set: { lastTokenJti: random, lastActiveTime: new Date().toISOString() } }
   )
   return jwt.sign({}, secret, {
     audience: uuid,
@@ -227,12 +229,15 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     case 'login':
       uuid = await login({ username: body.username, password: body.password })
       if (uuid !== '') {
-        res.status(200).json({
+        return res.status(200).json({
           code: 200,
           message: 'Login successful.',
           token: await issueToken(uuid),
         })
       }
+      return res
+        .status(403)
+        .send({ code: 403, message: 'Wrong username or password' })
       break
     case 'register':
       console.log(body)
