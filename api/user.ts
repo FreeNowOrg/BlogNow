@@ -83,7 +83,7 @@ export async function logout(
   await dbUpdateOne(
     'users',
     { uuid: request.uuid },
-    { $set: { lastTokenJti: '', lastActiveTime: Date.now() } }
+    { $set: { lastTokenJti: '', lastActiveTime: new Date().toISOString() } }
   )
 }
 
@@ -192,9 +192,9 @@ export async function issueToken(uuid: string): Promise<string> {
   await dbUpdateOne(
     'users',
     { uuid },
-    { $set: { lastTokenJti: random, lastActiveTime: iat } }
+    { $set: { lastTokenJti: random, lastActiveTime: new Date(iat).toISOString() } }
   )
-  return jwt.sign({ iat }, secret, {
+  return jwt.sign({ iat: Math.floor(iat / 1000) }, secret, {
     audience: uuid,
     expiresIn: '3d',
     jwtid: random,
