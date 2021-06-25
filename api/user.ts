@@ -40,7 +40,8 @@ export async function login(request: any): Promise<string> {
     return ''
   }
   dbData.forEach((value: DatabaseUser) => {
-    if (authPassword(value.uuid, password, value.passwordHash)) return value.uuid
+    if (authPassword(value.uuid, password, value.passwordHash))
+      return value.uuid
   })
   return ''
 }
@@ -50,10 +51,7 @@ export function authPassword(
   password: string,
   desiredHash: string
 ): boolean {
-  const hash = crypto
-    .createHmac('sha256', uuid)
-    .update(password)
-    .digest('hex')
+  const hash = crypto.createHmac('sha256', uuid).update(password).digest('hex')
   return hash === desiredHash
 }
 
@@ -72,10 +70,7 @@ export async function register(request: UserRequest): Promise<string> {
   const dbData = await dbFind('users', {}, {}, 'uid', -1)
   const uid = dbData.length > 0 ? +dbData[0].uid + 1 : 1
   const uuid = crypto.randomUUID()
-  const hash = crypto
-    .createHmac('sha256', uuid)
-    .update(password)
-    .digest('hex')
+  const hash = crypto.createHmac('sha256', uuid).update(password).digest('hex')
   await dbInsertOne('users', {
     uid,
     uuid,
@@ -86,7 +81,10 @@ export async function register(request: UserRequest): Promise<string> {
   return uuid
 }
 
-export async function modify(request: UserRequest, token: string): Promise<boolean> {
+export async function modify(
+  request: UserRequest,
+  token: string
+): Promise<boolean> {
   const secondAuth = (
     tokenUUID: string,
     requestUUID: string,
@@ -145,7 +143,11 @@ export async function modify(request: UserRequest, token: string): Promise<boole
         if (newHash === dbData.passwordHash) {
           return false
         }
-        await dbUpdateOne('users', { uuid: tokenUUID }, { passwordHash: newHash })
+        await dbUpdateOne(
+          'users',
+          { uuid: tokenUUID },
+          { passwordHash: newHash }
+        )
         return true
       default:
         return false
@@ -170,7 +172,10 @@ export async function issueToken(uuid: string): Promise<string> {
   })
 }
 
-export async function verifyToken(uuid: string, token: string): Promise<boolean> {
+export async function verifyToken(
+  uuid: string,
+  token: string
+): Promise<boolean> {
   try {
     const secret = (await dbFind('config', { name: 'secret' }))[0].value
     const dbData = await dbFind('users', { uuid })
@@ -234,7 +239,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       break
     case 'register':
       console.log(body)
-      uuid = await register({ uuid: '', username: body.username, password: body.password })
+      uuid = await register({
+        uuid: '',
+        username: body.username,
+        password: body.password,
+      })
       if (uuid !== '') {
         res.status(200).json({
           code: 200,
