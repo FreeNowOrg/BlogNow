@@ -92,61 +92,40 @@ export async function modify(
   token: string
 ): Promise<void> {
   await verifyToken(request, token)
-  const secondAuth = (
-    tokenUUID: string,
-    requestUUID: string,
-    password: string,
-    passwordHash: string
-  ) => {
-    if (tokenUUID !== requestUUID) {
-      return false
-    }
-    if (!authPassword(tokenUUID, password, passwordHash)) {
-      return false
-    }
-    return true
-  }
-  const secret = (await dbFind('config', { name: 'secret' }))[0].value
   const dbData = await dbFind('users', { uuid: request.uuid })[0]
-  const decoded: any = jwt.verify(token, secret)
-  const tokenUUID = decoded.aud
   switch (request.modify) {
     case 'nickname':
       await modifyNickname(dbData.nickname, request)
       break
     case 'username':
-      if (
-        !secondAuth(
-          tokenUUID,
-          request.uuid,
-          request.password,
-          dbData.passwordHash
-        )
-      ) {
+      if (!secondAuth(request, dbData)) {
         throw new Error('Permission denied')
       }
       await modifyUsername(dbData.username, request)
-      // sensitive action, need to login again
-      await logout(request, token)
       break
     case 'password':
-      if (
-        !secondAuth(
-          tokenUUID,
-          request.uuid,
-          request.password,
-          dbData.passwordHash
-        )
-      ) {
+      if (!secondAuth(request, dbData)) {
         throw new Error('Permission denied')
       }
       await modifyPassword(dbData.passwordHash, request)
-      // sensitive action, need to login again
-      await logout(request, token)
       break
     default:
       throw new Error('No such modify action')
   }
+}
+
+// this function should not be exported
+function secondAuth(
+  request: UserUpdateParams,
+  dbData: DatabaseUser
+) {
+  if (dbData.uuid !== request.uuid) {
+    return false
+  }
+  if (!authPassword(dbData.uuid, request.password, dbData.passwordHash)) {
+    return false
+  }
+  return true
 }
 
 // this function should not be exported
@@ -284,11 +263,20 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         break
       case 'modify':
         await modify(body, token)
-        res.status(200).json({
+        const response = {
           code: 0,
           message: 'Modification successful.',
           uuid: body.uuid,
-        })
+        }
+        // modify username and password requires login again,
+        // also no new token is issued
+        if (['username', 'password'].includes(body.modify)) {
+          await logout(body, token)
+          response.message = 'Modification successful. Please login again.'
+        } else {
+          Object.assign(response, { token: await issueToken(body.uuid) })
+        }
+        res.status(200).json(response)
         break
       default:
         throw new Error('Unknown action')
