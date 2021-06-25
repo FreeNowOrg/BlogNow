@@ -2,6 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node'
 import { createFilter, createProjection, dbFind, dbUpdateOne } from './database'
 
 export interface DatabaseSiteConfig {
+  version: string
   secret: string
   siteName: string
 }
@@ -12,7 +13,7 @@ export async function getBatchConfigs(key: string[]) {
   return data
 }
 
-export async function getConfig(key: string) {
+export async function getConfigValue(key: string) {
   const [data] = await getBatchConfigs([key])
   return data?.value
 }

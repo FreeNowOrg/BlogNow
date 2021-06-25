@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { dbFind, dbInsertOne, dbUpdateOne } from './database'
-import { getConfig } from './config'
+import { getConfigValue } from './config'
 
 // Types
 export interface DatabaseUser {
@@ -69,8 +69,11 @@ export async function logout(token: string): Promise<boolean> {
 
 export async function register(request: UserRequest): Promise<string> {
   const { username, password } = request
+
+  if ((await dbFind('users', { username })).length > 0) return ''
+
   const dbData = await dbFind('users', {}, {}, 'uid', -1)
-  const uid = dbData.length > 0 ? +dbData[0].uid + 1 : 1
+  const uid = dbData.length > 0 ? +dbData[0].uid + 1 : 10000
   const uuid = uuidv4()
   const hash = crypto.createHmac('sha256', uuid).update(password).digest('hex')
   await dbInsertOne('users', {
@@ -161,7 +164,7 @@ export async function modify(
 
 export async function issueToken(uuid: string): Promise<string> {
   const random = crypto.randomBytes(16).toString('hex')
-  const secret = await getConfig('secret')
+  const secret = await getConfigValue('secret')
   await dbUpdateOne(
     'users',
     { uuid: uuid },
@@ -246,13 +249,17 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         username: body.username,
         password: body.password,
       })
-      if (uuid !== '') {
-        res.status(200).json({
+      if (uuid) {
+        return res.status(200).json({
           code: 200,
           message: 'Registration successful.',
           token: await issueToken(uuid),
         })
       }
+      return res.status(403).json({
+        code: 403,
+        message: 'Requested username was already in use'
+      })
       break
     case 'logout':
       token = getTokenFromHeader(headers.authorization || '')
