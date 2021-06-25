@@ -19,7 +19,7 @@ export interface DatabaseUser {
   lastTokenJti: string
 }
 
-export interface UserRequest {
+export interface UserUpdateParams {
   uuid: string
   username?: string
   password?: string
@@ -67,7 +67,7 @@ export async function logout(token: string): Promise<boolean> {
   return true
 }
 
-export async function register(request: UserRequest): Promise<string> {
+export async function createUser(request: UserUpdateParams): Promise<string> {
   const { username, password } = request
 
   if ((await dbFind('users', { username })).length > 0) return ''
@@ -86,8 +86,8 @@ export async function register(request: UserRequest): Promise<string> {
   return uuid
 }
 
-export async function modify(
-  request: UserRequest,
+export async function updateUser(
+  request: UserUpdateParams,
   token: string
 ): Promise<boolean> {
   const secondAuth = (
@@ -244,7 +244,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       break
     case 'register':
       console.log(body)
-      uuid = await register({
+      uuid = await createUser({
         uuid: '',
         username: body.username,
         password: body.password,
@@ -281,7 +281,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       }
       break
     case 'modify':
-      if (await modify(body, token)) {
+      if (await updateUser(body, token)) {
         await logout(token)
         res.status(200).json({
           code: 200,
