@@ -66,15 +66,6 @@ export async function register(request: UserUpdateParams): Promise<string> {
   return uuid
 }
 
-export function authPassword(
-  uuid: string,
-  password: string,
-  desiredHash: string
-): boolean {
-  const hash = crypto.createHmac('sha256', uuid).update(password).digest('hex')
-  return hash === desiredHash
-}
-
 export async function logout(
   request: UserUpdateParams,
   token: string
@@ -114,8 +105,16 @@ export async function modify(
   }
 }
 
-// this function should not be exported
-function secondAuth(
+export function authPassword(
+  uuid: string,
+  password: string,
+  desiredHash: string
+): boolean {
+  const hash = crypto.createHmac('sha256', uuid).update(password).digest('hex')
+  return hash === desiredHash
+}
+
+export function secondAuth(
   request: UserUpdateParams,
   dbData: DatabaseUser
 ) {
@@ -128,8 +127,7 @@ function secondAuth(
   return true
 }
 
-// this function should not be exported
-async function modifyNickname(oldName: string, request: UserUpdateParams) {
+export async function modifyNickname(oldName: string, request: UserUpdateParams) {
   if (request.newName === oldName) {
     throw new Error('New nickname is the same as the old one')
   }
@@ -140,8 +138,7 @@ async function modifyNickname(oldName: string, request: UserUpdateParams) {
   )
 }
 
-// this function should not be exported
-async function modifyUsername(oldName: string, request: UserUpdateParams) {
+export async function modifyUsername(oldName: string, request: UserUpdateParams) {
   if (request.newName === oldName) {
     throw new Error('New username is the same as the old one')
   }
@@ -152,8 +149,7 @@ async function modifyUsername(oldName: string, request: UserUpdateParams) {
   )
 }
 
-// this function should not be exported
-async function modifyPassword(oldHash: string, request: UserUpdateParams) {
+export async function modifyPassword(oldHash: string, request: UserUpdateParams) {
   const newHash = crypto
     .createHmac('sha256', request.uuid)
     .update(request.newPassword)
