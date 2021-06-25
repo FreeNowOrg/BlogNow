@@ -33,9 +33,7 @@ export default defineComponent({
         .then((data) => {
           console.log(data)
           localStorage.setItem(data.data.uuid, data.data.token)
-          },
-          console.error
-        )
+        }, console.error)
     },
     register() {
       axios
@@ -43,31 +41,25 @@ export default defineComponent({
           username: this.username,
           password: this.password,
         })
-        .then(
-          (data) => {
-            console.log(data)
-            localStorage.setItem(data.data.uuid, data.data.token)
-          },
-          console.error
-          )
+        .then((data) => {
+          console.log(data)
+          localStorage.setItem(data.data.uuid, data.data.token)
+        }, console.error)
     },
     init() {
       axios
         .post('/api/config?action=init', {
-          secret: '0'
+          secret: '0',
         })
-        .then(
-          (data) => {
-            alert(data.data)
-          },
-          alert
-        )
+        .then((data) => {
+          alert(data.data)
+        }, alert)
     },
     query() {
-      axios
-        .post('/api/config?action=query')
-        .then(data => {console.log(data.data)})
-    }
+      axios.post('/api/config?action=query').then((data) => {
+        console.log(data.data)
+      })
+    },
   },
 })
 </script>

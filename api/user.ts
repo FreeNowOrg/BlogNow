@@ -75,7 +75,10 @@ export function authPassword(
   return hash === desiredHash
 }
 
-export async function logout(request: UserUpdateParams, token: string): Promise<void> {
+export async function logout(
+  request: UserUpdateParams,
+  token: string
+): Promise<void> {
   await verifyToken(request, token)
   await dbUpdateOne(
     'users',
@@ -179,11 +182,7 @@ async function modifyPassword(oldHash: string, request: UserUpdateParams) {
   if (newHash === oldHash) {
     throw new Error('New password is the same as the old one')
   }
-  await dbUpdateOne(
-    'users',
-    { uuid: request.uuid },
-    { passwordHash: newHash }
-  )
+  await dbUpdateOne('users', { uuid: request.uuid }, { passwordHash: newHash })
 }
 
 export async function issueToken(uuid: string): Promise<string> {
@@ -211,7 +210,10 @@ export async function verifyToken(
   if (dbData.length < 1) {
     throw new Error('No such user')
   }
-  jwt.verify(token, secret, { audience: request.uuid, jwtid: dbData[0].lastTokenJti })
+  jwt.verify(token, secret, {
+    audience: request.uuid,
+    jwtid: dbData[0].lastTokenJti,
+  })
 }
 
 export function getTokenFromHeader(header: string): string {
@@ -244,7 +246,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         uuid = await login({
           uuid: '',
           username: body.username,
-          password: body.password
+          password: body.password,
         })
         res.status(200).json({
           message: 'Login successful.',
@@ -267,7 +269,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         break
       case 'logout':
         await logout(body, token)
-        res.status(200).json({ code: 0, message: 'Logout successful.', uuid: body.uuid })
+        res
+          .status(200)
+          .json({ code: 0, message: 'Logout successful.', uuid: body.uuid })
         break
       case 'verify':
         await verifyToken(body, token)
@@ -283,7 +287,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         res.status(200).json({
           code: 0,
           message: 'Modification successful.',
-          uuid: body.uuid
+          uuid: body.uuid,
         })
         break
       default:
@@ -292,7 +296,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   } catch (error) {
     res.status(500).json({
       code: 1,
-      message: `Server error: ${error.message}`
+      message: `Server error: ${error.message}`,
     })
     throw error
   }
