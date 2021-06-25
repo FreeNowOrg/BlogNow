@@ -202,6 +202,13 @@ export async function verifyToken(
   })
 }
 
+// this helper function helps to renew token in one step
+export async function renewToken(request: UserUpdateParams, token: string): Promise<string> {
+  await verifyToken(request, token)
+  const newToken = await issueToken(request.uuid)
+  return newToken
+}
+
 export function getTokenFromHeader(header: string): string {
   if (!header.startsWith('Bearer ')) {
     return ''
