@@ -33,7 +33,7 @@ export type UserGroup = '*' | 'member' | 'moderator' | 'admin'
 export async function login(request: UserUpdateParams): Promise<string> {
   const { username, password } = request
   const dbData = await dbFind('users', {
-    $or: [{ username: username }, { nickname: parseInt(username) }],
+    $or: [{ username: username }, { nickname: username }],
   })
   if (dbData.length < 1) {
     throw new Error('No user found')
