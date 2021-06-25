@@ -8,8 +8,6 @@ form#login
     input#password(type='password', v-model='password')
   button(@click.prevent='login') login
   button(@click.prevent='register') register
-  a(@click.once='init') initDb
-  a(@click='query') query
 </template>
 
 <script>
@@ -45,20 +43,6 @@ export default defineComponent({
           console.log(data)
           localStorage.setItem(data.data.uuid, data.data.token)
         }, console.error)
-    },
-    init() {
-      axios
-        .post('/api/config?action=init', {
-          secret: '0',
-        })
-        .then((data) => {
-          alert(data.data)
-        }, alert)
-    },
-    query() {
-      axios.post('/api/config?action=query').then((data) => {
-        console.log(data.data)
-      })
     },
   },
 })
