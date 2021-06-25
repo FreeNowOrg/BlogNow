@@ -6,7 +6,8 @@ import { dbFind, dbInsertOne, dbUpdateOne } from './database'
 // Types
 export interface DatabaseUser {
   _id: string
-  uid: number
+  uid: number // login alias
+  uuid: string
   username: string
   passwordHash: string
   registrationTime: number
@@ -16,32 +17,41 @@ export interface DatabaseUser {
   lastTokenJti: string
 }
 
+export interface UserRequest {
+  uuid: string
+  username?: string
+  password?: string
+  newUsername?: string
+  newPassword?: string
+  modify?: 'username' | 'password'
+}
+
 export type UserGroup = '*' | 'member' | 'moderator' | 'admin'
 
-export async function login(request: any): Promise<number> {
+export async function login(request: any): Promise<string> {
   const { username, password } = request
   if (!(username && password)) {
-    return -1
+    return ''
   }
   const dbData = await dbFind('users', {
     $or: [{ username: username }, { uid: parseInt(username) }],
   })
   if (dbData.length < 1) {
-    return -1
+    return ''
   }
   dbData.forEach((value: DatabaseUser) => {
-    if (authPassword(value.uid, password, value.passwordHash)) return value.uid
+    if (authPassword(value.uuid, password, value.passwordHash)) return value.uuid
   })
-  return -1
+  return ''
 }
 
 export function authPassword(
-  uid: number,
+  uuid: string,
   password: string,
   desiredHash: string
 ): boolean {
   const hash = crypto
-    .createHmac('sha256', uid.toString())
+    .createHmac('sha256', uuid)
     .update(password)
     .digest('hex')
   return hash === desiredHash
@@ -51,55 +61,57 @@ export async function logout(token: string): Promise<boolean> {
   const body = JSON.parse(Buffer.from(token.split('.')[1]).toString('ascii'))
   await dbUpdateOne(
     'users',
-    { uid: body.aud },
+    { uuid: body.aud },
     { $set: { lastTokenJti: '', lastActiveTime: Date.now() } }
   )
   return true
 }
 
-export async function register(request: any): Promise<number> {
+export async function register(request: UserRequest): Promise<string> {
   const { username, password } = request
   const dbData = await dbFind('users', {}, {}, 'uid', -1)
   const uid = dbData.length > 0 ? +dbData[0].uid + 1 : 1
+  const uuid = crypto.randomUUID()
   const hash = crypto
-    .createHmac('sha256', uid.toString())
+    .createHmac('sha256', uuid)
     .update(password)
     .digest('hex')
   await dbInsertOne('users', {
     uid,
+    uuid,
     username,
     passwordHash: hash,
     registrationTime: Date.now(),
   })
-  return uid
+  return uuid
 }
 
-export async function modify(request: any, token: string): Promise<boolean> {
+export async function modify(request: UserRequest, token: string): Promise<boolean> {
   const secondAuth = (
-    tokenUid: number,
-    requestUid: number,
+    tokenUUID: string,
+    requestUUID: string,
     password: string,
     passwordHash: string
   ) => {
-    if (tokenUid !== requestUid) {
+    if (tokenUUID !== requestUUID) {
       return false
     }
-    if (!authPassword(tokenUid, password, passwordHash)) {
+    if (!authPassword(tokenUUID, password, passwordHash)) {
       return false
     }
     return true
   }
   try {
     const secret = (await dbFind('config', { name: 'secret' }))[0].value
-    const dbData = await dbFind('users', { uid: request.uid })[0]
+    const dbData = await dbFind('users', { uuid: request.uuid })[0]
     const decoded: any = jwt.verify(token, secret)
-    const tokenUid = decoded.aud
+    const tokenUUID = decoded.aud
     switch (request.modify) {
       case 'username':
         if (
           !secondAuth(
-            tokenUid,
-            request.uid,
+            tokenUUID,
+            request.uuid,
             request.password,
             dbData.passwordHash
           )
@@ -111,15 +123,15 @@ export async function modify(request: any, token: string): Promise<boolean> {
         }
         await dbUpdateOne(
           'users',
-          { uid: tokenUid },
+          { uuid: tokenUUID },
           { username: request.newUsername }
         )
         return true
       case 'password':
         if (
           !secondAuth(
-            tokenUid,
-            request.uid,
+            tokenUUID,
+            request.uuid,
             request.password,
             dbData.passwordHash
           )
@@ -127,13 +139,13 @@ export async function modify(request: any, token: string): Promise<boolean> {
           return false
         }
         const newHash = crypto
-          .createHmac('sha256', tokenUid.toString())
+          .createHmac('sha256', tokenUUID)
           .update(request.newPassword)
           .digest('hex')
         if (newHash === dbData.passwordHash) {
           return false
         }
-        await dbUpdateOne('users', { uid: tokenUid }, { passwordHash: newHash })
+        await dbUpdateOne('users', { uuid: tokenUUID }, { passwordHash: newHash })
         return true
       default:
         return false
@@ -143,32 +155,29 @@ export async function modify(request: any, token: string): Promise<boolean> {
   }
 }
 
-export async function issueToken(uid: number): Promise<string> {
+export async function issueToken(uuid: string): Promise<string> {
   const random = crypto.randomBytes(16).toString('hex')
   const secret = (await dbFind('config', { name: 'secret' }))[0].value
   await dbUpdateOne(
     'users',
-    { uid: uid },
+    { uuid: uuid },
     { $set: { lastTokenJti: random, lastActiveTime: Date.now() } }
   )
   return jwt.sign({}, secret, {
-    audience: uid.toString(),
+    audience: uuid,
     expiresIn: '3d',
     jwtid: random,
   })
 }
 
-export async function verifyToken(token: string): Promise<boolean> {
+export async function verifyToken(uuid: string, token: string): Promise<boolean> {
   try {
     const secret = (await dbFind('config', { name: 'secret' }))[0].value
-    const decoded: any = jwt.verify(token, secret)
-    const dbData = await dbFind('users', { uid: decoded.aud })
+    const dbData = await dbFind('users', { uuid })
     if (dbData.length < 1) {
       return false
     }
-    if (decoded.jti !== dbData[0].lastTokenJti) {
-      return false
-    }
+    jwt.verify(token, secret, { audience: uuid, jwtid: dbData[0].lastTokenJti })
     return true
   } catch (error) {
     return false
@@ -210,39 +219,40 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       .setHeader('allow', 'POST')
       .json({ code: 405, message: 'This action only accepts POST method.' })
   }
-  let uid = 0
+  let uuid = ''
   let token = ''
   switch (query.action) {
     case 'login':
-      uid = await login({ username: body.username, password: body.password })
-      if (uid !== -1) {
+      uuid = await login({ username: body.username, password: body.password })
+      if (uuid !== '') {
         res.status(200).json({
           code: 200,
           message: 'Login successful.',
-          token: await issueToken(uid),
+          token: await issueToken(uuid),
         })
       }
       break
     case 'register':
-      uid = await register({ username: body.username, password: body.password })
-      if (uid !== -1) {
+      console.log(body)
+      uuid = await register({ uuid: '', username: body.username, password: body.password })
+      if (uuid !== '') {
         res.status(200).json({
           code: 200,
           message: 'Registration successful.',
-          token: await issueToken(uid),
+          token: await issueToken(uuid),
         })
       }
       break
     case 'logout':
       token = getTokenFromHeader(headers.authorization || '')
-      if (await verifyToken(token)) {
+      if (await verifyToken(body.uuid, token)) {
         await logout(token)
         res.status(200).json({ code: 200, message: 'Logout successful.' })
       }
       break
     case 'verify':
       token = getTokenFromHeader(headers.authorization || '')
-      if (!(await verifyToken(token))) {
+      if (!(await verifyToken(body.uuid, token))) {
         res.status(403).json({ code: 403, message: 'Bad token received.' })
       } else {
         res.status(200).json({
