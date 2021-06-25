@@ -205,7 +205,7 @@ export async function verifyToken(
   request: UserUpdateParams,
   token: string
 ): Promise<void> {
-  const secret = (await dbFind('config', { name: 'secret' }))[0].value
+  const secret: string = await getConfigValue('secret')
   const dbData = await dbFind('users', { uuid: request.uuid })
   if (dbData.length < 1) {
     throw new Error('No such user')

@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import { dbFind } from './database'
+import { dbConnect, dbFind } from './database'
 
 // Types
 export interface DatabasePost {
@@ -31,7 +31,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     })
   }
 
-  const data = await getPost(pid)
+  const data = await getPost('pid', pid)
   if (!data) {
     return res.status(404).send({
       message: 'Post not found',
@@ -40,7 +40,34 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   return res.send(data)
 }
 
-async function getPost(pid: string): Promise<DatabasePost | null> {
-  const [post] = (await dbFind('posts', { pid })) as DatabasePost[]
+export async function getPost(
+  key: keyof DatabasePost,
+  value: string
+): Promise<DatabasePost | null> {
+  const [post] = (await dbFind('posts', {
+    [key]: value,
+  })) as DatabasePost[]
   return post || null
+}
+
+export async function getPostsByUser(uuid: string) {
+  const list = await dbFind('posts', { author: uuid })
+  return list
+}
+
+export async function getPostNumberOfUser(uuid: string): Promise<number> {
+  const db = await dbConnect()
+  const num = await db.collection('posts').countDocuments({ author: uuid })
+  return num
+}
+
+export async function updatePost({ pid, content }) {}
+
+export async function getPosts(
+  key: keyof DatabasePost,
+  pattern,
+  flags?: string
+) {
+  const list = await dbFind('posts', { [key]: new RegExp(pattern, flags) })
+  return list
 }
