@@ -63,7 +63,7 @@ export async function getPostNumberOfUser(uuid: string): Promise<number> {
 
 export async function updatePost({ pid, content }) {}
 
-export async function getPosts(
+export async function searchPosts(
   key: keyof DatabasePost,
   pattern,
   flags?: string
