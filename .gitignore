@@ -104,3 +104,11 @@ dist
 .tern-port
 
 .vercel
+
+lib/
+dev/
+secret/
+secret*.*
+
+!secret*.sample.*
+!sample/
