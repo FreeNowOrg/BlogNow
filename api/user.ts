@@ -19,9 +19,16 @@ export interface DatabaseUser {
   lastTokenJti: string
 }
 
-export interface UserUpdateParams {
+export interface UserBasicParams {
   uuid: string
-  username?: string
+}
+
+export interface UserLoginParams extends UserBasicParams {
+  username: string
+  password: string
+}
+
+export interface UserUpdateParams extends UserBasicParams {
   password?: string
   newName?: string
   newPassword?: string
@@ -30,7 +37,7 @@ export interface UserUpdateParams {
 
 export type UserGroup = '*' | 'member' | 'moderator' | 'admin'
 
-export async function login(request: UserUpdateParams): Promise<string> {
+export async function login(request: UserLoginParams): Promise<string> {
   const { username, password } = request
   const dbData = await dbFind('users', {
     $or: [{ username: username }, { nickname: username }],
@@ -45,7 +52,7 @@ export async function login(request: UserUpdateParams): Promise<string> {
   throw new Error('Invalid username or password')
 }
 
-export async function register(request: UserUpdateParams): Promise<string> {
+export async function register(request: UserLoginParams): Promise<string> {
   const { username, password } = request
   if (!username || !password) {
     throw new Error('Empty username or password')
@@ -67,23 +74,31 @@ export async function register(request: UserUpdateParams): Promise<string> {
 }
 
 export async function logout(
-  request: UserUpdateParams,
+  uuid: string,
   token: string
 ): Promise<void> {
-  await verifyToken(request, token)
+  await verifyToken(uuid, token)
   await dbUpdateOne(
     'users',
-    { uuid: request.uuid },
-    { $set: { lastTokenJti: '', lastActiveTime: new Date().toISOString() } }
+    { uuid },
+    { $set: { lastActiveTime: new Date().toISOString() } }
   )
+}
+
+export async function setUser(key: string, value: any[]) {
+
+}
+
+export async function getUser(uuid: string, key: string | string[]) {
+  const keys = typeof key === 'string' ? [key] : key
 }
 
 export async function modify(
   request: UserUpdateParams,
   token: string
 ): Promise<void> {
-  await verifyToken(request, token)
-  const dbData = await dbFind('users', { uuid: request.uuid })[0]
+  await verifyToken(request.uuid, token)
+  const dbData = (await dbFind('users', { uuid: request.uuid }))[0]
   switch (request.modify) {
     case 'nickname':
       await modifyNickname(dbData.nickname, request)
@@ -175,40 +190,32 @@ export async function issueToken(uuid: string): Promise<string> {
     { uuid },
     {
       $set: {
-        lastTokenJti: random,
         lastActiveTime: new Date(iat).toISOString(),
       },
     }
   )
   return jwt.sign({ iat: Math.floor(iat / 1000) }, secret, {
+    subject: 'blognow',
     audience: uuid,
     expiresIn: '3d',
     jwtid: random,
   })
 }
 
-export async function verifyToken(
-  request: UserUpdateParams,
-  token: string
-): Promise<void> {
+export async function verifyToken(uuid: string, token: string): Promise<void> {
   const secret: string = await getConfigValue('secret')
-  const dbData = await dbFind('users', { uuid: request.uuid })
-  if (dbData.length < 1) {
-    throw new Error('No such user')
-  }
   jwt.verify(token, secret, {
-    audience: request.uuid,
-    jwtid: dbData[0].lastTokenJti,
+    audience: uuid,
   })
 }
 
 // this helper function helps to renew token in one step
 export async function renewToken(
-  request: UserUpdateParams,
+  uuid: string,
   token: string
 ): Promise<string> {
-  await verifyToken(request, token)
-  const newToken = await issueToken(request.uuid)
+  await verifyToken(uuid, token)
+  const newToken = await issueToken(uuid)
   return newToken
 }
 
