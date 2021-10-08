@@ -17,6 +17,7 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
 import { userData } from '../components/userData'
+import { setTitle } from '../utils/setTitle'
 const route = useRoute()
 
 const uuid = route.params.uuid
@@ -30,12 +31,14 @@ function init() {
       },
     })
     .then(({ data }: any) => {
+      setTitle(data.body.title)
       post.value = data.body
     })
 }
 
 onMounted(() => {
   init()
+  setTitle('Post')
 })
 </script>
 

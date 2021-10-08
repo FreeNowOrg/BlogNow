@@ -27,6 +27,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     case 'POST':
       handlePost()
       break
+    case 'PATCH':
+      handlePatch()
+      break
     default:
       return http.send(405, 'Method Not Allowed')
   }
@@ -69,6 +72,43 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         author_uuid: user.uuid,
       })
       return http.send(200, 'Post created', data)
+    } catch (e) {
+      return http.mongoError(e)
+    }
+  }
+
+  async function handlePatch() {
+    const token = getTokenFromReq(req)
+    const { post_uuid, title, content, slug } = req.body || {}
+    if (!token) {
+      return http.send(401, 'Please login')
+    }
+    const user = await getUserDataByToken(token)
+    if (!user || user.authority <= 2) {
+      return http.send(403, 'Permission denied')
+    }
+    if (!post_uuid || title === undefined || content === undefined) {
+      return http.send(403, 'Missing params')
+    }
+
+    const { client, col } = database(COLNAME.POST)
+    const now = new Date()
+
+    try {
+      await client.connect()
+      const data = await col.findOneAndUpdate(
+        { uuid: post_uuid },
+        {
+          $set: {
+            title,
+            content,
+            edited_at: now.toISOString(),
+            editor_uuid: user.uuid,
+          },
+        }
+      )
+      await client.close()
+      return http.send(200, 'Post updated', data)
     } catch (e) {
       return http.mongoError(e)
     }

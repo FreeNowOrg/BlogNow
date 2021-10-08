@@ -175,13 +175,17 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
     await client.connect()
     const password_hash = getPasswordHash(password)
-    const user = await col.findOne({ username, password_hash })
-    if (!user) {
+    const profile = await col.findOne({ username, password_hash })
+    if (!profile) {
       return http.send(401, 'Invalid username or password')
     }
-    const token = user.token_expires - Date.now() < 0 ? nanoid(32) : user.token
+    const token =
+      profile.token_expires - Date.now() < 0 ? nanoid(32) : profile.token
     const token_expires = Date.now() + 7 * 24 * 60 * 60 * 1000
-    await col.updateOne({ uuid: user.uuid }, { $set: { token, token_expires } })
+    await col.updateOne(
+      { uuid: profile.uuid },
+      { $set: { token, token_expires } }
+    )
     await client.close()
     http.res.setHeader(
       'set-cookie',
@@ -189,10 +193,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         token_expires
       ).toUTCString()}; path=/`
     )
-    delete user.token
-    delete user.token_expires
-    delete user.password_hash
-    return http.send(200, 'ok', { token, profile: user })
+    delete profile.token
+    delete profile.token_expires
+    delete profile.password_hash
+    return http.send(200, 'ok', { token, profile })
   }
 }
 

@@ -7,7 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import {} from 'vue'
+import { onMounted } from 'vue'
+import { setTitle } from '../utils/setTitle'
+onMounted(() => {
+  setTitle('404', 'Error')
+})
 </script>
 
 <style scoped lang="sass"></style>

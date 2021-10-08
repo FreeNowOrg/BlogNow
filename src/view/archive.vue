@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
+import { setTitle } from '../utils/setTitle'
 
 const posts = ref([])
 
@@ -31,6 +32,7 @@ function init() {
 
 onMounted(() => {
   init()
+  setTitle('Archives')
 })
 </script>
 

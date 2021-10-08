@@ -22,9 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { getUserDataByLogin, userData } from '../components/userData'
+import { setTitle } from '../utils/setTitle'
 
 const username = ref('')
 const password = ref('')
@@ -51,6 +52,10 @@ function handleLogin() {
       loading.value = false
     })
 }
+
+onMounted(() => {
+  setTitle('Authorization')
+})
 </script>
 
 <style scoped lang="sass">

@@ -5,6 +5,12 @@ main
 </template>
 
 <script lang="ts">
+import { onMounted } from 'vue'
+import { getUserDataByToken } from './components/userData'
+
+onMounted(() => {
+  getUserDataByToken()
+})
 </script>
 
 <style scoped lang="sass">

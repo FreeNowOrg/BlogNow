@@ -14,6 +14,7 @@
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { setTitle } from '../utils/setTitle'
 
 const route = useRoute()
 
@@ -72,6 +73,7 @@ function handleUpdate() {
   loading.value = true
   axios
     .patch('/api/post', {
+      post_uuid: uuid,
       title: 'Post title',
       content: content.value,
     })
@@ -86,6 +88,7 @@ onMounted(() => {
   if (!isCreate) {
     getPost()
   }
+  setTitle('Edit', 'Post')
 })
 </script>
 
