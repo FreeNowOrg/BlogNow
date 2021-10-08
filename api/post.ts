@@ -5,8 +5,6 @@ import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
 import { database, getTokenFromReq } from './utils'
 import {
-  getAuthorityByToken,
-  getCurUserData,
   getUserDataByToken,
 } from './user/[controller]'
 

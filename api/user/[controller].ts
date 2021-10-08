@@ -148,7 +148,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   async function handleUserMeta() {
-    // const
+    return http.send(404, 'Work in progress')
   }
 
   async function handleSelfMeta() {
@@ -158,6 +158,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
     const data = await getUserDataByToken(token)
     http.send(200, 'ok', data)
+  }
+
+  function updateSelf(key: string) {
+    return http.send(404, 'Work in progress')
+  }
+  function updateUser(key: string) {
+    return http.send(404, 'Work in progress')
   }
 
   async function handleUserLogin() {
