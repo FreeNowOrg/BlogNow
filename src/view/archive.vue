@@ -1,17 +1,20 @@
 <template lang="pug">
-.loading(v-if='!posts.length')
-  | loading...
-
-.archive-container(v-if='posts.length')
-  h1 Archive
-  pre {{ posts }}
+.archive-container
+  .loading(v-if='!posts.length')
+    | loading post list...
+  .archive-main(v-else)
+    h1 Archive
+    ul
+      li(v-for='item in posts')
+        strong {{ item.title }}
+        i by {{ item.author_uuid }}
+        i ({{ new Date(item.created_at).toLocaleString() }})
+        router-link(:to='{ name: "post", params: { uuid: item.uuid } }') view
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from '@vue/runtime-core'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
-import { useRoute } from 'vue-router'
-const route = useRoute()
 
 const posts = ref([])
 

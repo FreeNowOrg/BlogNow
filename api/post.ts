@@ -4,9 +4,7 @@ import { HandleResponse } from 'serverless-kit'
 import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
 import { database, getTokenFromReq } from './utils'
-import {
-  getUserDataByToken,
-} from './user/[controller]'
+import { getUserDataByToken } from './user/[controller]'
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
   uuid: '',
@@ -36,6 +34,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   async function handleGet() {
     if (req.query.uuid) {
       const post = await getPostByUuid(req.query.uuid as string)
+      if (!post) {
+        return http.send(404, 'Post not found')
+      }
       return http.send(200, 'Get post by uuid', { post })
     }
 

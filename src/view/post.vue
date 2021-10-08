@@ -1,25 +1,32 @@
 <template lang="pug">
-.loading(v-if='!post')
-  | loading...
-
-.post-container(v-if='post')
-  h1 Post {{ $route.params.uuid }}
-  pre {{ post }}
+.post-container
+  .loading(v-if='!post')
+    | loading post...
+  .post-main(v-if='post')
+    h1 Post {{ uuid }}
+    pre {{ post }}
+    .btn
+      router-link(
+        :to='{ name: "post-edit", params: { uuid } }',
+        v-if='userData && userData.authority >= 2'
+      ) edit
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from '@vue/runtime-core'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
+import { userData } from '../components/userData'
 const route = useRoute()
 
+const uuid = route.params.uuid
 const post = ref(null)
 
 function init() {
   axios
     .get('/api/post', {
       params: {
-        uuid: route.params.uuid,
+        uuid,
       },
     })
     .then(({ data }: any) => {
