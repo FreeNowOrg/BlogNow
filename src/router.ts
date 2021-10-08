@@ -14,16 +14,23 @@ router.addRoute({
 
 // Posts
 router.addRoute({
-  path: '/post/:pid',
-  alias: ['/p/:pid'],
+  path: '/post/:uuid',
+  alias: ['/p/:uuid'],
   name: 'post',
   component: () => import('./view/post.vue'),
 })
 
 // User
+router.addRoute({
+  path: '/auth',
+  alias: ['/login'],
+  name: 'auth',
+  component: () => import('./view/auth.vue'),
+})
+
 // router.addRoute({
-//   path: '/user/:uid',
-//   name: 'users',
+//   path: '/user/:uuid',
+//   name: 'user',
 //   component: () => import('./view/user.vue'),
 // })
 

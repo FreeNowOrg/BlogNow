@@ -110,5 +110,5 @@ dev/
 secret/
 secret*.*
 
-!secret*.sample.*
+!*.sample.*
 !sample/

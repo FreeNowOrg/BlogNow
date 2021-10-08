@@ -1,68 +1,35 @@
 <template lang="pug">
-.loading(v-if="loading")
+.loading(v-if='!post')
   | loading...
 
-.postContainer(v-if="!loading")
-  article(v-if="!errorCode")
-    h1 {{ post.title }}
-    .content {{ post.content }}
-  article.error(v-if="errorCode")
-    error-page(:title="error.status" :description="error.data.message")
-
-  router-link(:to="$route.params.pid==='1' ? '/post/2' : '/post/1'") Goto {{ $route.params.pid==='1' ? '/post/2' : '/post/1' }}
+.post-container(v-if='post')
+  h1 Post {{ $route.params.uuid }}
+  pre {{ post }}
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { onMounted, ref } from '@vue/runtime-core'
 import axios from 'axios'
-import ErrorPage from '../components/ErrorPage.vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
 
-export default {
-  components: {
-    ErrorPage,
-  },
-  data() {
-    return {
-      loading: false,
-      errorCode: 0,
-      errorMsg: '',
-      post: {},
-    }
-  },
-  methods: {
-    getPost(pid: string) {
-      this.post = {}
-      this.errorCode = 0
-      this.loading = true
+const post = ref(null)
 
-      axios
-        .get(`/api/post`, {
-          params: {
-            pid,
-          },
-        })
-        .then(
-          ({ data }) => {
-            console.log('Post data', data)
-            this.post = data
-          },
-          ({ response }) => {
-            console.warn('Post fetch error', response)
-            this.errorCode = response.status
-            this.errorMsg = response.data.message || ''
-          }
-        )
-        .finally(() => {
-          this.loading = false
-        })
-    },
-  },
-  beforeRouteUpdate({ name, params }) {
-    if (name === 'post-view') this.getPost(params.pid as string)
-  },
-  created() {
-    this.getPost(this.$route.params.pid as string)
-  },
+function init() {
+  axios
+    .get('/api/post', {
+      params: {
+        uuid: route.params.uuid,
+      },
+    })
+    .then(({ data }: any) => {
+      post.value = data.body
+    })
 }
+
+onMounted(() => {
+  init()
+})
 </script>
 
-<style scoped lang="stylus"></style>
+<style scoped lang="sass"></style>
