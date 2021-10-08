@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { ref } from 'vue'
 export const userData = ref<{
   uuid: string
@@ -12,3 +13,24 @@ export const userData = ref<{
   authority: number
   title: string
 } | null>(null)
+
+export async function getUserDataByLogin({
+  username,
+  password,
+}: {
+  username: string
+  password: string
+}) {
+  const { data }: any = await axios.post('/api/user/sign-in', {
+    username,
+    password,
+  })
+  userData.value = data.body.profile
+  return data
+}
+
+export async function getUserDataByToken() {
+  const { data }: any = await axios.get('/api/user/profile')
+  userData.value = data.body.profile
+  return data
+}

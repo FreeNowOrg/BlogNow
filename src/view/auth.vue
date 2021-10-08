@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
-import { userData } from '../components/userData'
+import { getUserDataByLogin, userData } from '../components/userData'
 
 const username = ref('')
 const password = ref('')
@@ -37,17 +37,13 @@ function handleLogin() {
   token.value = ''
   error.value = ''
 
-  axios
-    .post('/api/user/sign-in', {
-      username: username.value,
-      password: password.value,
-    })
+  getUserDataByLogin({
+    username: username.value,
+    password: password.value,
+  })
     .then(
-      ({ data }: any) => {
-        token.value = data.body.token
-        userData.value = data.body
-      },
-      (e) => {
+      () => {},
+      (e): any => {
         error.value = e.message
       }
     )

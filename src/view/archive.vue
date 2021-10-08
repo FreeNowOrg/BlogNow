@@ -7,8 +7,11 @@
     ul
       li(v-for='item in posts')
         strong {{ item.title }}
+        | &nbsp;
         i by {{ item.author_uuid }}
+        | &nbsp;
         i ({{ new Date(item.created_at).toLocaleString() }})
+        | &nbsp;
         router-link(:to='{ name: "post", params: { uuid: item.uuid } }') view
 </template>
 

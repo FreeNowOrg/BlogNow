@@ -7,7 +7,7 @@
     .content-input
       textarea(v-model='content')
   .btn-area
-    button(@click='handleSubmit') Publish
+    button(@click='handleSubmit') {{ isCreate ? "Publish" : "Update" }}
 </template>
 
 <script setup lang="ts">
@@ -89,4 +89,11 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="sass"></style>
+<style scoped lang="sass">
+.edit-area
+  input, textarea
+    width: 100%
+  textarea
+    resize: vertical
+    min-height: 8rem
+</style>
