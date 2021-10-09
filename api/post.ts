@@ -108,6 +108,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         }
       )
       await client.close()
+
+      if (data.modifiedCount < 1) {
+        return http.send(404, 'Post not foud', data)
+      }
       return http.send(200, 'Post updated', data)
     } catch (e) {
       return http.mongoError(e)

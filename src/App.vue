@@ -1,5 +1,8 @@
 <template lang="pug">
 main
+  header
+    .site-name
+      router-link(to='/') Home
   article
     router-view
 </template>
@@ -9,6 +12,7 @@ import { onMounted } from 'vue'
 import { getUserDataByToken } from './components/userData'
 
 onMounted(() => {
+  console.log('init user')
   getUserDataByToken()
 })
 </script>

@@ -4,11 +4,16 @@
     | loading post list...
   .archive-main(v-else)
     h1 Archive
-    ul.post-list.card
-      li.post-card.card(v-for='item in posts')
-        .title
+    .post-list.flex-list.card
+      .list-item.header
+        .key Title
+        .val Author
+        .val Create
+        .val Link
+      .post-card.list-item.card(v-for='item in posts')
+        .key.title
           strong {{ item.title }}
-        .author by {{ item.author_uuid }}
+        .author @{{ item.author_uuid }}
         .created-time ({{ new Date(item.created_at).toLocaleString() }})
         .visit-link
           router-link(:to='{ name: "post", params: { uuid: item.uuid } }') view →

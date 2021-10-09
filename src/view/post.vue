@@ -5,9 +5,9 @@
     .card loading post...
   .post-main(v-if='post')
     h1 {{ post.title }}
-    .card.pre {{ post.content }}
     .btn-area
       router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "edit post" : "view source" }}
+    .card.pre {{ post.content }}
     .card
       details
         pre {{ post }}
