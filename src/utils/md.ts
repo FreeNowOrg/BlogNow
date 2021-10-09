@@ -1,8 +1,9 @@
 import * as MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-import AnchorPlugin from 'markdown-it-anchor'
 
-export const md: MarkdownIt = MarkdownIt({
+window.markdownit = MarkdownIt
+
+export const md: MarkdownIt = window.markdownit({
   // Enable HTML tags in source
   html: false,
   // Use '/' to close single tags (<br />).
@@ -41,8 +42,4 @@ export const md: MarkdownIt = MarkdownIt({
 
     return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`
   },
-}).use(AnchorPlugin, {
-  permalink(slug) {
-    return `<a>#</a>`
-  }
 })
