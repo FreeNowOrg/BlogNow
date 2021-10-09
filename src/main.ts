@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import 'js-cookie'
+import * as Cookies from 'js-cookie'
 
 // Create App
 import App from './App.vue'
@@ -14,3 +14,4 @@ import './styles/index.sass'
 
 // Mount
 app.mount('#app')
+window.Cookies = Cookies

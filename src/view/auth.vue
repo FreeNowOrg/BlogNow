@@ -6,7 +6,7 @@
       input(v-model='username')
     label
       strong password
-      input(v-model='password')
+      input(v-model='password', type='password')
     .btn
       button(@click.prevent='handleLogin') Login
   .user-info(v-else)
@@ -28,6 +28,9 @@ import axios from 'axios'
 import { getUserDataByLogin, userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
 import Cookies from 'js-cookie'
+import { useRoute, useRouter } from 'vue-router'
+
+const [route, router] = [useRoute(), useRouter()]
 
 const username = ref('')
 const password = ref('')
@@ -43,7 +46,11 @@ function handleLogin() {
     password: password.value,
   })
     .then(
-      () => {},
+      () => {
+        if (route.query.backto) {
+          router.push(route.query.backto as string)
+        }
+      },
       (e): any => {
         error.value = e.message
       }

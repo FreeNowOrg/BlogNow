@@ -9,11 +9,13 @@ main
 
 <script lang="ts">
 import { onMounted } from 'vue'
-import { getUserDataByToken } from './components/userData'
+import { userData, getUserDataByToken } from './components/userData'
 
 onMounted(() => {
-  console.log('init user')
-  getUserDataByToken()
+  if (!userData.value) {
+    console.log('init user')
+    getUserDataByToken().then((i) => console.info(i))
+  }
 })
 </script>
 

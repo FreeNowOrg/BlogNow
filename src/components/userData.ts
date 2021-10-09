@@ -32,7 +32,7 @@ export async function getUserDataByLogin({
 export async function getUserDataByToken() {
   console.log('getUserDataByToken')
   const { data }: any = await axios.get('/api/user/profile')
-  userData.value = data.body.profile
   console.log('profile', data.body.profile)
+  userData.value = data.body.profile
   return data
 }
