@@ -1,7 +1,8 @@
 import * as MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 
-window.markdownit = MarkdownIt
+// @ts-ignore
+window.markdownit = MarkdownIt.default || MarkdownIt
 
 export const md: MarkdownIt = window.markdownit({
   // Enable HTML tags in source
