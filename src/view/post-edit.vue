@@ -65,7 +65,7 @@ function handleCreate() {
       content: content.value,
     })
     .then(({ data }) => {
-      router.push({ name: 'post', { params: { data.body.uuid } })
+      router.push({ name: 'post', params: { data.body.uuid } })
     })
     .finally(() => {
       loading.value = false
@@ -81,7 +81,7 @@ function handleUpdate() {
       content: content.value,
     })
     .then(() => {
-      router.push({ name: 'post', { params: { uuid } })
+      router.push({ name: 'post', params: { uuid } })
     })
     .finally(() => {
       loading.value = false
