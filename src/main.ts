@@ -14,4 +14,6 @@ import './styles/index.sass'
 
 // Mount
 app.mount('#app')
-window.Cookies = Cookies
+
+// @ts-ignore
+window.Cookies = Cookies.default || Cookies

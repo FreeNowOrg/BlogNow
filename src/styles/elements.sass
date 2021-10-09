@@ -7,7 +7,8 @@
 h1
   font-size: 2.2rem
 
-h2
+h2,
+h2.align-center
   @include header-shared(1.4rem, #ef76a3)
   display: inline-block
   position: relative
@@ -16,10 +17,17 @@ h2
   /* margin: 0.4rem auto */
   padding: 0 0.4rem
 
-.align-center
+.align-center,
+#post-content
   h2
     left: unset
     transform: unset
+
+#post-content
+  h1
+    @include header-shared(2.2rem, #ef76a3)
+    margin-top: 1rem
+    margin-bottom: 1rem
 
 // Links
 a
@@ -142,6 +150,24 @@ textarea
     padding-left: 1rem
     padding-right: 1rem
 
+// Table
+table
+  width: 100%
+  max-width: 100%
+  margin-bottom: 20px
+  border-spacing: 0
+  border-collapse: collapse
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1)
+  border-radius: 8px
+
+  tr:nth-of-type(2n)
+    background-color: rgba(0, 0, 0, 0.1)
+
+  td
+    padding: 0.5rem
+    border-bottom: 1px solid #ccc
+    border-radius: 8px
+
 // Loading
 .loading-cover
   position: relative
@@ -167,7 +193,7 @@ textarea
     z-index: 5
 
 // Code
-pre
+pre:not(.hljs)
   overflow: auto
   background: rgba(172, 232, 255, 0.2)
   padding: 0.4rem

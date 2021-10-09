@@ -26,12 +26,13 @@
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { setTitle } from '../utils/setTitle'
+import { API_BASE } from '../config'
 
 const posts = ref([])
 
 function init() {
   axios
-    .get('/api/post', { params: { limit: 25, offset: 0 } })
+    .get(`${API_BASE}/post`, { params: { limit: 25, offset: 0 } })
     .then(({ data }: any) => {
       posts.value = data.body.posts
     })

@@ -8,15 +8,14 @@ main
 </template>
 
 <script lang="ts">
-import { onMounted } from 'vue'
+import {} from 'vue'
 import { userData, getUserDataByToken } from './components/userData'
-
-onMounted(() => {
+;(() => {
   if (!userData.value) {
     console.log('init user')
     getUserDataByToken().then((i) => console.info(i))
   }
-})
+})()
 </script>
 
 <style scoped lang="sass">

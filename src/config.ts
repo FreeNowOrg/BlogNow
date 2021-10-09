@@ -22,7 +22,7 @@ axios.interceptors.request.use(
     if (ENV !== 'prod') {
       req.headers = req.headers || {}
       try {
-        req.headers.authorization = window.Cookies.get('PICA_TOKEN') || ''
+        req.headers.authorization = window.Cookies.get('BLOG_NOW_TOKEN') || ''
         console.info('[Axios]', 'Request with local token')
       } catch (err) {
         console.warn('[Axios]', 'Inject error', err)

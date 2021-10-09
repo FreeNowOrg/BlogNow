@@ -8,12 +8,22 @@
 
   h1 {{ isCreate ? "Create new post" : "Edit post" }}
   .edit-area
-    .title-input
-      input(v-model='title')
-    .content-input
-      textarea(v-model='content')
-  .btn-area
-    button(@click='handleSubmit') {{ isCreate ? "Publish" : "Update" }}
+    .title-input(style='margin-bottom: 1rem')
+      label
+        strong Title
+        input(v-model='title')
+
+    //- Wide
+    .content-input.flex.gap-1
+      .text-area.flex-1
+        label(for='content')
+          strong Content
+        textarea#content(v-model='content')
+      .preview-area.flex-1
+        #post-content(v-html='contentHtml')
+
+    .btn-area
+      button(@click='handleSubmit') {{ isCreate ? "Publish" : "Update" }}
   .info.error(v-if='error')
     .title Submit faild
     p {{ error }}
@@ -21,9 +31,11 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrMsg } from '../utils/getErrMsg'
+import { userData } from '../components/userData'
+import { md } from '../utils/md'
 import { setTitle } from '../utils/setTitle'
 
 const route = useRoute()
@@ -35,6 +47,9 @@ const title = ref('My post')
 const content = ref('')
 const loading = ref(false)
 const error = ref('')
+const contentHtml = computed(() =>
+  md.render(`# ${title.value}\n\n${content.value}`)
+)
 
 function getPost() {
   loading.value = true
@@ -125,5 +140,17 @@ onMounted(() => {
     width: 100%
   textarea
     resize: vertical
-    min-height: 8rem
+    min-height: 70vh
+    padding: 1rem 0.4rem
+  #post-content
+    height: 70vh
+    overflow: auto
+
+  .btn-area
+    position: sticky
+    bottom: 0
+    background-color: #fff
+    margin-top: 1rem
+    padding: 1rem
+    box-shadow: 0px -4px 8px #efefef
 </style>
