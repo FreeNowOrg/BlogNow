@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import 'js-cookie'
 
 // Create App
 import App from './App.vue'

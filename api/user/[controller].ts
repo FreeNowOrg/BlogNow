@@ -82,7 +82,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         handleUserMeta()
         break
       case 'profile':
-        handleSelfMeta()
+        handleSelfProfile()
         break
       default:
         handleInvalidController(http)
@@ -137,12 +137,15 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return http.send(403, 'Username is already in use')
     }
 
+    const salt = nanoid(32)
     const insert: DbUserDoc = {
       ...USERDATA_DEFAULTS,
       username,
       uuid: UUID(),
-      password_hash: getPasswordHash(password),
+      password_hash: getPasswordHash(salt, password),
+      salt,
     }
+
     const r = await col.insertOne(insert)
     return http.send(200, 'User created', r)
   }
@@ -151,13 +154,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return http.send(404, 'Work in progress')
   }
 
-  async function handleSelfMeta() {
+  async function handleSelfProfile() {
     const token = getTokenFromReq(req)
     if (!token) {
       return http.send(401, 'Please login')
     }
-    const data = await getUserDataByToken(token)
-    http.send(200, 'ok', data)
+    const profile = await getUserDataByToken(token)
+    http.send(200, 'ok', { profile })
   }
 
   function updateSelf(key: string) {
@@ -174,10 +177,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return http.send(400, 'Missing params')
     }
     await client.connect()
-    const password_hash = getPasswordHash(password)
-    const profile = await col.findOne({ username, password_hash })
+    const profile = await col.findOne({ username })
     if (!profile) {
-      return http.send(401, 'Invalid username or password')
+      return http.send(401, 'Invalid username')
+    }
+    const password_hash = getPasswordHash(profile.salt, password)
+    if (password_hash !== profile.password_hash) {
+      return http.send(401, 'Invalid password')
     }
     const token =
       profile.token_expires - Date.now() < 0 ? nanoid(32) : profile.token
@@ -196,14 +202,15 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     delete profile.token
     delete profile.token_expires
     delete profile.password_hash
+    delete profile.salt
     return http.send(200, 'ok', { token, profile })
   }
 }
 
-function getPasswordHash(p: string) {
+function getPasswordHash(salt: string, password: string) {
   return crypto
     .createHash('sha256')
-    .update(`salt=blognowtest,password=${p}`)
+    .update(`salt=${salt},password=${password}`)
     .digest('hex')
 }
 
@@ -223,6 +230,7 @@ export async function getUserDataByToken(
   delete user.token
   delete user.token_expires
   delete user.password_hash
+  delete user.salt
   return user as DbUserDoc
 }
 

@@ -1,15 +1,16 @@
 <template lang="pug">
 .post-container
   .loading(v-if='!post')
-    | loading post...
+    h1 {{ uuid }}
+    .card loading post...
   .post-main(v-if='post')
-    h1 Post {{ uuid }}
-    pre {{ post }}
-    .btn
-      router-link(
-        :to='{ name: "post-edit", params: { uuid } }',
-        v-if='userData && userData.authority >= 2'
-      ) edit
+    h1 {{ post.title }}
+    .card.pre {{ post.content }}
+    .btn-area
+      router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "edit post" : "view source" }}
+    .card
+      details
+        pre {{ post }}
 </template>
 
 <script setup lang="ts">
@@ -20,19 +21,19 @@ import { userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
 const route = useRoute()
 
-const uuid = route.params.uuid
+const uuid = ref(route.params.uuid)
 const post = ref(null)
 
 function init() {
   axios
     .get('/api/post', {
       params: {
-        uuid,
+        uuid: uuid.value,
       },
     })
     .then(({ data }: any) => {
-      setTitle(data.body.title)
-      post.value = data.body
+      setTitle(data.body.post.title)
+      post.value = data.body.post
     })
 }
 

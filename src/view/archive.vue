@@ -4,15 +4,17 @@
     | loading post list...
   .archive-main(v-else)
     h1 Archive
-    ul
-      li(v-for='item in posts')
-        strong {{ item.title }}
-        | &nbsp;
-        i by {{ item.author_uuid }}
-        | &nbsp;
-        i ({{ new Date(item.created_at).toLocaleString() }})
-        | &nbsp;
-        router-link(:to='{ name: "post", params: { uuid: item.uuid } }') view
+    ul.post-list.card
+      li.post-card.card(v-for='item in posts')
+        .title
+          strong {{ item.title }}
+        .author by {{ item.author_uuid }}
+        .created-time ({{ new Date(item.created_at).toLocaleString() }})
+        .visit-link
+          router-link(:to='{ name: "post", params: { uuid: item.uuid } }') view →
+    .card
+      details
+        pre {{ posts }}
 </template>
 
 <script setup lang="ts">

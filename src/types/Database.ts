@@ -28,6 +28,7 @@ export interface DbUserDoc {
   gender: 'male' | 'female' | 'other'
   avatar: string
   password_hash: string
+  salt: string
   token: string
   token_expires: number
   authority: number
