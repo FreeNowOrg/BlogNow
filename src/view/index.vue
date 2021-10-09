@@ -4,7 +4,7 @@ h1 Blog Now
 .card.align-center
   p(v-if='!userData')
     router-link.button(to='/auth') Login
-  p(v-else) Welcome, {{ userData.name }}~
+  p(v-else) Welcome, {{ userData.username }}~
 
 .card
   router-link(to='/archive') Archive

@@ -10,12 +10,13 @@
     .btn
       button(@click.prevent='handleLogin') Login
   .user-info(v-else)
-    pre {{ userData }}
+    h1 hello, {{ userData.username }}~
+    .card
+      pre {{ userData }}
+      .btn
+        button(@click='handleLogout') Logout
 
   .info-area
-    .info.tips(v-if='token')
-      .title Login OK
-      p Your token is <code>{{ token }}</code>
     .info.error(v-if='error')
       .title Login faild
       p {{ error }}
@@ -26,16 +27,15 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { getUserDataByLogin, userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
+import Cookies from 'js-cookie'
 
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
-const token = ref('')
 const error = ref('')
 
 function handleLogin() {
   loading.value = true
-  token.value = ''
   error.value = ''
 
   getUserDataByLogin({
@@ -51,6 +51,11 @@ function handleLogin() {
     .finally(() => {
       loading.value = false
     })
+}
+
+function handleLogout() {
+  Cookies.remove('BLOGNOW_TOKEN')
+  location.reload()
 }
 
 onMounted(() => {

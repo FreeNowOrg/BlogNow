@@ -57,6 +57,7 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
   token_expires: 0,
   authority: 1,
   title: '',
+  salt: '',
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
@@ -144,6 +145,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       uuid: UUID(),
       password_hash: getPasswordHash(salt, password),
       salt,
+      created_at: new Date().toISOString(),
     }
 
     const r = await col.insertOne(insert)
