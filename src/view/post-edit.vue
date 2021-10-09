@@ -13,10 +13,11 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { setTitle } from '../utils/setTitle'
 
 const route = useRoute()
+const router = useRouter()
 
 const uuid = route.params.uuid
 const isCreate = !uuid
@@ -39,7 +40,7 @@ function getPost() {
       },
       (err) => {
         if (err?.response?.status === 404) {
-          location.href = '/post/new'
+          router.push('/post/new')
         }
       }
     )
@@ -60,10 +61,12 @@ function handleCreate() {
   loading.value = true
   axios
     .post('/api/post', {
-      title: 'Post title',
+      title: title.value,
       content: content.value,
     })
-    .then(console.info)
+    .then(({ data }) => {
+      router.push({ name: 'post', { params: { data.body.uuid } })
+    })
     .finally(() => {
       loading.value = false
     })
@@ -74,10 +77,12 @@ function handleUpdate() {
   axios
     .patch('/api/post', {
       post_uuid: uuid,
-      title: 'Post title',
+      title: title.value,
       content: content.value,
     })
-    .then(console.info)
+    .then(() => {
+      router.push({ name: 'post', { params: { uuid } })
+    })
     .finally(() => {
       loading.value = false
     })
