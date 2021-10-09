@@ -96,7 +96,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     try {
       await client.connect()
-      const data = await col.findOneAndUpdate(
+      const data = await col.updateOne(
         { uuid: post_uuid },
         {
           $set: {
