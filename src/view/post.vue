@@ -2,7 +2,7 @@
 .post-container
   header#post-header
     .inner
-      h1#post-title {{ post ? psot.title : "Post title" }}
+      h1#post-title {{ post ? post.title : "Post title" }}
       #post-meta(v-if='post')
         .author @Author
         .date Created at <time>time</time>
