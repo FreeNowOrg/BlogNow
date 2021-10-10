@@ -8,9 +8,9 @@
 
   main#home-main.body-inner
     .main-flex
-      #home-post-list.flex-1(v-if='siteCache.recents.length > 0')
+      #home-post-list.flex-1(v-if='recents.length > 0')
         .home-post-card.card(
-          v-for='(item, index) in siteCache.recents',
+          v-for='(item, index) in recents',
           style='padding: 0'
         )
           .thumb
@@ -38,11 +38,13 @@ import { setTitle, getRecentPosts, siteCache } from '../utils'
 import GlobalAside from '../components/GlobalAside.vue'
 
 const components = defineComponent({ GlobalAside })
-const posts = ref<any[]>([])
+const recents = ref<any[]>([])
 
 onMounted(() => {
   setTitle()
-  getRecentPosts()
+  getRecentPosts().then((list) => {
+    recents.value = list
+  })
 })
 </script>
 
