@@ -1,29 +1,38 @@
 <template lang="pug">
-main
-  header
-    .site-name
-      router-link(to='/') Home
-  article
+#full-container
+  global-header
+  .router-view
     router-view
+  global-footer
 </template>
 
-<script lang="ts">
-import {} from 'vue'
+<script setup lang="ts">
+import { defineComponent, onMounted } from 'vue'
+
+import GlobalHeader from './components/GlobalHeader.vue'
+import GlobalFooter from './components/GlobalFooter.vue'
+
+const components = defineComponent({
+  GlobalHeader,
+  GlobalFooter,
+})
+
 import { userData, getUserDataByToken } from './components/userData'
-;(() => {
+
+onMounted(() => {
   if (!userData.value) {
     console.log('init user')
     getUserDataByToken().then((i) => console.info(i))
   }
-})()
+})
 </script>
 
 <style scoped lang="sass">
-main
-  article
-    z-index: 1
-    min-height: 100vh
-    padding: 60px 1rem 100px 1rem
-    box-sizing: border-box
-    position: relative
+#full-container
+  display: flex
+  flex-direction: column
+  min-height: 100vh
+
+  .router-view
+    flex: 1
 </style>

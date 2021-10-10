@@ -1,32 +1,30 @@
 <template lang="pug">
-.archive-container
-  .loading(v-if='!posts.length')
-    | loading post list...
-  .archive-main(v-else)
-    h1 Archive
-    .post-list.flex-list.card
-      .list-item.header
-        .key Title
-        .val Author
-        .val Create
-        .val Link
-      .post-card.list-item.card(v-for='item in posts')
-        .key.title
-          strong {{ item.title }}
-        .author @{{ item.author_uuid }}
-        .created-time ({{ new Date(item.created_at).toLocaleString() }})
-        .visit-link
-          router-link(:to='{ name: "post", params: { uuid: item.uuid } }') view →
-    .card
-      details
-        pre {{ posts }}
+#archive-container
+  main#archive-main
+    .main-flex
+      #archive-post-list.flex-1
+        .card
+          h1 Posts
+          .loading(v-if='posts.length < 1')
+            placeholder
+          ul
+            li(v-for='item in posts')
+              .title {{ item.title }}
+              .link
+                router-link(
+                  :to='{ name: "post", params: { uuid: item.uuid } }'
+                ) view
+      global-aside
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, defineComponent } from 'vue'
 import axios from 'axios'
 import { setTitle } from '../utils/setTitle'
 import { API_BASE } from '../config'
+import GlobalAside from '../components/GlobalAside.vue'
+
+const components = defineComponent({ GlobalAside })
 
 const posts = ref([])
 
@@ -44,4 +42,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="sass"></style>
+<style scoped lang="sass">
+#archive-main
+  margin-top: calc(60px + 1rem)
+</style>

@@ -1,38 +1,43 @@
 <template lang="pug">
-.post-edit-container(:class='{ "loading-cover": loading }')
-  .info.warn(v-if='!userData || userData.authority < 2')
-    .title {{ userData ? "No permision" : "Please login" }}
-    p(v-if='!userData')
-      router-link(:to='{ name: "auth", query: { backto: $route.path } }') Login
-    p(v-else) Please contact site admin
+#post-edit-container
+  main#edit-main
+    .responsive
+      h1 {{ isCreate ? "Create new post" : "Edit post" }}
+      .bread-crumb(v-if='uuid')
+        router-link(:to='{ name: "post", params: { uuid } }') ← back to post
+      .edit-area(:class='{ "loading-cover": loading }')
+        .title-input(style='margin-bottom: 1rem')
+          label
+            strong Title
+            input(v-model='title')
 
-  h1 {{ isCreate ? "Create new post" : "Edit post" }}
-  .edit-area
-    .title-input(style='margin-bottom: 1rem')
-      label
-        strong Title
-        input(v-model='title')
-
-    //- Wide
-    .content-input.flex.gap-1
-      .text-area.flex-1
-        label(for='content')
-          strong Content
-        v-md-editor#content(
-          v-model='content',
-          height='70vh',
-          left-toolbar='undo redo | h bold italic strikethrough quote tip | ul ol table hr | link image code | emoji',
-          right-toolbar='preview toc fullscreen | save',
-          :disabled-menus='["image/upload-image", "h/h1"]',
-          @save='handleSubmit'
-        )
+        //- Wide
+        .content-input.flex.gap-1
+          .text-area.flex-1
+            label(for='content')
+              strong Content
+            v-md-editor#content(
+              v-model='content',
+              height='70vh',
+              left-toolbar='undo redo | h bold italic strikethrough quote tip | ul ol table hr | link image code | emoji',
+              right-toolbar='preview toc fullscreen | save',
+              :disabled-menus='["image/upload-image", "h/h1"]',
+              @save='handleSubmit'
+            )
 
     .btn-area
+      .info.warn(v-if='!userData || userData.authority < 2')
+        .title {{ userData ? "No permision" : "Authority error" }}
+        p(v-if='!userData')
+          | Please
+          |
+          router-link(:to='{ name: "auth", query: { backto: $route.path } }') Login
+        p(v-else) Please contact site admin
       .info.error(v-if='error')
         .title Submit faild
           a.pointer(style='float: right', @click='error = ""') ×
         p {{ error }}
-      button(@click='handleSubmit') {{ isCreate ? "Publish" : "Update" }}
+      button(@click='handleSubmit', :disabled='loading') {{ isCreate ? "Publish" : "Update" }}
 </template>
 
 <script setup lang="ts">
@@ -137,26 +142,29 @@ onMounted(() => {
 </script>
 
 <style scoped lang="sass">
+#post-edit-container
+  margin-top: calc(60px + 1rem)
 .edit-area
   input
     width: 100%
-    padding: 4px 0.75rem
-    font-size: 1rem
+    padding: 0.4em 0.75em
+    font-size: 1.4rem
     line-height: 1em
     border: none
-    border-radius: 1em
-    background-color: rgba(0, 0, 0, 0.05)
+    border-radius: 0.5em
+    background-color: rgba(0, 0, 0, 0.025)
     outline: none
     &:hover
       box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25)
     &:focus
       box-shadow: 0 0 0 2px var(--theme-accent-color)
 
-  .btn-area
-    position: sticky
-    bottom: 0
-    background-color: #fff
-    margin-top: 1rem
-    padding: 1rem
-    box-shadow: 0px -4px 8px #efefef
+.btn-area
+  position: sticky
+  bottom: 0
+  background-color: #fff
+  margin-top: 1rem
+  padding: 1rem
+  box-shadow: 0px -4px 8px #efefef
+  z-index: 20
 </style>

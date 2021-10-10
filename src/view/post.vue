@@ -1,25 +1,27 @@
 <template lang="pug">
 .post-container
-  .loading(v-if='!post')
-    h1 {{ uuid }}
-    .card loading post...
-  .post-main(v-if='post')
-    h1 {{ post.title }}
-    p.meta-area.card.flex.gap-1.flex-center
-      .author
-        | @{{ post.author_uuid }}
-      .created-time
-        span Created at&nbsp;
-        time {{ new Date(post.created_at).toLocaleString() }}
-      .edited-time(v-if='post.edited_at')
-        | (
-        span @{{ post.editor_uuid }} edited at&nbsp;
-        time {{ new Date(post.edited_at).toLocaleString() }}
-        | )
-      .edit-link
-        router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "edit post" : "view source" }}
-    #post-content.card
-      v-md-editor(v-model='post.content', mode='preview')
+  header#post-header
+    .inner
+      h1#post-title {{ post ? psot.title : "Post title" }}
+      #post-meta(v-if='post')
+        .author @Author
+        .date Created at <time>time</time>
+      #post-meta(v-else)
+        .foo Loading post...
+
+  main#post-main.responsive
+    .bread-crumb.card
+      router-link(to='/') Home
+      | &nbsp;|&nbsp;
+      router-link(to='/archive') Posts
+      | &nbsp;> yyyy > MM > dd
+
+    .main-flex
+      article#post-content.card
+        .loading(v-if='!post')
+          placeholder
+        v-md-editor(v-if='post', v-model='post.content', mode='preview')
+      global-aside
     .card
       details
         pre {{ post }}
@@ -30,6 +32,7 @@ import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
 import { userData } from '../components/userData'
+import GlobalAside from '../components/GlobalAside.vue'
 import { setTitle } from '../utils/setTitle'
 import { API_BASE } from '../config'
 
@@ -59,4 +62,30 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="sass"></style>
+<style scoped lang="sass">
+#post-header
+  position: relative
+  text-align: center
+  color: #fff
+  height: 400px
+  background-image: url(https://blog.wjghj.cn/_statics/images/uploads/cc848d0f-00ed-4c2e-be9d-aec88d410cfc.jpeg)
+  &::before
+    content: ""
+    display: block
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    background-color: rgba(0, 0, 0, 0.5)
+    z-index: 0
+  .inner
+    position: absolute
+    top: 50%
+    left: 0
+    transform: translateY(-50%)
+    width: 100%
+
+#post-main
+  margin: 3rem 0 4rem 0
+</style>

@@ -12,6 +12,14 @@ app.use(router)
 // Style
 import './styles/index.sass'
 
+// LazyLoad
+import Lazyload from './components/Lazyload.vue'
+app.component('Lazyload', Lazyload)
+
+// Placeholder
+import Placeholder from './components/Placeholder.vue'
+app.component('Placeholder', Placeholder)
+
 // highlightjs
 import hljs from 'highlight.js'
 

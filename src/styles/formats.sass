@@ -1,4 +1,5 @@
-.align-center
+.align-center,
+.loading
   text-align: center
 
 .align-left
@@ -55,6 +56,21 @@
     .key
       font-weight: 600
       box-shadow: 2px 0 #dedede
+
+.main-flex
+  display: flex
+  gap: 1.5rem
+  margin-bottom: 2rem
+  article
+    flex: 1
+  aside
+    width: 200px
+
+@media screen and(max-width: 800px)
+  .main-flex
+    flex-direction: column
+    aside
+      width: 100%
 
 .pointer
   cursor: pointer
