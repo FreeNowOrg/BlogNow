@@ -52,9 +52,9 @@ const uuid = ref(route.params.uuid as string)
 const post = ref<any>(null)
 
 function init() {
-  getPost({ uuid: uuid.value }, !!route.query.noCahce).then(({ data }: any) => {
-    setTitle(data.body.post.title)
-    post.value = data.body.post
+  getPost({ uuid: uuid.value }, !!route.query.noCahce).then((data) => {
+    setTitle(data.title)
+    post.value = data
   })
 }
 

@@ -47,29 +47,31 @@ import { useRoute, useRouter } from 'vue-router'
 import { getErrMsg } from '../utils/getErrMsg'
 import { userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
+import { getPost } from '../utils'
 
 const route = useRoute()
 const router = useRouter()
 
-const uuid = route.params.uuid
+const uuid = route.params.uuid as string
 const isCreate = !uuid
 const title = ref('My post')
 const content = ref('')
 const loading = ref(false)
 const error = ref('')
 
-function getPost() {
+function fetchPost() {
   loading.value = true
-  axios
-    .get('/api/post', {
-      params: {
-        uuid,
-      },
-    })
+  getPost(
+    {
+      uuid,
+    },
+    true
+  )
     .then(
-      ({ data }: any) => {
-        title.value = data.body.post.title
-        content.value = data.body.post.content
+      (post) => {
+        setTitle(`Edit ${post.title}`)
+        title.value = post.title
+        content.value = post.content
       },
       (err) => {
         if (err?.response?.status === 404) {
@@ -139,9 +141,9 @@ function handleUpdate() {
 onMounted(() => {
   console.log({ isCreate })
   if (!isCreate) {
-    getPost()
+    fetchPost()
   }
-  setTitle('Edit', 'Post')
+  setTitle('Edit post')
 })
 </script>
 

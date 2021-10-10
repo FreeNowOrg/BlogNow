@@ -26,7 +26,7 @@ export function setPostCache(post: DbPostDoc) {
 export async function getPost(
   params: Partial<DbPostDoc>,
   noCache?: boolean
-): Promise<DbPostDoc | null> {
+): Promise<DbPostDoc> {
   const key = Object.keys(params)[0] as keyof DbPostDoc
   const val: any = params[key]
   const cache = siteCache.value.posts.find((i) => i[key] === val)
@@ -35,14 +35,10 @@ export async function getPost(
     return cache
   }
   params[key] = val
-  try {
-    console.info('[CACHE]', 'Get post from origin')
-    const { data }: any = await axios.get(`${API_BASE}/post`, { params })
-    setPostCache(data.body.post)
-    return data.body.post
-  } catch (e) {
-    return null
-  }
+  console.info('[CACHE]', 'Get post from origin')
+  const { data }: any = await axios.get(`${API_BASE}/post`, { params })
+  setPostCache(data.body.post)
+  return data.body.post
 }
 
 export async function addNewPost(payload: Partial<DbPostDoc>) {
