@@ -87,7 +87,7 @@ function handleLogin() {
 }
 
 function handleLogout() {
-  Cookies.remove('BLOGNOW_TOKEN')
+  Cookies.remove('BLOG_NOW_TOKEN')
   location.reload()
 }
 

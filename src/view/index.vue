@@ -13,12 +13,12 @@
           v-for='(item, index) in recents',
           style='padding: 0'
         )
-          .thumb
+          .post-cover
             router-link(:to='{ name: "post", params: { uuid: item.uuid } }')
               img.cover(
                 :src='"https://api.daihan.top/api/acg?_random=" + item.uuid'
               )
-          .meta
+          .post-meta
             router-link.title(
               :to='{ name: "post", params: { uuid: item.uuid } }'
             ) {{ item.title }}
@@ -98,10 +98,10 @@ onMounted(() => {
     height: 240px
     border-radius: 1rem
     overflow: hidden
-    gap: 1.5rem
+
     &:nth-of-type(2n + 1)
       flex-direction: row-reverse
-    .thumb
+    .post-cover
       position: relative
       width: 45%
       height: 100%
@@ -117,12 +117,22 @@ onMounted(() => {
     &:hover
       .cover
         transform: scale(1.1)
-    .meta
-      padding: 2rem 0
+    .post-meta
+      padding: 2rem 1rem
+      flex: 1
       .title
         font-size: 1.4rem
         font-weight: 600
         --color: var(--theme-accent-color)
+
+@media screen and(max-width: 900px)
+  .home-post-card
+    flex-direction: column
+    height: 400px
+
+    .post-cover
+      width: 100%
+      min-height: 60px
 
 #home-main
   background-color: #fff
