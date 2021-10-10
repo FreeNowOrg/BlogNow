@@ -52,7 +52,7 @@ const uuid = ref(route.params.uuid as string)
 const post = ref<any>(null)
 
 function init() {
-  getPost({ uuid: uuid.value }, !!route.query.noCahce).then((data) => {
+  getPost({ uuid: uuid.value }, !!route.query.noCache).then((data) => {
     setTitle(data.title)
     post.value = data
   })
@@ -97,5 +97,5 @@ onMounted(() => {
       margin-bottom: 1rem
 
 #post-main
-  margin: 3rem 0 4rem 0
+  margin: 3rem auto 4rem
 </style>
