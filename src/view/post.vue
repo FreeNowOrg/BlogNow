@@ -18,7 +18,8 @@
         | )
       .edit-link
         router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "edit post" : "view source" }}
-    article#post-content.card(v-html='postHtml')
+    #post-content.card
+      v-md-editor(v-model='post.content', mode='preview')
     .card
       details
         pre {{ post }}
@@ -30,7 +31,6 @@ import axios from 'axios'
 import { useRoute } from 'vue-router'
 import { userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
-import { md } from '../utils/md'
 import { API_BASE } from '../config'
 
 const route = useRoute()
@@ -51,7 +51,7 @@ function init() {
     })
 }
 
-const postHtml = computed(() => md.render(post.value?.content))
+// const postHtml = computed(() => md.render(post.value?.content))
 
 onMounted(() => {
   init()

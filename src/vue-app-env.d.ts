@@ -68,3 +68,9 @@ declare module '*.vue' {
   const componentOptions: ComponentOptions
   export default componentOptions
 }
+
+// VMEditor
+declare module '@kangc/v-md-editor'
+declare module '@kangc/v-md-editor/lib/theme/hljs'
+declare module '@kangc/v-md-editor/lib/plugins/tip/index'
+declare module '@kangc/v-md-editor/lib/plugins/emoji/index'

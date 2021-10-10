@@ -18,15 +18,21 @@
       .text-area.flex-1
         label(for='content')
           strong Content
-        textarea#content(v-model='content')
-      .preview-area.flex-1
-        #post-content(v-html='contentHtml')
+        v-md-editor#content(
+          v-model='content',
+          height='70vh',
+          left-toolbar='undo redo | h bold italic strikethrough quote tip | ul ol table hr | link image code | emoji',
+          right-toolbar='preview toc fullscreen | save',
+          :disabled-menus='["image/upload-image", "h/h1"]',
+          @save='handleSubmit'
+        )
 
     .btn-area
+      .info.error(v-if='error')
+        .title Submit faild
+          a.pointer(style='float: right', @click='error = ""') ×
+        p {{ error }}
       button(@click='handleSubmit') {{ isCreate ? "Publish" : "Update" }}
-  .info.error(v-if='error')
-    .title Submit faild
-    p {{ error }}
 </template>
 
 <script setup lang="ts">
@@ -35,7 +41,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrMsg } from '../utils/getErrMsg'
 import { userData } from '../components/userData'
-import { md } from '../utils/md'
 import { setTitle } from '../utils/setTitle'
 
 const route = useRoute()
@@ -47,9 +52,6 @@ const title = ref('My post')
 const content = ref('')
 const loading = ref(false)
 const error = ref('')
-const contentHtml = computed(() =>
-  md.render(`# ${title.value}\n\n${content.value}`)
-)
 
 function getPost() {
   loading.value = true
@@ -136,15 +138,19 @@ onMounted(() => {
 
 <style scoped lang="sass">
 .edit-area
-  input, textarea
+  input
     width: 100%
-  textarea
-    resize: vertical
-    min-height: 70vh
-    padding: 1rem 0.4rem
-  #post-content
-    height: 70vh
-    overflow: auto
+    padding: 4px 0.75rem
+    font-size: 1rem
+    line-height: 1em
+    border: none
+    border-radius: 1em
+    background-color: rgba(0, 0, 0, 0.05)
+    outline: none
+    &:hover
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25)
+    &:focus
+      box-shadow: 0 0 0 2px var(--theme-accent-color)
 
   .btn-area
     position: sticky
