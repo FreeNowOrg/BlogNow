@@ -1,15 +1,17 @@
 <template lang="pug">
-.post-container
+#post-container
   header#post-header
     .inner
-      h1#post-title {{ post ? psot.title : "Post title" }}
+      h1#post-title {{ post ? post.title : "Post title" }}
       #post-meta(v-if='post')
         .author @Author
         .date Created at <time>time</time>
       #post-meta(v-else)
         .foo Loading post...
+      #edit-links
+        router-link(:to='{ name: "post-edit", params: { uuid } }') {{ userData && userData.authority >= 2 ? "Edit post" : "View source" }}
 
-  main#post-main.responsive
+  main#post-main.body-inner
     .bread-crumb.card
       router-link(to='/') Home
       | &nbsp;|&nbsp;
@@ -21,7 +23,14 @@
         .loading(v-if='!post')
           placeholder
         v-md-editor(v-if='post', v-model='post.content', mode='preview')
+        .after(v-if='post')
+          hr
+          p Article after
       global-aside
+        template(#top)
+          .card.author-card Author
+        template(#default)
+          .card 123
     .card
       details
         pre {{ post }}
@@ -35,26 +44,19 @@ import { userData } from '../components/userData'
 import GlobalAside from '../components/GlobalAside.vue'
 import { setTitle } from '../utils/setTitle'
 import { API_BASE } from '../config'
+import { getPost } from '../utils'
 
 const route = useRoute()
 
-const uuid = ref(route.params.uuid)
+const uuid = ref(route.params.uuid as string)
 const post = ref<any>(null)
 
 function init() {
-  axios
-    .get(`${API_BASE}/post`, {
-      params: {
-        uuid: uuid.value,
-      },
-    })
-    .then(({ data }: any) => {
-      setTitle(data.body.post.title)
-      post.value = data.body.post
-    })
+  getPost({ uuid: uuid.value }, !!route.query.noCahce).then(({ data }: any) => {
+    setTitle(data.body.post.title)
+    post.value = data.body.post
+  })
 }
-
-// const postHtml = computed(() => md.render(post.value?.content))
 
 onMounted(() => {
   init()
@@ -68,7 +70,10 @@ onMounted(() => {
   text-align: center
   color: #fff
   height: 400px
-  background-image: url(https://blog.wjghj.cn/_statics/images/uploads/cc848d0f-00ed-4c2e-be9d-aec88d410cfc.jpeg)
+  background-image: url(https://api.daihan.top/api/acg)
+  background-position: center
+  background-size: cover
+  background-attachment: fixed
   &::before
     content: ""
     display: block
@@ -85,6 +90,11 @@ onMounted(() => {
     left: 0
     transform: translateY(-50%)
     width: 100%
+    a
+      --color: #a3cfff
+
+    #post-meta
+      margin-bottom: 1rem
 
 #post-main
   margin: 3rem 0 4rem 0

@@ -1,11 +1,17 @@
 <template lang="pug">
 nav#global-header.flex.gap-1
   .item.site-logo-area.flex.flex-center
-    router-link(to='/') LOGO
+    router-link.plain(to='/')
+      .logo-placeholder LOGO
+
   .item.links-area.flex.flex-1.gap-1
-    router-link(to='/archive') Archive
+    router-link(to='/') Home
+    router-link(to='/archives') Archives
+    router-link(to='/-/about') About
+
   .item.user-area
-    .avatar-placeholder You
+    router-link.plain(to='/auth')
+      .avatar-placeholder You
 </template>
 
 <script setup lang="ts">
@@ -25,6 +31,15 @@ import {} from 'vue'
   align-items: center
   box-shadow: 0 2px 0 #f8f8f8
 
+  a
+    --color: var(--theme-text-color)
+
+  .site-logo-area
+    .logo-placeholder
+      border: 1px solid #888
+      border-radius: 6px
+      padding: 0.5rem
+
   .links-area
     justify-content: flex-end
 
@@ -33,9 +48,9 @@ import {} from 'vue'
       display: inline-block
       border-radius: 50%
       box-shadow: 0 0 0 2px #aaa
-      width: 40px
-      height: 40px
+      width: 2rem
+      height: 2rem
       background-color: #fff
-      line-height: 40px
+      line-height: 2rem
       text-align: center
 </style>

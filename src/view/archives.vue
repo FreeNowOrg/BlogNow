@@ -1,7 +1,7 @@
 <template lang="pug">
 #archive-container
   main#archive-main
-    .main-flex
+    .main-flex.body-inner
       #archive-post-list.flex-1
         .card
           h1 Posts
@@ -23,17 +23,16 @@ import axios from 'axios'
 import { setTitle } from '../utils/setTitle'
 import { API_BASE } from '../config'
 import GlobalAside from '../components/GlobalAside.vue'
+import { getRecentPosts, setPostCache } from '../utils'
 
 const components = defineComponent({ GlobalAside })
 
-const posts = ref([])
+const posts = ref<any[]>([])
 
 function init() {
-  axios
-    .get(`${API_BASE}/post`, { params: { limit: 25, offset: 0 } })
-    .then(({ data }: any) => {
-      posts.value = data.body.posts
-    })
+  getRecentPosts(true).then((list) => {
+    posts.value = list
+  })
 }
 
 onMounted(() => {

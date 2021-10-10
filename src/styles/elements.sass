@@ -64,6 +64,12 @@ a
       background-color: rgba(var(--theme-link-color--rgb), 1)
       color: var(--theme-accent-link-color)
 
+hr,
+.hr
+  border: none
+  border-bottom: 4px dotted rgba(var(--theme-accent-color--rgb), 0.5)
+  margin: 1rem 0
+
 // Button
 button
   display: inline-block
@@ -120,29 +126,31 @@ button
       color: #fff
       background-color: var(--theme-link-color)
 
-// input,
-// textarea
-//   padding: 4px 0.75rem
-//   font-size: 1rem
-//   line-height: 1em
-//   border: none
-//   border-radius: 1em
-//   background-color: rgba(0, 0, 0, 0.05)
-//   outline: none
-//   &:hover
-//     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25)
-//   &:focus
-//     box-shadow: 0 0 0 2px var(--theme-accent-color)
+input.site-style,
+textarea.site-style
+  width: 100%
+  padding: 0.4em 0.75em
+  font-size: 1rem
+  line-height: 1em
+  border: none
+  border-radius: 0.5em
+  background-color: rgba(0, 0, 0, 0.04)
+  outline: none
+  &:hover
+    background-color: rgba(0, 0, 0, 0.08)
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25)
+  &:focus
+    background-color: rgba(0, 0, 0, 0.04)
+    box-shadow: 0 0 0 2px var(--theme-accent-color)
 
 // Responsive
-.responsive
+.responsive,
+.body-inner
   padding-left: 5%
   padding-right: 5%
-
-@media screen and(max-width: 800px)
-  .responsive
-    padding-left: 1rem
-    padding-right: 1rem
+  max-width: 1200px
+  margin-left: auto
+  margin-right: auto
 
 // Table
 table

@@ -14,9 +14,10 @@ router.addRoute({
 
 // Archive
 router.addRoute({
-  path: '/archive',
-  name: 'archive',
-  component: () => import('./view/archive.vue'),
+  path: '/archives',
+  name: 'archives',
+  alias: ['/archive'],
+  component: () => import('./view/archives.vue'),
 })
 
 // Post

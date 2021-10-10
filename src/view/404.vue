@@ -1,9 +1,11 @@
 <template lang="pug">
-.404-page
-  h1 404
-  p This page has been lost.
-  p 
-    router-link(to='/') Take me home
+#error-container
+  .body-inner
+    article.404-page
+      h1 404
+      p This page has been lost.
+      p 
+        router-link.button(to='/') ← Take me home
 </template>
 
 <script setup lang="ts">
@@ -14,4 +16,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="sass"></style>
+<style scoped lang="sass">
+#error-container
+  margin-top: calc(60px + 1rem)
+</style>

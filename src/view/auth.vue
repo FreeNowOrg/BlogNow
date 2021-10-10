@@ -1,25 +1,48 @@
 <template lang="pug">
-.auth-container
-  form(:class='{ "loadin-cover": loading }', v-if='!userData')
-    label
-      strong username
-      input(v-model='username')
-    label
-      strong password
-      input(v-model='password', type='password')
-    .btn
-      button(@click.prevent='handleLogin') Login
-  .user-info(v-else)
-    h1 hello, {{ userData.username }}~
-    .card
-      pre {{ userData }}
-      .btn
-        button(@click='handleLogout') Logout
+#auth-container
+  .body-inner
+    form#auth-form.card(v-if='!userData', :class='{ "loadin-cover": loading }')
+      #logo-area
+        img(src='/images/wordpress.svg')
 
-  .info-area
-    .info.error(v-if='error')
-      .title Login faild
-      p {{ error }}
+      #info-area
+        .info.error(v-if='errorMsg')
+          .title {{ errorTitle }}
+          p {{ errorMsg }}
+
+      #tabber-area
+        .tabber
+          .tabber-tabs
+            .tab.flex-1
+              a.pointer(
+                @click='tab = "login"',
+                :class='{ "tab-active": tab === "login" }'
+              ) Login
+            .tab.flex-1
+              a.pointer(
+                @click='tab = "register"',
+                :class='{ "tab-active": tab === "register" }'
+              ) Register
+
+      #login(v-if='tab === "login"')
+        label
+          strong Username
+          input.site-style(v-model='username')
+        label
+          strong Password
+          input.site-style(v-model='password', type='password')
+        .btn
+          button(@click.prevent='handleLogin') Login
+
+      #register(v-else)
+        p You can't regist at this time
+
+    #user-info(v-else)
+      h1 hello, {{ userData.username }}~
+      .card
+        pre {{ userData }}
+        .btn
+          button(@click='handleLogout') Logout
 </template>
 
 <script setup lang="ts">
@@ -35,11 +58,13 @@ const [route, router] = [useRoute(), useRouter()]
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
-const error = ref('')
+const tab = ref('login')
+const errorTitle = ref('')
+const errorMsg = ref('')
 
 function handleLogin() {
   loading.value = true
-  error.value = ''
+  errorMsg.value = ''
 
   getUserDataByLogin({
     username: username.value,
@@ -52,7 +77,8 @@ function handleLogin() {
         }
       },
       (e): any => {
-        error.value = e.message
+        errorTitle.value = 'Login failed'
+        errorMsg.value = e.message
       }
     )
     .finally(() => {
@@ -71,11 +97,29 @@ onMounted(() => {
 </script>
 
 <style scoped lang="sass">
+#auth-container
+  margin-top: calc(60px + 1rem)
+  margin-bottom: 3rem
+
+#logo-area
+  margin: 2rem auto
+
+#tabber-area
+  margin: 2rem 1rem
+  font-size: 1.5rem
+
 form
   text-align: center
+  width: 400px
+  max-width: 100%
+  margin: 0 auto
+  input
+    width: 100%
   label
     display: block
     margin-bottom: 1rem
     strong
+      text-align: left
       display: block
+      margin-bottom: 6px
 </style>

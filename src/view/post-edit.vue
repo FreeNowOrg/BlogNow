@@ -1,7 +1,7 @@
 <template lang="pug">
 #post-edit-container
   main#edit-main
-    .responsive
+    .body-inner
       h1 {{ isCreate ? "Create new post" : "Edit post" }}
       .bread-crumb(v-if='uuid')
         router-link(:to='{ name: "post", params: { uuid } }') ← back to post
@@ -73,7 +73,7 @@ function getPost() {
       },
       (err) => {
         if (err?.response?.status === 404) {
-          router.push('/post/new')
+          location.href = '/post/new'
         }
       }
     )
@@ -121,7 +121,11 @@ function handleUpdate() {
     })
     .then(
       () => {
-        router.push({ name: 'post', params: { uuid } })
+        router.push({
+          name: 'post',
+          params: { uuid },
+          query: { noCache: 1 },
+        })
       },
       (e) => {
         error.value = getErrMsg(e)
