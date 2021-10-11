@@ -11,7 +11,6 @@ import {
   sortKeys,
 } from './utils'
 import { getUserMetaByToken } from './user'
-import { nanoid } from 'nanoid'
 import slugify from 'slugify'
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
@@ -31,9 +30,7 @@ export function getPostModel(payload: Partial<DbPostDoc>) {
     ...POSTDATA_DEFAULTS,
     ...payload,
   })
-  post.slug = post.slug
-    ? slugify(post.slug, { lower: true, trim: true })
-    : nanoid(6)
+  post.slug = slugify(post.slug, { lower: true })
   return post
 }
 

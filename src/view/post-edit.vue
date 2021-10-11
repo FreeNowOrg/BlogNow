@@ -8,7 +8,7 @@
       .edit-area(:class='{ "loading-cover": loading }')
 
         //- title
-        .title-area(style='margin-bottom: 1rem')
+        .title-area
           label
             strong Title
             input.title-input(v-model='title')
@@ -28,7 +28,7 @@
             )
 
         //- slug
-        .slug-area(style='margin-bottom: 1rem')
+        .slug-area
           label
             strong Slug
             input.slug-input.site-style(v-model='slug')
@@ -72,7 +72,7 @@ const error = ref('')
 
 // Slug
 watch(slug, (val) => {
-  slug.value = slugify(val)
+  slug.value = slugify(val, { lower: true })
 })
 
 function fetchPost() {
@@ -164,6 +164,8 @@ onMounted(() => {
 #post-edit-container
   margin-top: calc(60px + 1rem)
 .edit-area
+  > div
+    margin-bottom: 1rem
   .title-input
     width: 100%
     padding: 0.4em 0.75em
@@ -190,4 +192,5 @@ onMounted(() => {
 // Make edit area wide
 .body-inner
   padding: 0 1rem
+  max-width: unset
 </style>
