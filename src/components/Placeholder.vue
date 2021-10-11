@@ -19,8 +19,7 @@
   </svg>
 </template>
 
-<script>
-</script>
+<script></script>
 
 <style scoped lang="sass">
 .svgspinner

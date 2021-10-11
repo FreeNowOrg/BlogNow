@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { MongoClient } from 'mongodb'
-import { GenerateMongo, HandleResponse } from 'serverless-kit'
+import { HandleResponse } from 'serverless-kit'
 import { getLocalConfig } from './config'
 import { TOKEN_COOKIE_NAME } from './user/[controller]'
 

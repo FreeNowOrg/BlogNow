@@ -11,10 +11,9 @@ import { ExternalLinkAlt } from '@vicons/fa'
 
 // const components = defineComponent()
 
-const props =
-  defineProps<{
-    href: string
-  }>()
+const props = defineProps<{
+  href: string
+}>()
 </script>
 
 <style scoped lang="sass">
