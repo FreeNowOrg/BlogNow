@@ -49,7 +49,6 @@
 import { onMounted, ref } from 'vue'
 import { userLogin, userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
-import Cookies from 'js-cookie'
 import { useRoute, useRouter } from 'vue-router'
 
 const [route, router] = [useRoute(), useRouter()]
@@ -86,7 +85,7 @@ function handleLogin() {
 }
 
 function handleLogout() {
-  Cookies.remove('BLOG_NOW_TOKEN')
+  window.Cookies.remove('BLOG_NOW_TOKEN')
   location.reload()
 }
 

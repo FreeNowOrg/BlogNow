@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import * as Cookies from 'js-cookie'
+import Cookies from 'js-cookie'
 
 // Create App
 import App from './App.vue'
@@ -43,5 +43,4 @@ app.use(VMdEditor)
 // Mount
 app.mount('#app')
 
-// @ts-ignore
-window.Cookies = Cookies.default || Cookies
+window.Cookies = Cookies
