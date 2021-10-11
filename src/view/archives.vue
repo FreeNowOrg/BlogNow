@@ -11,8 +11,13 @@
             li(v-for='item in posts')
               .title {{ item.title }}
               .link
-                router-link(
-                  :to='{ name: "post", params: { slug: item.slug || undefined, uuid: item.slug ? undefined : item.uuid } }'
+                router-link.title(
+                  v-if='item.slug'
+                  :to='{ name: "post-slug", params: { slug: item.slug } }'
+                ) view
+                router-link.title(
+                  v-else
+                  :to='{ name: "post", params: { sluguuid: item.sluguuid } }'
                 ) view
       global-aside
 </template>
