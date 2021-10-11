@@ -190,6 +190,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     await client.connect()
     const already = await col.findOne({ username })
     if (already) {
+      await client.close()
       return http.send(403, 'Username is already in use')
     }
 
@@ -202,8 +203,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       created_at: new Date().toISOString(),
     })
 
-    const r = await col.insertOne(insert)
-    return http.send(200, 'User created', r)
+    const dbRes = await col.insertOne(insert)
+    await client.close()
+
+    return http.send(200, 'User created', dbRes)
   }
 
   async function post_auth_login() {
@@ -215,10 +218,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     await client.connect()
     const profile = await col.findOne({ username })
     if (!profile) {
+      await client.close()
       return http.send(401, 'Invalid username')
     }
     const password_hash = getPasswordHash(profile.salt, password)
     if (password_hash !== profile.password_hash) {
+      await client.close()
       return http.send(401, 'Invalid password')
     }
     const token =
@@ -228,18 +233,17 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       { uuid: profile.uuid },
       { $set: { token, token_expires } }
     )
+
     await client.close()
+
     http.res.setHeader(
       'set-cookie',
       `${TOKEN_COOKIE_NAME}=${token}; expires=${new Date(
         token_expires
       ).toUTCString()}; path=/`
     )
-    delete profile.token
-    delete profile.token_expires
-    delete profile.password_hash
-    delete profile.salt
-    return http.send(200, 'ok', { token, profile })
+
+    return http.send(200, 'ok', { token, profile: getUserModel(profile, true) })
   }
 
   // PATCH

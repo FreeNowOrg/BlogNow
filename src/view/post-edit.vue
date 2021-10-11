@@ -6,12 +6,14 @@
       .bread-crumb(v-if='uuid')
         router-link(:to='{ name: "post", params: { uuid } }') ← back to post
       .edit-area(:class='{ "loading-cover": loading }')
-        .title-input(style='margin-bottom: 1rem')
+
+        //- title
+        .title-area(style='margin-bottom: 1rem')
           label
             strong Title
-            input(v-model='title')
+            input.title-input(v-model='title')
 
-        //- Wide
+        //- content
         .content-input.flex.gap-1
           .text-area.flex-1
             label(for='content')
@@ -24,6 +26,12 @@
               :disabled-menus='["image/upload-image", "h/h1"]',
               @save='handleSubmit'
             )
+
+        //- slug
+        .slug-area(style='margin-bottom: 1rem')
+          label
+            strong Slug
+            input.slug-input.site-style(v-model='slug')
 
     .btn-area
       .info.warn(v-if='!userData || userData.authority < 2')
@@ -57,6 +65,7 @@ const uuid = route.params.uuid as string
 const isCreate = !uuid
 const title = ref('My post')
 const content = ref('')
+const slug = ref('')
 const loading = ref(false)
 const error = ref('')
 
@@ -68,6 +77,7 @@ function fetchPost() {
         setTitle(`Edit ${post.title}`)
         title.value = post.title
         content.value = post.content
+        slug.value = post.slug
       },
       (err) => {
         if (err?.response?.status === 404) {
@@ -95,6 +105,7 @@ function handleCreate() {
     .post(`${API_BASE}/post/new`, {
       title: title.value,
       content: content.value,
+      slug: slug.value,
     })
     .then(
       ({ data }: any) => {
@@ -115,6 +126,7 @@ function handleUpdate() {
     .patch(`${API_BASE}/post/uuid/${uuid}`, {
       title: title.value,
       content: content.value,
+      slug: slug.value,
     })
     .then(
       () => {
@@ -146,7 +158,7 @@ onMounted(() => {
 #post-edit-container
   margin-top: calc(60px + 1rem)
 .edit-area
-  input
+  .title-input
     width: 100%
     padding: 0.4em 0.75em
     font-size: 1.4rem
@@ -168,4 +180,8 @@ onMounted(() => {
   padding: 1rem
   box-shadow: 0px -4px 8px #efefef
   z-index: 20
+
+// Make edit area wide
+.body-inner
+  padding: 0 1rem
 </style>

@@ -81,9 +81,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const { client, col } = database(COLNAME.POST)
     await client.connect()
     const post = await col.findOne(filter)
+
     if (!post) {
+      await client.close()
       return http.send(404, 'Post not found', { filter })
     }
+
+    await client.close()
     return http.send(200, `Get post by filter`, { post, filter })
   }
 
@@ -169,6 +173,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         .limit(1)
         .toArray()
 
+      if (slug && (await col.findOne({ slug }))) {
+        await client.close()
+        return http.send(409, 'Slug has been taken')
+      }
+
       const pid = isNaN(lastPost?.pid)
         ? (await col.countDocuments()) + 1
         : (lastPost.pid as number) + 1
@@ -203,8 +212,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         filter.uuid = SCOPE
         break
       case 'pid':
-        scopeBeNumber = true
-        filter.pid = SCOPE
+        filter.pid = parseInt(SCOPE as string)
         break
       default:
         return handleInvalidScope(http)
@@ -232,10 +240,17 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     try {
       await client.connect()
+
+      if (slug && (await col.findOne({ slug }))) {
+        await client.close()
+        return http.send(409, 'Slug has been taken')
+      }
+
       const data = await col.updateOne(filter, {
         $set: {
           title,
           content,
+          slug,
           edited_at: now.toISOString(),
           editor_uuid: user.uuid,
         },

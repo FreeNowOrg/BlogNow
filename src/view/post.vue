@@ -4,12 +4,12 @@
     .inner
       h1#post-title {{ post ? post.title : "Post title" }}
       #post-meta(v-if='post')
-        .author @Author
-        .date Created at <time>time</time>
+        .create-date Created at <time>{{ new Date(post.created_at).toLocaleString() }}</time>
+        .edited-date(v-if='post.edited_at') Created at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
       #post-meta(v-else)
         .foo Loading post...
       #edit-links
-        router-link(:to='{ name: "post-edit", params: { uuid } }') {{ userData && userData.authority >= 2 ? "Edit post" : "View source" }}
+        router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "Edit post" : "View source" }}
 
   main#post-main.body-inner
     .bread-crumb.card
@@ -46,14 +46,27 @@ import { getPost } from '../utils'
 
 const route = useRoute()
 
-const uuid = ref(route.params.uuid as string)
+let search = ref({} as { key: 'uuid' | 'pid' | 'slug'; val: string })
+if (route.params.uuid) {
+  search.value.key = 'uuid'
+  search.value.val = route.params.uuid as string
+} else if (route.params.pid) {
+  search.value.key = 'pid'
+  search.value.val = route.params.pid as string
+} else if (route.params.slug) {
+  search.value.key = 'slug'
+  search.value.val = route.params.slug as string
+}
+
 const post = ref<any>(null)
 
 function init() {
-  getPost('uuid', uuid.value, !!route.query.noCache).then((data) => {
-    setTitle(data.title)
-    post.value = data
-  })
+  getPost(search.value.key, search.value.val, !!route.query.noCache).then(
+    (data) => {
+      setTitle(data.title)
+      post.value = data
+    }
+  )
 }
 
 onMounted(() => {

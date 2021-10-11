@@ -26,16 +26,16 @@ router.addRoute({
   name: 'post',
   component: () => import('./view/post.vue'),
 })
-// router.addRoute({
-//   path: '/pid/:pid',
-//   name: 'post-pid',
-//   component: () => import('./view/post.vue'),
-// })
-// router.addRoute({
-//   path: '/-/:slug',
-//   name: 'post-slug',
-//   component: () => import('./view/post.vue'),
-// })
+router.addRoute({
+  path: '/pid/:pid',
+  name: 'post-pid',
+  component: () => import('./view/post.vue'),
+})
+router.addRoute({
+  path: '/-/:slug',
+  name: 'post-slug',
+  component: () => import('./view/post.vue'),
+})
 
 // Post edit
 router.addRoute({
