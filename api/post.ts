@@ -11,6 +11,8 @@ import {
   sortKeys,
 } from './utils'
 import { getUserMetaByToken } from './user'
+import { nanoid } from 'nanoid'
+import slugify from 'slugify'
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
   uuid: '',
@@ -25,10 +27,14 @@ export const POSTDATA_DEFAULTS: DbPostDoc = {
 }
 
 export function getPostModel(payload: Partial<DbPostDoc>) {
-  return sortKeys({
+  const post = sortKeys({
     ...POSTDATA_DEFAULTS,
     ...payload,
   })
+  post.slug = post.slug
+    ? slugify(post.slug, { lower: true, trim: true })
+    : nanoid(6)
+  return post
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {

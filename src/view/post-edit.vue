@@ -50,8 +50,9 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import slugify from 'slugify'
 import { getErrMsg } from '../utils/getErrMsg'
 import { userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
@@ -68,6 +69,11 @@ const content = ref('')
 const slug = ref('')
 const loading = ref(false)
 const error = ref('')
+
+// Slug
+watch(slug, (val) => {
+  slug.value = slugify(val)
+})
 
 function fetchPost() {
   loading.value = true
