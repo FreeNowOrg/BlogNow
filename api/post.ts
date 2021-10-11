@@ -34,6 +34,7 @@ export function getPostModel(payload: Partial<DbPostDoc>) {
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
   const { CONTROLLER, SCOPE } = req.query
+  // let scopeBeNumber = false
 
   switch (req.method) {
     case 'GET':
@@ -67,7 +68,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         hasScope() && (filter.uuid = SCOPE)
         break
       case 'pid':
-        hasScope() && (filter.pid = SCOPE)
+        hasScope() && (filter.pid = parseInt(SCOPE as string))
         break
       default:
         return handleInvalidController(http)
@@ -97,11 +98,36 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   async function get_list_recent() {
-    const data = await getPostList({
-      limit: parseInt((req.query.limit as string) || '10'),
-      offset: parseInt((req.query.offset as string) || '0'),
-    })
-    http.send(200, `Get post list by ${SCOPE}`, data)
+    const { client, col } = database(COLNAME.POST)
+
+    const offset = parseInt((req.query.offset as string) || '0')
+    const limit = Math.min(25, parseInt((req.query.limit as string) || '10'))
+
+    try {
+      await client.connect()
+      const posts = await col
+        .find()
+        .sort({ pid: -1 })
+        .skip(offset)
+        .limit(limit)
+        .toArray()
+      await client.close()
+
+      let hasNext = false
+      if (posts.length > limit) {
+        hasNext = true
+        posts.pop()
+      }
+
+      return http.send(200, `Get post list by ${SCOPE}`, {
+        posts: posts.map(getPostModel),
+        hasNext,
+        limit,
+        offset,
+      })
+    } catch (e) {
+      return http.mongoError(e)
+    }
   }
 
   // POST
@@ -131,13 +157,36 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     try {
-      const data = await createPost({
+      const { client, col } = database(COLNAME.POST)
+      await client.connect()
+
+      const now = new Date()
+
+      const [lastPost] = await col
+        .find()
+        .project({ pid: 1 })
+        .sort({ pid: -1 })
+        .limit(1)
+        .toArray()
+
+      const pid = isNaN(lastPost?.pid)
+        ? (await col.countDocuments()) + 1
+        : (lastPost.pid as number) + 1
+      const uuid = UUID()
+
+      const insert: DbPostDoc = getPostModel({
+        uuid,
+        pid,
         title,
         content,
         slug,
         author_uuid: user.uuid,
+        created_at: now.toISOString(),
       })
-      return http.send(200, 'Post created', data)
+      const dbRes = await col.insertOne(insert)
+      await client.close()
+
+      return http.send(200, 'Post created', { ...dbRes, uuid })
     } catch (e) {
       return http.mongoError(e)
     }
@@ -154,6 +203,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         filter.uuid = SCOPE
         break
       case 'pid':
+        scopeBeNumber = true
         filter.pid = SCOPE
         break
       default:
@@ -200,74 +250,4 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return http.mongoError(e)
     }
   }
-}
-
-export async function getPostList({
-  sort = { pid: -1 },
-  offset = 0,
-  limit = 10,
-}: {
-  sort?: Record<string, 1 | -1>
-  offset?: number
-  limit?: number
-}) {
-  const { client, col } = database(COLNAME.POST)
-  await client.connect()
-  const posts = await col
-    .find()
-    .sort(sort)
-    .skip(offset)
-    .limit(Math.max(1, Math.min(25, limit)) + 1)
-    .toArray()
-  let hasNext = false
-  if (posts.length > limit) {
-    hasNext = true
-    posts.pop()
-  }
-  return { posts: posts.map(getPostModel), hasNext, limit, offset }
-}
-
-export async function createPost({
-  title,
-  content,
-  slug = '',
-  author_uuid,
-}: {
-  title: string
-  content: string
-  slug?: string
-  author_uuid: string
-}) {
-  const { client, col } = database(COLNAME.POST)
-  await client.connect()
-
-  const now = new Date()
-
-  const [lastPost] = await col
-    .find()
-    .project({ pid: 1 })
-    .sort({ pid: -1 })
-    .limit(1)
-    .toArray()
-
-  console.log({ lastPost })
-
-  const pid = isNaN(lastPost?.pid)
-    ? (await col.countDocuments()) + 1
-    : (lastPost.pid as number) + 1
-  const uuid = UUID()
-
-  const insert: DbPostDoc = getPostModel({
-    uuid,
-    pid,
-    title,
-    content,
-    slug,
-    author_uuid,
-    created_at: now.toISOString(),
-  })
-  const r = await col.insertOne(insert)
-  await client.close()
-
-  return { ...r, uuid }
 }

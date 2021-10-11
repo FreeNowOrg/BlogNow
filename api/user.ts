@@ -79,6 +79,7 @@ export function getUserModel(
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
   const { CONTROLLER, SCOPE } = req.query
+  let scopeBeNumber = false
 
   switch (req.method) {
     case 'GET':
@@ -95,8 +96,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   // GET
   function methodGET() {
     switch (CONTROLLER) {
-      case 'uuid':
       case 'uid':
+        scopeBeNumber = true
+      case 'uuid':
         return get_meta()
       case 'auth':
         return get_auth()
@@ -106,7 +108,31 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   async function get_meta() {
-    return http.send(404, 'Work in progress')
+    if (!SCOPE) {
+      return handleInvalidScope(http)
+    }
+    const filter: Record<string, any> = {}
+    filter[CONTROLLER as string] = scopeBeNumber
+      ? parseInt(SCOPE as string)
+      : SCOPE
+
+    try {
+      const { client, col } = database(COLNAME.USER)
+      await client.connect()
+      const user = await col.findOne(filter)
+      await client.close()
+
+      if (!user) {
+        return http.send(404, 'User not found', { filter })
+      }
+
+      return http.send(200, `Get user by filter`, {
+        filter,
+        user: getUserModel(user, true),
+      })
+    } catch (e) {
+      return http.mongoError(e)
+    }
   }
 
   async function get_auth() {
