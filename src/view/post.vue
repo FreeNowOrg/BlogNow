@@ -5,10 +5,10 @@
       h1#post-title {{ post ? post.title : "Post title" }}
       #post-meta(v-if='post')
         .create-date Created at <time>{{ new Date(post.created_at).toLocaleString() }}</time>
-        .edited-date(v-if='post.edited_at') Created at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
-      #post-meta(v-else)
+        .edited-date(v-if='post.edited_at') Edited at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
+      #post-meta(v-if='!post')
         .foo Loading post...
-      #edit-links
+      #edit-links(v-if='!post')
         router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "Edit post" : "View source" }}
 
   main#post-main.body-inner

@@ -73,6 +73,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       case 'pid':
         hasScope() && (filter.pid = parseInt(SCOPE as string))
         break
+      case 'slug':
+        hasScope() && (filter.slug = SCOPE)
+        break
       default:
         return handleInvalidController(http)
     }

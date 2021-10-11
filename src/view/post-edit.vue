@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import slugify from 'slugify'
 import { getErrMsg } from '../utils/getErrMsg'

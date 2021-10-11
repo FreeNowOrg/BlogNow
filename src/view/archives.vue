@@ -12,7 +12,7 @@
               .title {{ item.title }}
               .link
                 router-link(
-                  :to='{ name: "post", params: { uuid: item.uuid } }'
+                  :to='{ name: "post", params: { slug: item.slug || undefined, uuid: item.slug ? undefined : item.uuid } }'
                 ) view
       global-aside
 </template>

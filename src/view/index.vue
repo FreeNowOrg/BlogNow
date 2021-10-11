@@ -20,7 +20,7 @@
               )
           .post-meta
             router-link.title(
-              :to='{ name: "post", params: { uuid: item.uuid } }'
+              :to='{ name: "post", params: { slug: item.slug || undefined, uuid: item.slug ? undefined : item.uuid } }'
             ) {{ item.title }}
             .time Created at {{ new Date(item.created_at).toLocaleString() }}
             p.preview {{ item.content.length > 120 ? item.content.slice(0, 120) + "..." : item.content }}
