@@ -47,8 +47,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import axios from 'axios'
-import { getUserDataByLogin, userData } from '../components/userData'
+import { userLogin, userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
 import Cookies from 'js-cookie'
 import { useRoute, useRouter } from 'vue-router'
@@ -66,7 +65,7 @@ function handleLogin() {
   loading.value = true
   errorMsg.value = ''
 
-  getUserDataByLogin({
+  userLogin({
     username: username.value,
     password: password.value,
   })

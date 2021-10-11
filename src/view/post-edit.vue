@@ -42,12 +42,13 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrMsg } from '../utils/getErrMsg'
 import { userData } from '../components/userData'
 import { setTitle } from '../utils/setTitle'
 import { getPost } from '../utils'
+import { API_BASE } from '../config'
 
 const route = useRoute()
 const router = useRouter()
@@ -61,12 +62,7 @@ const error = ref('')
 
 function fetchPost() {
   loading.value = true
-  getPost(
-    {
-      uuid,
-    },
-    true
-  )
+  getPost('uuid', uuid, true)
     .then(
       (post) => {
         setTitle(`Edit ${post.title}`)
@@ -96,7 +92,7 @@ function handleSubmit() {
 function handleCreate() {
   loading.value = true
   axios
-    .post('/api/post', {
+    .post(`${API_BASE}/post/new`, {
       title: title.value,
       content: content.value,
     })
@@ -116,8 +112,7 @@ function handleCreate() {
 function handleUpdate() {
   loading.value = true
   axios
-    .patch('/api/post', {
-      post_uuid: uuid,
+    .patch(`${API_BASE}/post/uuid/${uuid}`, {
       title: title.value,
       content: content.value,
     })

@@ -1,17 +1,15 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { HandleResponse } from 'serverless-kit'
-import {
-  DbAuthorityDoc,
-  DbAuthorityKeys,
-  DbUserDoc,
-} from '../../src/types/Database'
-import { COLNAME } from '../config'
+import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
+import { COLNAME } from './config'
 import {
   database,
   getTokenFromReq,
   handleInvalidController,
+  handleInvalidScope,
   handleMissingParams,
-} from '../utils'
+  sortKeys,
+} from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
@@ -46,84 +44,115 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
   uuid: '',
   uid: 10000,
   username: '',
-  email: '',
-  created_at: '',
   nickname: '',
+  email: '',
+  title: '',
   slogan: '',
   gender: 'other',
+  created_at: '',
   avatar: '',
+  authority: 1,
+  // sensitive
   password_hash: '',
   token: '',
   token_expires: 0,
-  authority: 1,
-  title: '',
   salt: '',
+}
+
+export function getUserModel(
+  payload: Partial<DbUserDoc>,
+  removeSensitive?: boolean
+) {
+  const data = {
+    ...USERDATA_DEFAULTS,
+    ...payload,
+  }
+  if (!removeSensitive) {
+    delete data.password_hash
+    delete data.token
+    delete data.token_expires
+    delete data.salt
+  }
+  return sortKeys(data)
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
-  const controller = (req.query.controller as string) || ''
+  const { CONTROLLER, SCOPE } = req.query
+
   switch (req.method) {
     case 'GET':
-      handleGet()
-      break
+      return methodGET()
     case 'POST':
-      handlePost()
-      break
-    case 'PUT':
-      handleUpdate()
-      break
+      return methodPOST()
+    case 'PATCH':
+      return methodPATCH()
     default:
+      http.res.setHeader('allow', 'GET, POST, PATCH')
       return http.send(400, `Invalid method: ${req.method}`)
   }
 
-  function handleGet() {
-    switch (controller) {
-      case 'meta':
-        handleUserMeta()
-        break
+  // GET
+  function methodGET() {
+    switch (CONTROLLER) {
+      case 'uuid':
+      case 'uid':
+        return get_meta()
+      case 'auth':
+        return get_auth()
+      default:
+        return handleInvalidController(http)
+    }
+  }
+
+  async function get_meta() {
+    return http.send(404, 'Work in progress')
+  }
+
+  async function get_auth() {
+    switch (SCOPE) {
       case 'profile':
-        handleSelfProfile()
+        return get_auth_profile()
+      default:
+        return handleInvalidScope(http)
+    }
+  }
+
+  async function get_auth_profile() {
+    const token = getTokenFromReq(req)
+    if (!token) {
+      return http.send(401, 'Please login')
+    }
+    const profile = await getUserMetaByToken(token)
+    return http.send(200, 'ok', { profile })
+  }
+
+  // POST
+  function methodPOST() {
+    switch (CONTROLLER) {
+      case 'auth':
+        post_auth()
         break
       default:
         handleInvalidController(http)
     }
   }
 
-  function handlePost() {
-    switch (controller) {
+  function post_auth() {
+    switch (SCOPE) {
       case 'register':
-        handleUserRegister()
+        post_auth_register()
         break
       case 'sign-in':
-        handleUserLogin()
+      case 'login':
+        post_auth_login()
         break
       default:
         handleInvalidController(http)
     }
   }
 
-  function handleUpdate() {
-    const s = controller.split('.')
-    if (s.length !== 2) {
-      return handleInvalidController(http)
-    }
-    const target = s[0]
-    const key = s[1]
-
-    switch (target) {
-      case 'self':
-        updateSelf(key)
-        break
-      case 'other':
-        updateUser(key)
-        break
-      default:
-        handleInvalidController(http)
-    }
-  }
-
-  async function handleUserRegister() {
+  async function post_auth_register() {
     const { username, password } = req.body || {}
     if (!username || !password) {
       return handleMissingParams(http)
@@ -139,40 +168,19 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     const salt = nanoid(32)
-    const insert: DbUserDoc = {
-      ...USERDATA_DEFAULTS,
+    const insert: DbUserDoc = getUserModel({
       username,
       uuid: UUID(),
       password_hash: getPasswordHash(salt, password),
       salt,
       created_at: new Date().toISOString(),
-    }
+    })
 
     const r = await col.insertOne(insert)
     return http.send(200, 'User created', r)
   }
 
-  async function handleUserMeta() {
-    return http.send(404, 'Work in progress')
-  }
-
-  async function handleSelfProfile() {
-    const token = getTokenFromReq(req)
-    if (!token) {
-      return http.send(401, 'Please login')
-    }
-    const profile = await getUserDataByToken(token)
-    http.send(200, 'ok', { profile })
-  }
-
-  function updateSelf(key: string) {
-    return http.send(404, 'Work in progress')
-  }
-  function updateUser(key: string) {
-    return http.send(404, 'Work in progress')
-  }
-
-  async function handleUserLogin() {
+  async function post_auth_login() {
     const { client, col } = database(COLNAME.USER)
     const { username, password } = req.body || {}
     if (!username || !password) {
@@ -207,8 +215,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     delete profile.salt
     return http.send(200, 'ok', { token, profile })
   }
+
+  // PATCH
+  function methodPATCH() {
+    return http.send(404, 'Work in progress')
+  }
 }
 
+// Utils
 function getPasswordHash(salt: string, password: string) {
   return crypto
     .createHash('sha256')
@@ -216,7 +230,7 @@ function getPasswordHash(salt: string, password: string) {
     .digest('hex')
 }
 
-export async function getUserDataByToken(
+export async function getUserMetaByToken(
   token: string
 ): Promise<DbUserDoc | null> {
   const { client, col } = database(COLNAME.USER)
@@ -229,16 +243,12 @@ export async function getUserDataByToken(
   if (!user) {
     return null
   }
-  delete user.token
-  delete user.token_expires
-  delete user.password_hash
-  delete user.salt
-  return user as DbUserDoc
+  return getUserModel(user, true)
 }
 
 export async function getAuthorityByToken(token: string) {
   if (!token) return 0
-  const user = await getUserDataByToken(token)
+  const user = await getUserMetaByToken(token)
   return user?.authority || 0
 }
 
@@ -247,5 +257,5 @@ export async function getCurAuthority(req: VercelRequest) {
 }
 
 export async function getCurUserData(req: VercelRequest) {
-  return getUserDataByToken(getTokenFromReq(req))
+  return getUserMetaByToken(getTokenFromReq(req))
 }

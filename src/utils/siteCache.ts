@@ -24,35 +24,25 @@ export function setPostCache(post: DbPostDoc) {
 }
 
 export async function getPost(
-  params: Partial<DbPostDoc>,
+  controller: 'uuid' | 'pid' | 'slug',
+  scope: string | number,
   noCache?: boolean
 ): Promise<DbPostDoc> {
-  const key = Object.keys(params)[0] as keyof DbPostDoc
-  const val: any = params[key]
-  const cache = siteCache.value.posts.find((i) => i[key] === val)
+  const cache = siteCache.value.posts.find((i) => i[controller] === scope)
   if (cache && !noCache) {
     console.info('[CACHE]', 'Get post from cache')
     return cache
   }
-  params[key] = val
   console.info('[CACHE]', 'Get post from origin')
-  const { data }: any = await axios.get(`${API_BASE}/post`, { params })
+  const { data }: any = await axios.get(
+    `${API_BASE}/post/${controller}/${scope}`
+  )
   setPostCache(data.body.post)
   return data.body.post
 }
 
-export async function addNewPost(payload: Partial<DbPostDoc>) {
-  const { data }: any = await axios.post(`${API_BASE}/post`, { data: payload })
-  return data
-}
-
-export async function updatePost(payload: Partial<DbPostDoc>) {
-  const { data }: any = await axios.patch(`${API_BASE}/post`, { data: payload })
-  return data
-}
-
 export async function getPostList({ limit = 25, offset = 0 }) {
-  const { data }: any = await axios.get(`${API_BASE}/post`, {
+  const { data }: any = await axios.get(`${API_BASE}/post/list/recent`, {
     params: { limit, offset },
   })
 

@@ -18,14 +18,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, defineComponent } from 'vue'
-import axios from 'axios'
+import { onMounted, ref } from 'vue'
 import { setTitle } from '../utils/setTitle'
 import { API_BASE } from '../config'
 import GlobalAside from '../components/GlobalAside.vue'
-import { getRecentPosts, setPostCache } from '../utils'
-
-const components = defineComponent({ GlobalAside })
+import { getRecentPosts } from '../utils'
 
 const posts = ref<any[]>([])
 

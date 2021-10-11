@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node'
 import { MongoClient } from 'mongodb'
 import { HandleResponse } from 'serverless-kit'
 import { getLocalConfig } from './config'
-import { TOKEN_COOKIE_NAME } from './user/[controller]'
+import { TOKEN_COOKIE_NAME } from './user'
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
@@ -19,7 +19,11 @@ export function database(colName: string, devMode?: boolean) {
 }
 
 export function handleInvalidController(http: HandleResponse) {
-  http.send(400, `Invalid controller: ${http.req.query.controller}`, {})
+  return http.send(400, `Invalid controller: ${http.req.query.CONTROLLER}`, {})
+}
+
+export function handleInvalidScope(http: HandleResponse) {
+  return http.send(400, `Invalid scope: ${http.req.query.SCOPE}`, {})
 }
 
 export function handleMissingParams(http: HandleResponse) {
@@ -33,4 +37,13 @@ export function getTokenFromReq(req: VercelRequest) {
     req.cookies[TOKEN_COOKIE_NAME] ||
     ''
   )
+}
+
+export function sortKeys<T extends Object>(obj: T): T {
+  const copy = {} as T
+  const allKeys = Object.keys(obj).sort()
+  allKeys.forEach((key) => {
+    copy[key] = obj[key]
+  })
+  return copy
 }

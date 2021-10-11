@@ -37,13 +37,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import axios from 'axios'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { userData } from '../components/userData'
 import GlobalAside from '../components/GlobalAside.vue'
 import { setTitle } from '../utils/setTitle'
-import { API_BASE } from '../config'
 import { getPost } from '../utils'
 
 const route = useRoute()
@@ -52,7 +50,7 @@ const uuid = ref(route.params.uuid as string)
 const post = ref<any>(null)
 
 function init() {
-  getPost({ uuid: uuid.value }, !!route.query.noCache).then((data) => {
+  getPost('uuid', uuid.value, !!route.query.noCache).then((data) => {
     setTitle(data.title)
     post.value = data
   })

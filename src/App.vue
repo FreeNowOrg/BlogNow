@@ -7,22 +7,17 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted } from 'vue'
+import { onMounted } from 'vue'
 
 import GlobalHeader from './components/GlobalHeader.vue'
 import GlobalFooter from './components/GlobalFooter.vue'
 
-const components = defineComponent({
-  GlobalHeader,
-  GlobalFooter,
-})
-
-import { userData, getUserDataByToken } from './components/userData'
+import { userData, initUserData } from './components/userData'
 
 onMounted(() => {
   if (!userData.value) {
     console.log('init user')
-    getUserDataByToken().then((i) => console.info(i))
+    initUserData().then((i) => console.info(i))
   }
 })
 </script>

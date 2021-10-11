@@ -3,8 +3,14 @@ import { v4 as UUID } from 'uuid'
 import { HandleResponse } from 'serverless-kit'
 import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { database, getTokenFromReq } from './utils'
-import { getUserDataByToken } from './user/[controller]'
+import {
+  database,
+  getTokenFromReq,
+  handleInvalidController,
+  handleInvalidScope,
+  sortKeys,
+} from './utils'
+import { getUserMetaByToken } from './user'
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
   uuid: '',
@@ -18,44 +24,104 @@ export const POSTDATA_DEFAULTS: DbPostDoc = {
   editor_uuid: '',
 }
 
+export function getPostModel(payload: Partial<DbPostDoc>) {
+  return sortKeys({
+    ...POSTDATA_DEFAULTS,
+    ...payload,
+  })
+}
+
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
+  const { CONTROLLER, SCOPE } = req.query
+
   switch (req.method) {
     case 'GET':
-      handleGet()
-      break
+      return methodGET()
     case 'POST':
-      handlePost()
-      break
+      return methodPOST()
     case 'PATCH':
-      handlePatch()
-      break
+      return methodPATCH()
+    // case 'DELETE':
+    //   return methodDELETE()
     default:
+      http.res.setHeader('allow', 'GET, POST, PATCH, DELETE')
       return http.send(405, 'Method Not Allowed')
   }
 
-  async function handleGet() {
-    if (req.query.uuid) {
-      const post = await getPostByUuid(req.query.uuid as string)
-      if (!post) {
-        return http.send(404, 'Post not found')
+  async function methodGET() {
+    const filter: Record<string, any> = {}
+    const hasScope = () => {
+      if (SCOPE) {
+        return true
+      } else {
+        handleInvalidScope(http)
+        return false
       }
-      return http.send(200, 'Get post by uuid', { post })
     }
 
+    switch (CONTROLLER) {
+      case 'list':
+        return get_list()
+      case 'uuid':
+        hasScope() && (filter.uuid = SCOPE)
+        break
+      case 'pid':
+        hasScope() && (filter.pid = SCOPE)
+        break
+      default:
+        return handleInvalidController(http)
+    }
+
+    return get_byFilter(filter)
+  }
+
+  async function get_byFilter(filter: Record<string, any>) {
+    const { client, col } = database(COLNAME.POST)
+    await client.connect()
+    const post = await col.findOne(filter)
+    if (!post) {
+      return http.send(404, 'Post not found', { filter })
+    }
+    return http.send(200, `Get post by filter`, { post, filter })
+  }
+
+  function get_list() {
+    switch (SCOPE) {
+      case 'recent':
+      case 'recents':
+        return get_list_recent()
+      default:
+        return handleInvalidScope(http)
+    }
+  }
+
+  async function get_list_recent() {
     const data = await getPostList({
       limit: parseInt((req.query.limit as string) || '10'),
       offset: parseInt((req.query.offset as string) || '0'),
     })
-    http.send(200, 'Post list', data)
+    http.send(200, `Get post list by ${SCOPE}`, data)
   }
 
-  async function handlePost() {
+  // POST
+  async function methodPOST() {
+    switch (CONTROLLER) {
+      case 'new':
+      case 'create':
+        return post_create()
+      default:
+        return handleInvalidController(http)
+    }
+  }
+
+  async function post_create() {
+    // auth
     const token = getTokenFromReq(req)
     if (!token) {
       return http.send(401, 'Please login')
     }
-    const user = await getUserDataByToken(token)
+    const user = await getUserMetaByToken(token)
     if (!user || user.authority <= 2) {
       return http.send(403, 'Permission denied')
     }
@@ -77,17 +143,37 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
   }
 
-  async function handlePatch() {
+  async function methodPATCH() {
+    if (!SCOPE) {
+      return handleInvalidScope(http)
+    }
+
+    const filter: Record<string, any> = {}
+    switch (CONTROLLER) {
+      case 'uuid':
+        filter.uuid = SCOPE
+        break
+      case 'pid':
+        filter.pid = SCOPE
+        break
+      default:
+        return handleInvalidScope(http)
+    }
+
+    return patch_byFilter(filter)
+  }
+
+  async function patch_byFilter(filter: Record<string, any>) {
     const token = getTokenFromReq(req)
-    const { post_uuid, title, content, slug } = req.body || {}
+    const { title, content, slug } = req.body || {}
     if (!token) {
       return http.send(401, 'Please login')
     }
-    const user = await getUserDataByToken(token)
+    const user = await getUserMetaByToken(token)
     if (!user || user.authority <= 2) {
       return http.send(403, 'Permission denied')
     }
-    if (!post_uuid || title === undefined || content === undefined) {
+    if (title === undefined || content === undefined) {
       return http.send(403, 'Missing params')
     }
 
@@ -96,17 +182,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     try {
       await client.connect()
-      const data = await col.updateOne(
-        { uuid: post_uuid },
-        {
-          $set: {
-            title,
-            content,
-            edited_at: now.toISOString(),
-            editor_uuid: user.uuid,
-          },
-        }
-      )
+      const data = await col.updateOne(filter, {
+        $set: {
+          title,
+          content,
+          edited_at: now.toISOString(),
+          editor_uuid: user.uuid,
+        },
+      })
       await client.close()
 
       if (data.modifiedCount < 1) {
@@ -141,14 +224,7 @@ export async function getPostList({
     hasNext = true
     posts.pop()
   }
-  return { posts, hasNext, limit, offset }
-}
-
-export async function getPostByUuid(uuid: string) {
-  const { client, col } = database(COLNAME.POST)
-  await client.connect()
-  const r = await col.findOne({ uuid })
-  return r
+  return { posts: posts.map(getPostModel), hasNext, limit, offset }
 }
 
 export async function createPost({
@@ -181,8 +257,7 @@ export async function createPost({
     : (lastPost.pid as number) + 1
   const uuid = UUID()
 
-  const insert: DbPostDoc = {
-    ...POSTDATA_DEFAULTS,
+  const insert: DbPostDoc = getPostModel({
     uuid,
     pid,
     title,
@@ -190,7 +265,7 @@ export async function createPost({
     slug,
     author_uuid,
     created_at: now.toISOString(),
-  }
+  })
   const r = await col.insertOne(insert)
   await client.close()
 

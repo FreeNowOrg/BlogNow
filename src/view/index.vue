@@ -15,8 +15,8 @@
         )
           .post-cover
             router-link(:to='{ name: "post", params: { uuid: item.uuid } }')
-              img.cover(
-                :src='"https://api.daihan.top/api/acg?_random=" + item.uuid'
+              img.cover-img(
+                :src='item.cover || "https://api.daihan.top/api/acg?_random=" + item.uuid'
               )
           .post-meta
             router-link.title(
@@ -32,12 +32,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { userData } from '../components/userData'
 import { setTitle, getRecentPosts, siteCache } from '../utils'
 import GlobalAside from '../components/GlobalAside.vue'
 
-const components = defineComponent({ GlobalAside })
 const recents = ref<any[]>([])
 
 onMounted(() => {
@@ -108,14 +107,14 @@ onMounted(() => {
       overflow: hidden
       a
         height: 100%
-        .cover
+        .cover-img
           width: 100%
           height: 100%
           max-width: 100%
           object-fit: cover
           transition: all 0.4s ease
     &:hover
-      .cover
+      .cover-img
         transform: scale(1.1)
     .post-meta
       padding: 2rem 1rem
@@ -126,13 +125,13 @@ onMounted(() => {
         --color: var(--theme-accent-color)
 
 @media screen and(max-width: 900px)
-  .home-post-card
-    flex-direction: column
-    height: 400px
+  #home-post-list
+    .home-post-card
+      flex-direction: column !important
+      height: 400px
 
-    .post-cover
-      width: 100%
-      min-height: 60px
+      .post-cover
+        width: 100%
 
 #home-main
   background-color: #fff

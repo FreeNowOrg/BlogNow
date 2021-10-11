@@ -1,0 +1,28 @@
+# 设定保存的方式暂时未确定，可能会变更
+
+# Site meta
+
+site_mame: Blog Now
+site_desc: This is a blog built by BlogNow engine.
+site_logo: https://www.wjghj.cn/public/icons/wiki-wordmark.svg
+
+# Top nav links & Side nav links
+site_menu:
+  - text: Home
+    link: /
+  - text: Posts
+    children:
+      - text: Archives
+        link: /archives
+      - text: Tags
+        link: /tags
+  - text: About
+    link: /-/about
+
+# Footer
+footer_top: global footer
+footer_bottom: Powered by <a href="https://github.com/FreeNowOrg/BlogNow">BlogNow</a>
+
+# Custom
+insert_after_body: # e.g. <script src="google analytics..."></script>
+insert_after_head: # e.g. <link rel="stylesheet" href="...">

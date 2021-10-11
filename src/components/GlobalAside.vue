@@ -1,5 +1,7 @@
 <template lang="pug">
 aside#global-aside
+  hr#global-aside-hr
+
   slot(name='top')
 
   .card.site-card.align-center
@@ -29,6 +31,9 @@ import {} from 'vue'
 </script>
 
 <style scoped lang="sass">
+#global-aside-hr
+  display: none
+
 #global-aside
   display: flex
   flex-direction: column
@@ -47,4 +52,8 @@ import {} from 'vue'
     .stats
       .key
         font-weight: 600
+
+@media screen and(max-width: 900px)
+  #global-aside-hr
+    display: block
 </style>

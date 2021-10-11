@@ -1,27 +1,18 @@
 import axios from 'axios'
 import { ref } from 'vue'
-export const userData = ref<{
-  uuid: string
-  uid: number
-  username: string
-  email: string
-  created_at: string
-  nickname: string
-  slogan: string
-  gender: 'male' | 'female' | 'other'
-  avatar: string
-  authority: number
-  title: string
-} | null>(null)
+import { API_BASE } from '../config'
+import { DbUserDoc } from '../types/Database'
 
-export async function getUserDataByLogin({
+export const userData = ref<DbUserDoc | null>(null)
+
+export async function userLogin({
   username,
   password,
 }: {
   username: string
   password: string
-}) {
-  const { data }: any = await axios.post('/api/user/sign-in', {
+}): Promise<DbUserDoc> {
+  const { data }: any = await axios.post(`${API_BASE}/user/auth/sign-in`, {
     username,
     password,
   })
@@ -29,9 +20,9 @@ export async function getUserDataByLogin({
   return data
 }
 
-export async function getUserDataByToken() {
+export async function initUserData(): Promise<DbUserDoc> {
   console.log('getUserDataByToken')
-  const { data }: any = await axios.get('/api/user/profile')
+  const { data }: any = await axios.get(`${API_BASE}/user/auth/profile`)
   console.log('profile', data.body.profile)
   userData.value = data.body.profile
   return data
