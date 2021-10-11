@@ -14,7 +14,9 @@
           style='padding: 0'
         )
           .post-cover
-            router-link(:to='{ name: "post", params: { uuid: item.uuid } }')
+            router-link.title(
+              :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
+            )
               img.cover-img(
                 :src='item.cover || "https://api.daihan.top/api/acg?_random=" + item.uuid'
               )
