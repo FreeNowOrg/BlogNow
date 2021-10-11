@@ -31,7 +31,10 @@
         .slug-area
           label
             strong Slug
-            input.slug-input.site-style(v-model='slug')
+            input.slug-input.site-style(
+              v-model='slug',
+              @blur='slug = slugify(slug, { lower: true })'
+            )
 
     .btn-area
       .info.warn(v-if='!userData || userData.authority < 2')
@@ -69,11 +72,6 @@ const content = ref('')
 const slug = ref('')
 const loading = ref(false)
 const error = ref('')
-
-// Slug
-watch(slug, (val) => {
-  slug.value = slugify(val, { lower: true })
-})
 
 function fetchPost() {
   loading.value = true
