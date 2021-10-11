@@ -3,6 +3,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(),
   routes: [],
+  scrollBehavior(to, from) {
+    if (to === from) return
+    return { top: 0 }
+  },
+})
+
+router.afterEach(({ name }) => {
+  document.body.setAttribute('data-route', name as string)
+  // Fix route when modal opened
+  document.body.style.overflow = 'visible'
 })
 
 // Home
