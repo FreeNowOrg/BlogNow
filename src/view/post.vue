@@ -8,7 +8,7 @@
         .edited-date(v-if='post.edited_at') Edited at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
       #post-meta(v-if='!post')
         .foo Loading post...
-      #edit-links(v-if='!post')
+      #edit-links(v-if='post')
         router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "Edit post" : "View source" }}
 
   main#post-main.body-inner
