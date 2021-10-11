@@ -13,11 +13,7 @@
               .link
                 router-link.title(
                   v-if='item.slug'
-                  :to='{ name: "post-slug", params: { slug: item.slug } }'
-                ) view
-                router-link.title(
-                  v-else
-                  :to='{ name: "post", params: { sluguuid: item.sluguuid } }'
+                  :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: post.uuid } }'
                 ) view
       global-aside
 </template>

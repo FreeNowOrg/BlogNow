@@ -20,12 +20,7 @@
               )
           .post-meta
             router-link.title(
-              v-if='item.slug'
-              :to='{ name: "post-slug", params: { slug: item.slug } }'
-            ) {{ item.title }}
-            router-link.title(
-              v-else
-              :to='{ name: "post", params: { sluguuid: item.sluguuid } }'
+              :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
             ) {{ item.title }}
             .time Created at {{ new Date(item.created_at).toLocaleString() }}
             p.preview {{ item.content.length > 120 ? item.content.slice(0, 120) + "..." : item.content }}
