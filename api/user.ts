@@ -67,7 +67,7 @@ export function getUserModel(
     ...USERDATA_DEFAULTS,
     ...payload,
   }
-  if (!removeSensitive) {
+  if (removeSensitive) {
     delete data.password_hash
     delete data.token
     delete data.token_expires
