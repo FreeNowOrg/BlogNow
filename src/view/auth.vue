@@ -3,7 +3,7 @@
   .body-inner
     form#auth-form.card(v-if='!userData', :class='{ "loadin-cover": loading }')
       #logo-area
-        img(src='/images/wordpress.svg')
+        .logo-placeholder LOGO
 
       #info-area
         .info.error(v-if='errorMsg')
@@ -101,6 +101,19 @@ onMounted(() => {
 
 #logo-area
   margin: 2rem auto
+  .logo-placeholder
+    display: inline-block
+    width: 80px
+    height: 80px
+    background-color: var(--theme-accent-color)
+    border-radius: 50%
+    box-shadow: 0 0 0 4px #fff inset, 0 0 0 4px var(--theme-accent-color)
+    font-size: 20px
+    line-height: 80px
+    font-weight: 600
+    color: #fff
+    user-select: none
+
 
 #tabber-area
   margin: 2rem 1rem

@@ -43,6 +43,7 @@ import { userData } from '../components/userData'
 import GlobalAside from '../components/GlobalAside.vue'
 import { setTitle } from '../utils/setTitle'
 import { getPost } from '../utils'
+import type { DbPostDoc } from '../types/Database'
 
 const route = useRoute()
 
@@ -58,7 +59,12 @@ if (route.params.uuid) {
   search.value.val = route.params.slug as string
 }
 
-const post = ref<any>(null)
+const post = ref<DbPostDoc | null>(null)
+const bgImg = ref(
+  `url(https://api.daihan.top/api/acg?_random=${
+    post.value?.uuid || route.params.uuid
+  })`
+)
 
 function init() {
   getPost(search.value.key, search.value.val, !!route.query.noCache).then(
@@ -81,7 +87,7 @@ onMounted(() => {
   text-align: center
   color: #fff
   height: 400px
-  background-image: url(https://api.daihan.top/api/acg)
+  background-image: v-bind(bgImg)
   background-position: center
   background-size: cover
   background-attachment: fixed

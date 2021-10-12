@@ -250,6 +250,13 @@
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.10.2.tgz#0798c03351f0dea1a5a4cabddf26a55a7cbee590"
   integrity sha512-IXf3XA7+XyN7CP9gGh/XB0UxVMlvARGEgGXLubFICsUMGz6Q+DU+i4gGlpOxTjKvXjkJDJC8YdqdKkDj9qZHEQ==
 
+"@prettier/plugin-pug@^1.16.7":
+  version "1.16.7"
+  resolved "https://registry.npmjs.org/@prettier/plugin-pug/-/plugin-pug-1.16.7.tgz#6b4d4e434d37e5854e148fbdd4d6da27bc33e375"
+  integrity sha512-YqBbnzHw/S5Td03mzUAoNDoYZlegXMXes3oE4hFxb361vsGPSUJklBS/HulyPk/aicCCCTJHyBn8GscEWqvEDw==
+  dependencies:
+    pug-lexer "^5.0.0"
+
 "@sentry/core@5.30.0":
   version "5.30.0"
   resolved "https://registry.npmjs.org/@sentry/core/-/core-5.30.0.tgz#6b203664f69e75106ee8b5a2fe1d717379b331f3"
@@ -3190,7 +3197,7 @@ pug-filters@^4.0.0:
     pug-walk "^2.0.0"
     resolve "^1.15.1"
 
-pug-lexer@^5.0.1:
+pug-lexer@^5.0.0, pug-lexer@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/pug-lexer/-/pug-lexer-5.0.1.tgz#ae44628c5bef9b190b665683b288ca9024b8b0d5"
   integrity sha512-0I6C62+keXlZPZkOJeVam9aBLVP2EnbeDw3An+k0/QlqdwH6rv8284nko14Na7c0TtqtogfWXcRoFE4O4Ff20w==

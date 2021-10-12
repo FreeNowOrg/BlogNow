@@ -1,8 +1,8 @@
 <template lang="pug">
-aside#sidebar(:class="{active: active}")
-  #sidebar-top
-  #sidebar-bottom
-    ul#sidebar-items
+aside#global-side-nav(:class="{active: active}")
+  #global-side-nav-top
+  #global-side-nav-bottom
+    ul#global-side-nav-items
       li(v-for="item in sidebarItems") {{ item }}
 </template>
 <script setup lang="ts">
@@ -17,7 +17,7 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="sass">
-#sidebar
+#global-side-nav
   position: fixed
   z-index: 100
   width: 300px
@@ -28,13 +28,13 @@ onMounted(() => {
   &.active
     left: 0
 
-#sidebar-top
+#global-side-nav-top
   height: 120px
   background-color: var(--theme-secondary-color)
   box-shadow: var(--theme-box-shadow)
   margin-bottom: 4px
 
-#sidebar-bottom
+#global-side-nav-bottom
   ul
     list-style: none
     margin: 0

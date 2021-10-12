@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@dragon-fish/bump": "^0.0.15",
+    "@prettier/plugin-pug": "^1.16.7",
     "@types/js-cookie": "^3.0.0",
     "@types/node": "^16.10.3",
     "@types/nprogress": "^0.2.0",

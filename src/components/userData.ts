@@ -21,7 +21,7 @@ export async function userLogin({
 }
 
 export async function initUserData(): Promise<DbUserDoc> {
-  console.log('getUserDataByToken')
+  console.log('Get userData by token')
   const { data }: any = await axios.get(`${API_BASE}/user/auth/profile`)
   console.log('profile', data.body.profile)
   userData.value = data.body.profile

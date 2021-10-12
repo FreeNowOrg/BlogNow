@@ -18,6 +18,21 @@ const CONFIG_DEFAULTS = [
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
+  const { CONTROLLER, SCOPE } = req.query
+  if (CONTROLLER === 'site' && SCOPE === 'meta') {
+    try {
+      const { client, db } = database(COLNAME.CONFIG)
+      await client.connect()
+      const total_posts = await db.collection(COLNAME.POST).countDocuments()
+      const total_users = await db.collection(COLNAME.USER).countDocuments()
+      await client.close()
+      return http.send(200, 'Get site meta', {
+        meta: { total_posts, total_users },
+      })
+    } catch (e) {
+      return http.mongoError(e)
+    }
+  }
   return http.send(404, 'Work in progress')
 }
 

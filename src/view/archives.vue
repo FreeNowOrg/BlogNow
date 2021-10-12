@@ -12,8 +12,7 @@
               .title {{ item.title }}
               .link
                 router-link.title(
-                  v-if='item.slug'
-                  :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid:item.uuid } }'
+                  :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
                 ) view
       global-aside
 </template>
@@ -21,7 +20,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { setTitle } from '../utils/setTitle'
-import { API_BASE } from '../config'
 import GlobalAside from '../components/GlobalAside.vue'
 import { getRecentPosts } from '../utils'
 

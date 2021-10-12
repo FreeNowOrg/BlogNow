@@ -247,9 +247,20 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     try {
       await client.connect()
 
-      if (slug && (await col.findOne({ slug }))) {
-        await client.close()
-        return http.send(409, 'Slug has been taken')
+      const filterKey = Object.keys(filter)[0]
+      const filterVal = filter[filterKey]
+
+      if (
+        // If requested to modify the slug
+        slug
+      ) {
+        // Check if slug has been taken
+        const already = await col.findOne({ slug })
+        // and not current post
+        if (already && already[filterKey] !== filterVal) {
+          await client.close()
+          return http.send(409, 'Slug has been taken')
+        }
       }
 
       const data = await col.updateOne(filter, {
