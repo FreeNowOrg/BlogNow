@@ -31,7 +31,7 @@ watch(isHidden, (val) => {
 </script>
 <style scoped lang="sass">
 #global-side-nav
-  z-index: 100
+  z-index: 10
 
   .backdrop
     position: fixed
@@ -40,13 +40,13 @@ watch(isHidden, (val) => {
     width: 100vw
     height: 100vh
     background-color: rgba(0, 0, 0, 0.1)
-    z-index: 100
+    z-index: 10
 
   .inner
     position: fixed
     top: 0
     left: 0
-    width: 300px
+    width: calc(1rem + 240px)
     max-width: 80vw
     height: 100vh
     transition: left .8s ease-in
