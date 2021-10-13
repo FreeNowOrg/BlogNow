@@ -23,7 +23,7 @@ function backToTop() {
   position: fixed
   right: -35px
   bottom: 20px
-  z-index: 100
+  z-index: 5
   transition: right .4s
 
   &:not(.is-hidden)

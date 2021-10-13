@@ -12,7 +12,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { userData } from './userData'
 const router = useRouter()
-const isHidden = ref(true)
+const isHidden = ref(true) // maybe need to move outside
 const sidebarItems = ref<any[]>([])
 router.afterEach(() => isHidden.value = true)
 onMounted(() => {
