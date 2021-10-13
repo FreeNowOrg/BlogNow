@@ -1,26 +1,33 @@
 <template lang="pug">
-#rightside
-  #rightside-config-detail(:class="{isHidden: isHidden}")
-  #rightside-config
-    button#settings(title="Settings" type="button" @click="toggleSettings") S
+#float-toolbox(:class="{ 'is-hidden': lastScrollPos - 50 < 0 }")
+  #float-toolbox-config-detail(:class="{ 'is-hidden': isHidden }")
+  #float-toolbox-config
+    button#settings(title="Settings" type="button" @click="isHidden = !isHidden") S
     button#to-top(title="Back to top" type="button" @click="backToTop") T
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 const isHidden = ref(true)
-function toggleSettings() {
-  isHidden.value = !isHidden.value
-}
+const lastScrollPos = ref(0)
+onMounted(() => {
+  document.addEventListener('scroll', () => {
+    lastScrollPos.value = window.scrollY
+  })
+})
 function backToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 </script>
 <style scoped lang="sass">
-#rightside
+#float-toolbox
   position: fixed
   right: -35px
   bottom: 20px
-  z-index: 100
+  z-index: 5
+  transition: right .4s
+
+  &:not(.is-hidden)
+    right: 0
 
   button
     width: 30px
@@ -31,13 +38,13 @@ function backToTop() {
     background-color: var(--theme-accent-color)
     color: var(--theme-accent-link-color)
 
-  &:hover
-    background-color: var(--theme-secondary-color)
+    &:hover
+      background-color: var(--theme-secondary-color)
 
-#rightside-config-detail
-  transform: translateX(35px)
+#float-toolbox-config-detail
+  transform: translateX(-35px)
   transition: transform .4s
 
-  &:not(.isHidden)
-    transform: translateX(0)
+  &:not(.is-hidden)
+    transform: none
 </style>
