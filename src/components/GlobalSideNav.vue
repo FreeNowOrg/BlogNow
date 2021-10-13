@@ -1,32 +1,63 @@
 <template lang="pug">
-aside#global-side-nav(:class="{active: active}")
-  #global-side-nav-top
-  #global-side-nav-bottom
-    ul#global-side-nav-items
-      li(v-for="item in sidebarItems") {{ item }}
+aside#global-side-nav(:class="{ 'is-hidden': isHidden }")
+  .backdrop(@click="isHidden = true")
+  .inner
+    #global-side-nav-top
+    #global-side-nav-bottom
+      ul#global-side-nav-items
+        li(v-for="item in sidebarItems") {{ item }}
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { initUserData } from './userData'
-const active = ref(false)
+import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { userData } from './userData'
+const router = useRouter()
+const isHidden = ref(true)
 const sidebarItems = ref<any[]>([])
+router.afterEach(() => isHidden.value = true)
 onMounted(() => {
-  initUserData().then((data) => {
-    sidebarItems.value = [] // TODO: where to store the items?
+  document.addEventListener('keypress', ({ key }) => {
+    if (key == 'Escape') isHidden.value = true
   })
+})
+watch(isHidden, (val) => {
+  if (!val) {
+    document.body.classList.add('global-side-nav-show', 'lock-scroll')
+  }
+  else {
+    document.body.classList.remove('global-side-nav-show', 'lock-scroll')
+  }
 })
 </script>
 <style scoped lang="sass">
 #global-side-nav
-  position: fixed
   z-index: 100
-  width: 300px
-  left: -300px
-  transition: left .8s ease-in
-  background-color: var(--theme-background-color)
 
-  &.active
+  .backdrop
+    position: fixed
+    top: 0
     left: 0
+    width: 100vw
+    height: 100vh
+    background-color: rgba(0, 0, 0, 0.1)
+    z-index: 100
+
+  .inner
+    position: fixed
+    top: 0
+    left: 0
+    width: 300px
+    max-width: 80vw
+    height: 100vh
+    transition: left .8s ease-in
+    background-color: var(--theme-background-color)
+
+.is-hidden
+  .backdrop
+    display: none
+
+  .inner
+    left: -300px
 
 #global-side-nav-top
   height: 120px

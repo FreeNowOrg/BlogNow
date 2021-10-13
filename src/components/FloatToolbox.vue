@@ -1,16 +1,13 @@
 <template lang="pug">
 #rightside
-  #rightside-config-detail(:class="{isHidden: isHidden}")
+  #rightside-config-detail(:class="{ 'is-hidden': isHidden }")
   #rightside-config
-    button#settings(title="Settings" type="button" @click="toggleSettings") S
+    button#settings(title="Settings" type="button" @click="isHidden = !isHidden") S
     button#to-top(title="Back to top" type="button" @click="backToTop") T
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 const isHidden = ref(true)
-function toggleSettings() {
-  isHidden.value = !isHidden.value
-}
 function backToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -21,6 +18,7 @@ function backToTop() {
   right: -35px
   bottom: 20px
   z-index: 100
+  transition: transform .4s
 
   button
     width: 30px
@@ -35,9 +33,9 @@ function backToTop() {
     background-color: var(--theme-secondary-color)
 
 #rightside-config-detail
-  transform: translateX(35px)
+  transform: translateX(-35px)
   transition: transform .4s
 
-  &:not(.isHidden)
+  &:not(.is-hidden)
     transform: translateX(0)
 </style>
