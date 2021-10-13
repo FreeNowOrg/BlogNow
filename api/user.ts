@@ -1,18 +1,19 @@
-import { VercelRequest, VercelResponse } from '@vercel/node'
-import { HandleResponse } from 'serverless-kit'
+import { HandeleRouter } from 'serverless-kit'
 import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
 import {
-  database,
-  getTokenFromReq,
-  handleInvalidController,
-  handleInvalidScope,
-  handleMissingParams,
+  checkLogin,
+  closeMongo,
+  initUserData,
+  initMongo,
   sortKeys,
 } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
+
+const router = new HandeleRouter()
+export default router.init
 
 /**
  * @desc authority ```
@@ -42,7 +43,7 @@ export const AUTHORITY_DEFAULTS: Record<DbAuthorityKeys, number> = {
 export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
 export const USERDATA_DEFAULTS: DbUserDoc = {
   uuid: '',
-  uid: 10000,
+  uid: -1,
   username: '',
   nickname: '',
   email: '',
@@ -51,7 +52,7 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
   gender: 'other',
   created_at: '',
   avatar: '',
-  authority: 1,
+  authority: 0,
   // sensitive
   password_hash: '',
   token: '',
@@ -76,124 +77,91 @@ export function getUserModel(
   return sortKeys(data)
 }
 
-export default async (req: VercelRequest, res: VercelResponse) => {
-  const http = new HandleResponse(req, res)
-  const { CONTROLLER, SCOPE } = req.query
-  let scopeBeNumber = false
+// Connect db
+router.beforeEach(async (ctx) => await initMongo(ctx, COLNAME.USER))
 
-  switch (req.method) {
-    case 'GET':
-      return methodGET()
-    case 'POST':
-      return methodPOST()
-    case 'PATCH':
-      return methodPATCH()
-    default:
-      http.res.setHeader('allow', 'GET, POST, PATCH')
-      return http.send(400, `Invalid method: ${req.method}`)
-  }
+// Close db
+router.afterEach(closeMongo)
 
-  // GET
-  function methodGET() {
-    switch (CONTROLLER) {
-      case 'uid':
-        scopeBeNumber = true
-      case 'uuid':
-        return get_meta()
-      case 'auth':
-        return get_auth()
-      default:
-        return handleInvalidController(http)
-    }
-  }
+// Pre fetch userData
+router.beforeEach(initUserData)
 
-  async function get_meta() {
-    if (!SCOPE) {
-      return handleInvalidScope(http)
-    }
+router
+  .addRoute()
+  .method('GET')
+  .path('user')
+  .path(['uuid', 'uid'], 'selector')
+  .path(/.+/, 'val')
+  .action(async (ctx) => {
     const filter: Record<string, any> = {}
-    filter[CONTROLLER as string] = scopeBeNumber
-      ? parseInt(SCOPE as string)
-      : SCOPE
+    filter[ctx.params.selector] =
+      ctx.params.selector === 'uid' ? parseInt(ctx.params.val) : ctx.params.val
 
-    try {
-      const { client, col } = database(COLNAME.USER)
-      await client.connect()
-      const user = await col.findOne(filter)
-      await client.close()
+    const user = await ctx.col.findOne(filter)
 
-      if (!user) {
-        return http.send(404, 'User not found', { filter })
-      }
-
-      return http.send(200, `Get user by filter`, {
+    if (!user) {
+      ctx.status = 404
+      ctx.message = 'User not found'
+      ctx.body = {
         filter,
-        user: getUserModel(user, true),
-      })
-    } catch (e) {
-      return http.mongoError(e)
+      }
+      return
     }
-  }
 
-  async function get_auth() {
-    switch (SCOPE) {
-      case 'profile':
-        return get_auth_profile()
-      default:
-        return handleInvalidScope(http)
+    ctx.status = 200
+    ctx.message = 'Get user by filter'
+    ctx.body = {
+      filter,
+      profile: getUserModel(user, true),
     }
-  }
+  })
 
-  async function get_auth_profile() {
-    const token = getTokenFromReq(req)
-    if (!token) {
-      return http.send(401, 'Please login')
+router
+  .addRoute()
+  .method('GET')
+  .path('user')
+  .path('auth')
+  .path('profile')
+  .check(checkLogin)
+  .action(async (ctx) => {
+    ctx.body = {
+      profile: getUserModel(ctx.user, true),
     }
-    const profile = await getUserMetaByToken(token)
-    return http.send(200, 'ok', { profile })
-  }
+  })
 
-  // POST
-  function methodPOST() {
-    switch (CONTROLLER) {
-      case 'auth':
-        post_auth()
-        break
-      default:
-        handleInvalidController(http)
-    }
-  }
-
-  function post_auth() {
-    switch (SCOPE) {
-      case 'register':
-        post_auth_register()
-        break
-      case 'sign-in':
-      case 'login':
-        post_auth_login()
-        break
-      default:
-        handleInvalidController(http)
-    }
-  }
-
-  async function post_auth_register() {
-    const { username, password } = req.body || {}
+router
+  .addRoute()
+  .method('POST')
+  .path('user')
+  .path('auth')
+  .path('register')
+  .check((ctx) => {
+    const { username, password } = ctx.req.body || {}
     if (!username || !password) {
-      return handleMissingParams(http)
+      ctx.status = 400
+      ctx.message = 'Missing params'
+      return false
     }
+  })
+  .check((ctx) => {
+    const { username, password } = ctx.req.body || {}
     if (username.length < 4 || password.length < 4) {
-      return http.send(400, 'Username or password too short')
+      ctx.status = 400
+      ctx.message = 'Username or password too short'
+      return false
     }
-    const { client, col } = database(COLNAME.USER)
-    await client.connect()
-    const already = await col.findOne({ username })
+  })
+  .check(async (ctx) => {
+    const { username } = ctx.req.body || {}
+    const already = await ctx.col.findOne({ username })
     if (already) {
-      await client.close()
-      return http.send(403, 'Username is already in use')
+      ctx.status = 409
+      ctx.message = 'Username has been taken'
+      return false
     }
-
+  })
+  .action(async (ctx) => {
+    const { username, password } = ctx.req.body || {}
     const salt = nanoid(32)
     const insert: DbUserDoc = getUserModel({
       username,
@@ -203,54 +171,57 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       created_at: new Date().toISOString(),
     })
 
-    const dbRes = await col.insertOne(insert)
-    await client.close()
+    const dbRes = await ctx.col.insertOne(insert)
 
-    return http.send(200, 'User created', dbRes)
-  }
+    ctx.message = 'User created'
+    ctx.body = dbRes
+  })
 
-  async function post_auth_login() {
-    const { client, col } = database(COLNAME.USER)
-    const { username, password } = req.body || {}
+router
+  .addRoute()
+  .method('POST')
+  .path('user')
+  .path('auth')
+  .path(/(log-?in|sign-?in)/)
+  .check((ctx) => {
+    const { username, password } = ctx.req.body || {}
     if (!username || !password) {
-      return http.send(400, 'Missing params')
+      ctx.status = 400
+      ctx.message = 'Missing params'
+      return false
     }
-    await client.connect()
-    const profile = await col.findOne({ username })
+  })
+  .action(async (ctx) => {
+    const { username, password } = ctx.req.body || {}
+    const profile = await ctx.col.findOne({ username })
     if (!profile) {
-      await client.close()
-      return http.send(401, 'Invalid username')
+      ctx.status = 403
+      ctx.message = 'Invalid username'
+      return false
     }
     const password_hash = getPasswordHash(profile.salt, password)
     if (password_hash !== profile.password_hash) {
-      await client.close()
-      return http.send(401, 'Invalid password')
+      ctx.status = 403
+      ctx.message = 'Invalid password'
+      return false
     }
     const token =
       profile.token_expires - Date.now() < 0 ? nanoid(32) : profile.token
     const token_expires = Date.now() + 7 * 24 * 60 * 60 * 1000
-    await col.updateOne(
+    await ctx.col.updateOne(
       { uuid: profile.uuid },
       { $set: { token, token_expires } }
     )
 
-    await client.close()
-
-    http.res.setHeader(
+    ctx.res.setHeader(
       'set-cookie',
       `${TOKEN_COOKIE_NAME}=${token}; expires=${new Date(
         token_expires
       ).toUTCString()}; path=/`
     )
 
-    return http.send(200, 'ok', { token, profile: getUserModel(profile, true) })
-  }
-
-  // PATCH
-  function methodPATCH() {
-    return http.send(404, 'Work in progress')
-  }
-}
+    ctx.body = { token, profile: getUserModel(profile, true) }
+  })
 
 // Utils
 function getPasswordHash(salt: string, password: string) {
@@ -258,34 +229,4 @@ function getPasswordHash(salt: string, password: string) {
     .createHash('sha256')
     .update(`salt=${salt},password=${password}`)
     .digest('hex')
-}
-
-export async function getUserMetaByToken(
-  token: string
-): Promise<DbUserDoc | null> {
-  const { client, col } = database(COLNAME.USER)
-  await client.connect()
-  const user = await col.findOne({
-    token,
-    token_expires: { $gt: Date.now() },
-  })
-  await client.close()
-  if (!user) {
-    return null
-  }
-  return getUserModel(user, true)
-}
-
-export async function getAuthorityByToken(token: string) {
-  if (!token) return 0
-  const user = await getUserMetaByToken(token)
-  return user?.authority || 0
-}
-
-export async function getCurAuthority(req: VercelRequest) {
-  return getAuthorityByToken(getTokenFromReq(req))
-}
-
-export async function getCurUserData(req: VercelRequest) {
-  return getUserMetaByToken(getTokenFromReq(req))
 }

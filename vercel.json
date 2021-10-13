@@ -1,20 +1,20 @@
 {
   "rewrites": [
     {
-      "source": "/api/user/:CONTROLLER/:SCOPE?",
-      "destination": "/api/user"
-    },
-    {
-      "source": "/api/post/:CONTROLLER/:SCOPE?",
-      "destination": "/api/post"
-    },
-    {
-      "source": "/api/config/:CONTROLLER/:SCOPE?",
+      "source": "/api/config(.*)",
       "destination": "/api/config"
     },
     {
+      "source": "/api/post(.*)",
+      "destination": "/api/post"
+    },
+    {
+      "source": "/api/user(.*)",
+      "destination": "/api/user"
+    },
+    {
       "source": "/api(.*)",
-      "destination": "/api/404"
+      "destination": "/api/index"
     }
   ]
 }

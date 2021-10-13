@@ -1,17 +1,19 @@
-import { VercelRequest, VercelResponse } from '@vercel/node'
 import { v4 as UUID } from 'uuid'
-import { HandleResponse } from 'serverless-kit'
+import { HandeleRouter } from 'serverless-kit'
 import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
 import {
-  database,
-  getTokenFromReq,
-  handleInvalidController,
-  handleInvalidScope,
+  checkAuth,
+  checkLogin,
+  closeMongo,
+  initMongo,
+  initUserData,
   sortKeys,
 } from './utils'
-import { getUserMetaByToken } from './user'
 import slugify from 'slugify'
+
+const router = new HandeleRouter()
+export default router.init
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
   uuid: '',
@@ -34,252 +36,197 @@ export function getPostModel(payload: Partial<DbPostDoc>) {
   return post
 }
 
-export default async (req: VercelRequest, res: VercelResponse) => {
-  const http = new HandleResponse(req, res)
-  const { CONTROLLER, SCOPE } = req.query
-  // let scopeBeNumber = false
+// Connect db
+router.beforeEach(async (ctx) => await initMongo(ctx, COLNAME.POST))
 
-  switch (req.method) {
-    case 'GET':
-      return methodGET()
-    case 'POST':
-      return methodPOST()
-    case 'PATCH':
-      return methodPATCH()
-    // case 'DELETE':
-    //   return methodDELETE()
-    default:
-      http.res.setHeader('allow', 'GET, POST, PATCH, DELETE')
-      return http.send(405, 'Method Not Allowed')
-  }
+// Close db
+router.afterEach(closeMongo)
 
-  async function methodGET() {
-    const filter: Record<string, any> = {}
-    const hasScope = () => {
-      if (SCOPE) {
-        return true
-      } else {
-        handleInvalidScope(http)
-        return false
-      }
-    }
+// Pre fetch userData
+router.beforeEach(initUserData)
 
-    switch (CONTROLLER) {
-      case 'list':
-        return get_list()
-      case 'uuid':
-        hasScope() && (filter.uuid = SCOPE)
-        break
-      case 'pid':
-        hasScope() && (filter.pid = parseInt(SCOPE as string))
-        break
-      case 'slug':
-        hasScope() && (filter.slug = SCOPE)
-        break
-      default:
-        return handleInvalidController(http)
-    }
+// GET /post/:selector/:scope
+router
+  .addRoute()
+  .method('GET')
+  .path('post')
+  .path(['uuid', 'pid', 'slug'], 'filterKey')
+  .path(/.+/, 'filterVal')
+  .action(async (ctx) => {
+    const filter = {}
+    filter[ctx.params.filterKey] =
+      ctx.params.filterKey === 'pid'
+        ? parseInt(ctx.params.filterVal)
+        : ctx.params.filterVal
 
-    return get_byFilter(filter)
-  }
-
-  async function get_byFilter(filter: Record<string, any>) {
-    const { client, col } = database(COLNAME.POST)
-    await client.connect()
-    const post = await col.findOne(filter)
+    const post = await ctx.col.findOne(filter)
 
     if (!post) {
-      await client.close()
-      return http.send(404, 'Post not found', { filter })
+      ctx.status = 404
+      ctx.message = 'Post not found'
+    } else {
+      ctx.message = 'Get post by filter'
+    }
+    ctx.body = { post, filter }
+  })
+
+// GET /post/list/recent
+router
+  .addRoute()
+  .method('GET')
+  .path('post')
+  .path('list')
+  .path(/recents?/)
+  .check((ctx) => {
+    ctx.offset = parseInt((ctx.req.query.offset as string) || '0')
+    ctx.limit = Math.min(25, parseInt((ctx.req.query.limit as string) || '10'))
+  })
+  .action(async (ctx) => {
+    const posts = await ctx.col
+      .find()
+      .sort({ pid: -1 })
+      .skip(ctx.offset)
+      .limit(ctx.limit)
+      .toArray()
+
+    let hasNext = false
+    if (posts.length > ctx.limit) {
+      hasNext = true
+      posts.pop()
     }
 
-    await client.close()
-    return http.send(200, `Get post by filter`, { post, filter })
-  }
-
-  function get_list() {
-    switch (SCOPE) {
-      case 'recent':
-      case 'recents':
-        return get_list_recent()
-      default:
-        return handleInvalidScope(http)
+    ctx.body = {
+      posts: posts.map(getPostModel),
+      hasNext,
+      limit: ctx.limit,
+      offset: ctx.offset,
     }
-  }
+  })
 
-  async function get_list_recent() {
-    const { client, col } = database(COLNAME.POST)
-
-    const offset = parseInt((req.query.offset as string) || '0')
-    const limit = Math.min(25, parseInt((req.query.limit as string) || '10'))
-
-    try {
-      await client.connect()
-      const posts = await col
-        .find()
-        .sort({ pid: -1 })
-        .skip(offset)
-        .limit(limit)
-        .toArray()
-      await client.close()
-
-      let hasNext = false
-      if (posts.length > limit) {
-        hasNext = true
-        posts.pop()
-      }
-
-      return http.send(200, `Get post list by ${SCOPE}`, {
-        posts: posts.map(getPostModel),
-        hasNext,
-        limit,
-        offset,
-      })
-    } catch (e) {
-      return http.mongoError(e)
-    }
-  }
-
-  // POST
-  async function methodPOST() {
-    switch (CONTROLLER) {
-      case 'new':
-      case 'create':
-        return post_create()
-      default:
-        return handleInvalidController(http)
-    }
-  }
-
-  async function post_create() {
-    // auth
-    const token = getTokenFromReq(req)
-    if (!token) {
-      return http.send(401, 'Please login')
-    }
-    const user = await getUserMetaByToken(token)
-    if (!user || user.authority <= 2) {
-      return http.send(403, 'Permission denied')
-    }
-    const { title, content, slug } = req.body || {}
+// POST /post/create
+router
+  .addRoute()
+  .method('POST')
+  .path('post')
+  .path(['create', 'new'])
+  .check(checkLogin)
+  .check((ctx) => checkAuth(2, ctx))
+  .check((ctx) => {
+    ctx.req.body = ctx.req.body || {}
+    const { title, content } = ctx.req.body
     if (title === undefined || content === undefined) {
-      return http.send(403, 'Missing params')
+      ctx.status = 400
+      ctx.message = 'Missing params'
+      return false
     }
-
-    try {
-      const { client, col } = database(COLNAME.POST)
-      await client.connect()
-
-      const now = new Date()
-
-      const [lastPost] = await col
-        .find()
-        .project({ pid: 1 })
-        .sort({ pid: -1 })
-        .limit(1)
-        .toArray()
-
-      if (slug && (await col.findOne({ slug }))) {
-        await client.close()
-        return http.send(409, 'Slug has been taken')
-      }
-
-      const pid = isNaN(lastPost?.pid)
-        ? (await col.countDocuments()) + 1
-        : (lastPost.pid as number) + 1
-      const uuid = UUID()
-
-      const insert: DbPostDoc = getPostModel({
-        uuid,
-        pid,
-        title,
-        content,
-        slug,
-        author_uuid: user.uuid,
-        created_at: now.toISOString(),
-      })
-      const dbRes = await col.insertOne(insert)
-      await client.close()
-
-      return http.send(200, 'Post created', { ...dbRes, uuid })
-    } catch (e) {
-      return http.mongoError(e)
+  })
+  .check(async (ctx) => {
+    ctx.req.body.slug = slugify(ctx.req.body.slug || '', { lower: true })
+    const slug = ctx.req.body.slug
+    if (slug && (await ctx.col.findOne({ slug }))) {
+      ctx.status = 409
+      ctx.message = 'Slug has been taken'
+      return false
     }
-  }
-
-  async function methodPATCH() {
-    if (!SCOPE) {
-      return handleInvalidScope(http)
-    }
-
-    const filter: Record<string, any> = {}
-    switch (CONTROLLER) {
-      case 'uuid':
-        filter.uuid = SCOPE
-        break
-      case 'pid':
-        filter.pid = parseInt(SCOPE as string)
-        break
-      default:
-        return handleInvalidScope(http)
-    }
-
-    return patch_byFilter(filter)
-  }
-
-  async function patch_byFilter(filter: Record<string, any>) {
-    const token = getTokenFromReq(req)
-    const { title, content, slug } = req.body || {}
-    if (!token) {
-      return http.send(401, 'Please login')
-    }
-    const user = await getUserMetaByToken(token)
-    if (!user || user.authority <= 2) {
-      return http.send(403, 'Permission denied')
-    }
-    if (title === undefined || content === undefined) {
-      return http.send(403, 'Missing params')
-    }
-
-    const { client, col } = database(COLNAME.POST)
+  })
+  .action(async (ctx) => {
+    const { title, content, slug } = ctx.req.body
     const now = new Date()
 
-    try {
-      await client.connect()
+    const [lastPost] = await ctx.col
+      .find()
+      .project({ pid: 1 })
+      .sort({ pid: -1 })
+      .limit(1)
+      .toArray()
 
-      const filterKey = Object.keys(filter)[0]
-      const filterVal = filter[filterKey]
+    const pid = isNaN(lastPost?.pid)
+      ? (await ctx.col.countDocuments()) + 1
+      : (lastPost.pid as number) + 1
+    const uuid = UUID()
 
-      if (
-        // If requested to modify the slug
-        slug
-      ) {
-        // Check if slug has been taken
-        const already = await col.findOne({ slug })
-        // and not current post
-        if (already && already[filterKey] !== filterVal) {
-          await client.close()
-          return http.send(409, 'Slug has been taken')
-        }
-      }
+    const insert: DbPostDoc = getPostModel({
+      uuid,
+      pid,
+      title,
+      content,
+      slug,
+      author_uuid: ctx.user.uuid,
+      created_at: now.toISOString(),
+    })
+    const dbRes = await ctx.col.insertOne(insert)
 
-      const data = await col.updateOne(filter, {
+    ctx.message = 'Post created'
+    ctx.body = { ...dbRes, uuid }
+  })
+
+// PATCH /post/:selector/:scope
+router
+  .addRoute()
+  .method('PATCH')
+  .path('post')
+  .path(['uuid'], 'filterKey')
+  .path(/.+/, 'filterVal')
+  .check(checkLogin)
+  // Validate body
+  .check((ctx) => {
+    ctx.req.body = ctx.req.body || {}
+    const { title, content } = ctx.req.body
+    if (title === undefined || content === undefined) {
+      ctx.status = 400
+      ctx.message = 'Missing params'
+      return false
+    }
+  })
+  // Find target post
+  .check(async (ctx) => {
+    const filter = {}
+    filter[ctx.params.filterKey] = ctx.params.filterVal
+    ctx.post = await ctx.col.findOne(filter)
+
+    if (!ctx.post) {
+      ctx.status = 404
+      ctx.message = 'Post not found'
+      return false
+    }
+  })
+  // User authentication
+  .check((ctx) => {
+    if (ctx.post.author_uuid !== ctx.user.uuid && ctx.user.authority <= 3) {
+      ctx.status = 403
+      ctx.message = 'Permission denied'
+      return false
+    }
+  })
+  // Check slug conflict
+  .check(async (ctx) => {
+    ctx.req.body.slug = slugify(ctx.req.body.slug || '', { lower: true })
+    const slug = ctx.req.body.slug
+
+    if (slug && slug !== ctx.post.slug && (await ctx.col.findOne({ slug }))) {
+      ctx.status = 409
+      ctx.message = 'Slug has been taken'
+      return false
+    }
+  })
+  // Update db
+  .action(async (ctx) => {
+    const { title, content, slug } = ctx.req.body
+    const now = new Date()
+
+    const dbRes = await ctx.col.updateOne(
+      { uuid: ctx.post.uuid },
+      {
         $set: {
           title,
           content,
           slug,
           edited_at: now.toISOString(),
-          editor_uuid: user.uuid,
+          editor_uuid: ctx.user.uuid,
         },
-      })
-      await client.close()
-
-      if (data.modifiedCount < 1) {
-        return http.send(404, 'Post not foud', data)
       }
-      return http.send(200, 'Post updated', data)
-    } catch (e) {
-      return http.mongoError(e)
-    }
-  }
-}
+    )
+
+    ctx.message = 'Post updated'
+    ctx.body = dbRes
+  })

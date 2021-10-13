@@ -1,21 +1,59 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { MongoClient } from 'mongodb'
 import { HandleResponse } from 'serverless-kit'
-import { getLocalConfig } from './config'
-import { TOKEN_COOKIE_NAME } from './user'
+import { COLNAME, getLocalConfig } from './config'
+import { getUserModel, TOKEN_COOKIE_NAME } from './user'
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   const http = new HandleResponse(req, res)
   http.send(403, 'Invalid endpoint')
 }
 
-export function database(colName: string, devMode?: boolean) {
+export async function initMongo(ctx, colName?: string) {
   const client = new MongoClient(
     getLocalConfig('MONGO_URI') || 'mongodb://localhost'
   )
   const db = client.db(getLocalConfig('BLOGNOW_DB') || 'blog_now')
-  const col = db.collection(colName)
-  return { client, db, col }
+  await client.connect()
+  ctx.mongoClient = client
+  ctx.db = db
+  if (colName) ctx.col = db.collection(colName)
+}
+
+export async function closeMongo(ctx) {
+  await ctx.mongoClient.close()
+}
+
+export async function initUserData(ctx) {
+  const token = getTokenFromReq(ctx.req)
+  const col = ctx.db.collection(COLNAME.USER)
+  const user = await col.findOne({
+    token,
+    token_expires: { $gt: Date.now() },
+  })
+  ctx.user = getUserModel(user)
+}
+
+export async function checkLogin(ctx) {
+  if (!ctx.user.uuid || ctx.user.uid < 0) {
+    ctx.status = 401
+    ctx.message = 'Please login'
+    return false
+  }
+}
+
+export function checkAuth(required: number, ctx) {
+  if (ctx.user.authority < required) {
+    ctx.status = 403
+    ctx.message = 'Permission denied'
+    ctx.body = {
+      authcheck: {
+        required,
+        recived: ctx.user.authority,
+      },
+    }
+    return false
+  }
 }
 
 export function handleInvalidController(http: HandleResponse) {
