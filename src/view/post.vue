@@ -8,8 +8,6 @@
         .edited-date(v-if='post.edited_at') Edited at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
       #post-meta(v-if='!post')
         .foo Loading post...
-      #edit-links(v-if='post')
-        router-link(:to='{ name: "post-edit", params: { uuid: post.uuid } }') {{ userData && userData.authority >= 2 ? "Edit post" : "View source" }}
 
   main#post-main.body-inner
     .bread-crumb.card
@@ -22,10 +20,27 @@
       article#post-content.card
         .loading(v-if='!post')
           placeholder
-        v-md-editor(v-if='post', v-model='post.content', mode='preview')
-        .after(v-if='post')
+        v-md-editor(
+          v-if='post',
+          v-model='post.content',
+          mode='preview',
+          ref='article'
+        )
+
+        #post-after(v-if='post')
           hr
           p Article after
+
+        #post-tools-container
+          #post-tools
+            router-link.plain(
+              :to='{ name: "post-edit", params: { uuid: post?.uuid || $route.params.uuid } }'
+            ) E
+              .tooltip {{ userData && userData.authority >= 2 ? "Edit this post" : "View source" }}
+            button M
+              .tooltip Toggle menu
+            button D
+              .tooltip Delete this post
       global-aside
         template(#top)
           .card.author-card Author
@@ -37,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { getCurrentInstance, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { userData } from '../components/userData'
 import GlobalAside from '../components/GlobalAside.vue'
@@ -115,4 +130,58 @@ onMounted(() => {
 
 #post-main
   margin: 3rem auto 4rem
+
+#post-content
+  padding: 2rem
+  position: relative
+
+#post-tools-container
+  position: absolute
+  left: 0
+  top: 0
+  width: 0
+  height: 100%
+  #post-tools
+    position: sticky
+    top: 60px
+    display: flex
+    flex-direction: column
+    gap: 1rem
+    margin-left: -1rem
+    padding-top: 2rem
+    padding-bottom: 4rem
+    a,
+    button
+      position: relative
+      display: block
+      border-radius: 50%
+      background-color: var(--theme-accent-color)
+      --color: #fff
+      color: #fff
+      box-shadow: 0 0 6px #aaa
+      width: 2rem
+      height: 2rem
+      line-height: 2rem
+      padding: 0
+      text-align: center
+      .tooltip
+        display: block
+        position: absolute
+        left: 2rem
+        top: 0
+        font-size: 0.85rem
+        background-color: #f8f8f8
+        color: var(--theme-text-color)
+        white-space: pre
+        box-shadow: 0 0 6px #ccc
+        padding: 0.2rem 0.4rem
+        border-radius: 4px
+        opacity: 0
+        pointer-events: none
+        transition: all 0.24s ease
+      &:hover
+        .tooltip
+          pointer-events: unset
+          left: 2.4rem
+          opacity: 1
 </style>

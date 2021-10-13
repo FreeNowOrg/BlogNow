@@ -3,7 +3,7 @@ import { version } from '../package.json'
 
 export const ENV = process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
 export const API_BASE =
-  ENV === 'prod' ? '/api' : 'https://blog-now.vercel.app/api'
+  ENV === 'prod' ? '/api' : 'http://localhost:3000/api'
 export const PROJECT_NAME = 'Blog Now'
 export const VERSION = version
 
