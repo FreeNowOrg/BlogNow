@@ -24,10 +24,10 @@ function backToTop() {
   right: -35px
   bottom: 20px
   z-index: 100
-  transition: transform .4s
+  transition: right .4s
 
   &:not(.is-hidden)
-    transform: translateX(-35px)
+    right: 0
 
   button
     width: 30px
@@ -46,5 +46,5 @@ function backToTop() {
   transition: transform .4s
 
   &:not(.is-hidden)
-    transform: translateX(0)
+    transform: none
 </style>
