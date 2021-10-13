@@ -55,6 +55,8 @@ nav#global-header.flex.gap-1
                   .uid {{ userData.email }}
             li(v-if='userData')
               router-link.plain(to='/user/@me/posts') My Posts
+            li(v-if='userData')
+              router-link.plain(to='/post/new') Add new post
 
             li(v-if='$route.path !== "/auth"')
               router-link.plain(to='/auth') {{ userData ? "Logout" : "Login" }}
