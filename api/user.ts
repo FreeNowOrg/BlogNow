@@ -1,19 +1,9 @@
-import { HandeleRouter } from 'serverless-kit'
 import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import {
-  checkLogin,
-  closeMongo,
-  initUserData,
-  initMongo,
-  sortKeys,
-} from './utils'
+import { checkLogin, router, sortKeys, initCol } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
-
-const router = new HandeleRouter()
-export default router.init
 
 /**
  * @desc authority ```
@@ -77,156 +67,152 @@ export function getUserModel(
   return sortKeys(data)
 }
 
-// Connect db
-router.beforeEach(async (ctx) => await initMongo(ctx, COLNAME.USER))
-
-// Close db
-router.afterEach(closeMongo)
-
-// Pre fetch userData
-router.beforeEach(initUserData)
-
-router
-  .addRoute()
-  .method('GET')
-  .path('user')
-  .path(['uuid', 'uid'], 'selector')
-  .path(/.+/, 'val')
-  .action(async (ctx) => {
-    const filter: Record<string, any> = {}
-    filter[ctx.params.selector] =
-      ctx.params.selector === 'uid' ? parseInt(ctx.params.val) : ctx.params.val
-
-    const user = await ctx.col.findOne(filter)
-
-    if (!user) {
-      ctx.status = 404
-      ctx.message = 'User not found'
-      ctx.body = {
-        filter,
-      }
-      return
-    }
-
-    ctx.status = 200
-    ctx.message = 'Get user by filter'
-    ctx.body = {
-      filter,
-      profile: getUserModel(user, true),
-    }
-  })
-
-router
-  .addRoute()
-  .method('GET')
-  .path('user')
-  .path('auth')
-  .path('profile')
-  .check(checkLogin)
-  .action(async (ctx) => {
-    ctx.body = {
-      profile: getUserModel(ctx.user, true),
-    }
-  })
-
-router
-  .addRoute()
-  .method('POST')
-  .path('user')
-  .path('auth')
-  .path('register')
-  .check((ctx) => {
-    const { username, password } = ctx.req.body || {}
-    if (!username || !password) {
-      ctx.status = 400
-      ctx.message = 'Missing params'
-      return false
-    }
-  })
-  .check((ctx) => {
-    const { username, password } = ctx.req.body || {}
-    if (username.length < 4 || password.length < 4) {
-      ctx.status = 400
-      ctx.message = 'Username or password too short'
-      return false
-    }
-  })
-  .check(async (ctx) => {
-    const { username } = ctx.req.body || {}
-    const already = await ctx.col.findOne({ username })
-    if (already) {
-      ctx.status = 409
-      ctx.message = 'Username has been taken'
-      return false
-    }
-  })
-  .action(async (ctx) => {
-    const { username, password } = ctx.req.body || {}
-    const salt = nanoid(32)
-    const insert: DbUserDoc = getUserModel({
-      username,
-      uuid: UUID(),
-      password_hash: getPasswordHash(salt, password),
-      salt,
-      created_at: new Date().toISOString(),
-    })
-
-    const dbRes = await ctx.col.insertOne(insert)
-
-    ctx.message = 'User created'
-    ctx.body = dbRes
-  })
-
-router
-  .addRoute()
-  .method('POST')
-  .path('user')
-  .path('auth')
-  .path(/(log-?in|sign-?in)/)
-  .check((ctx) => {
-    const { username, password } = ctx.req.body || {}
-    if (!username || !password) {
-      ctx.status = 400
-      ctx.message = 'Missing params'
-      return false
-    }
-  })
-  .action(async (ctx) => {
-    const { username, password } = ctx.req.body || {}
-    const profile = await ctx.col.findOne({ username })
-    if (!profile) {
-      ctx.status = 403
-      ctx.message = 'Invalid username'
-      return false
-    }
-    const password_hash = getPasswordHash(profile.salt, password)
-    if (password_hash !== profile.password_hash) {
-      ctx.status = 403
-      ctx.message = 'Invalid password'
-      return false
-    }
-    const token =
-      profile.token_expires - Date.now() < 0 ? nanoid(32) : profile.token
-    const token_expires = Date.now() + 7 * 24 * 60 * 60 * 1000
-    await ctx.col.updateOne(
-      { uuid: profile.uuid },
-      { $set: { token, token_expires } }
-    )
-
-    ctx.res.setHeader(
-      'set-cookie',
-      `${TOKEN_COOKIE_NAME}=${token}; expires=${new Date(
-        token_expires
-      ).toUTCString()}; path=/`
-    )
-
-    ctx.body = { token, profile: getUserModel(profile, true) }
-  })
-
 // Utils
 function getPasswordHash(salt: string, password: string) {
   return crypto
     .createHash('sha256')
     .update(`salt=${salt},password=${password}`)
     .digest('hex')
+}
+
+export default (req, res) => {
+  router.endpoint('/api/user')
+  router.beforeEach((ctx) => initCol(ctx, COLNAME.USER))
+
+  router
+    .addRoute()
+    .method('GET')
+    .path(['uuid', 'uid'], 'selector')
+    .path(/.+/, 'val')
+    .action(async (ctx) => {
+      const filter: Record<string, any> = {}
+      filter[ctx.params.selector] =
+        ctx.params.selector === 'uid'
+          ? parseInt(ctx.params.val)
+          : ctx.params.val
+
+      const user = await ctx.col.findOne(filter)
+
+      if (!user) {
+        ctx.status = 404
+        ctx.message = 'User not found'
+        ctx.body = {
+          filter,
+        }
+        return
+      }
+
+      ctx.status = 200
+      ctx.message = 'Get user by filter'
+      ctx.body = {
+        filter,
+        profile: getUserModel(user, true),
+      }
+    })
+
+  router
+    .addRoute()
+    .method('GET')
+    .path('auth')
+    .path('profile')
+    .check(checkLogin)
+    .action(async (ctx) => {
+      ctx.body = {
+        profile: getUserModel(ctx.user, true),
+      }
+    })
+
+  router
+    .addRoute()
+    .method('POST')
+    .path('auth')
+    .path('register')
+    .check((ctx) => {
+      const { username, password } = ctx.req.body || {}
+      if (!username || !password) {
+        ctx.status = 400
+        ctx.message = 'Missing params'
+        return false
+      }
+    })
+    .check((ctx) => {
+      const { username, password } = ctx.req.body || {}
+      if (username.length < 4 || password.length < 4) {
+        ctx.status = 400
+        ctx.message = 'Username or password too short'
+        return false
+      }
+    })
+    .check(async (ctx) => {
+      const { username } = ctx.req.body || {}
+      const already = await ctx.col.findOne({ username })
+      if (already) {
+        ctx.status = 409
+        ctx.message = 'Username has been taken'
+        return false
+      }
+    })
+    .action(async (ctx) => {
+      const { username, password } = ctx.req.body || {}
+      const salt = nanoid(32)
+      const insert: DbUserDoc = getUserModel({
+        username,
+        uuid: UUID(),
+        password_hash: getPasswordHash(salt, password),
+        salt,
+        created_at: new Date().toISOString(),
+      })
+
+      const dbRes = await ctx.col.insertOne(insert)
+
+      ctx.message = 'User created'
+      ctx.body = dbRes
+    })
+
+  router
+    .addRoute()
+    .method('POST')
+    .path('auth')
+    .path(/(log-?in|sign-?in)/)
+    .check((ctx) => {
+      const { username, password } = ctx.req.body || {}
+      if (!username || !password) {
+        ctx.status = 400
+        ctx.message = 'Missing params'
+        return false
+      }
+    })
+    .action(async (ctx) => {
+      const { username, password } = ctx.req.body || {}
+      const profile = await ctx.col.findOne({ username })
+      if (!profile) {
+        ctx.status = 403
+        ctx.message = 'Invalid username'
+        return false
+      }
+      const password_hash = getPasswordHash(profile.salt, password)
+      if (password_hash !== profile.password_hash) {
+        ctx.status = 403
+        ctx.message = 'Invalid password'
+        return false
+      }
+      const token =
+        profile.token_expires - Date.now() < 0 ? nanoid(32) : profile.token
+      const token_expires = Date.now() + 7 * 24 * 60 * 60 * 1000
+      await ctx.col.updateOne(
+        { uuid: profile.uuid },
+        { $set: { token, token_expires } }
+      )
+
+      ctx.res.setHeader(
+        'set-cookie',
+        `${TOKEN_COOKIE_NAME}=${token}; expires=${new Date(
+          token_expires
+        ).toUTCString()}; path=/`
+      )
+
+      ctx.body = { token, profile: getUserModel(profile, true) }
+    })
+
+  return router.init(req, res)
 }

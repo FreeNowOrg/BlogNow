@@ -1,15 +1,21 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { MongoClient } from 'mongodb'
-import { HandleResponse } from 'serverless-kit'
+import { HandeleRouter, HandleResponse } from 'serverless-kit'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
 
-export default async (req: VercelRequest, res: VercelResponse) => {
-  const http = new HandleResponse(req, res)
-  http.send(403, 'Invalid endpoint')
-}
+// Router
+const router = new HandeleRouter()
+// Connect db
+router.beforeEach(initMongo)
+// Close db
+router.afterEach(closeMongo)
+// Pre fetch userData
+router.beforeEach(initUserData)
+export { router }
+export default router.init
 
-export async function initMongo(ctx, colName?: string) {
+export async function initMongo(ctx) {
   const client = new MongoClient(
     getLocalConfig('MONGO_URI') || 'mongodb://localhost'
   )
@@ -17,11 +23,16 @@ export async function initMongo(ctx, colName?: string) {
   await client.connect()
   ctx.mongoClient = client
   ctx.db = db
-  if (colName) ctx.col = db.collection(colName)
+  console.log('DB Connected')
+}
+
+export function initCol(ctx, colName: string) {
+  ctx.col = ctx.db.collection(colName)
 }
 
 export async function closeMongo(ctx) {
   await ctx.mongoClient.close()
+  console.log('DB Closed')
 }
 
 export async function initUserData(ctx) {

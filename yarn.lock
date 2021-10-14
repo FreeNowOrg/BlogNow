@@ -127,6 +127,11 @@
     commander "^7.1.0"
     fs-extra "^9.1.0"
 
+"@emotion/hash@~0.8.0":
+  version "0.8.0"
+  resolved "https://registry.npmjs.org/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
+  integrity sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==
+
 "@intlify/core-base@9.1.9":
   version "9.1.9"
   resolved "https://registry.npmjs.org/@intlify/core-base/-/core-base-9.1.9.tgz#e4e8c951010728e4af3a0d13d74cf3f9e7add7f6"
@@ -372,6 +377,11 @@
   resolved "https://registry.npmjs.org/@types/node/-/node-16.10.5.tgz#7fe4123b061753f1a58a6cd077ff0bb069ee752d"
   integrity sha512-9iI3OOlkyOjLQQ9s+itIJNMRepDhB/96jW3fqduJ2FTPQj1dJjw6Q3QCImF9FE1wmdBs5QSun4FjDSFS8d8JLw==
 
+"@types/node@~14.14.31":
+  version "14.14.45"
+  resolved "https://registry.npmjs.org/@types/node/-/node-14.14.45.tgz#ec2dfb5566ff814d061aef7e141575aedba245cf"
+  integrity sha512-DssMqTV9UnnoxDWu959sDLZzfvqCF0qDNRjaWeYSui9xkFe61kKo4l1TWNTQONpuXEm+gLMRvdlzvNHBamzmEw==
+
 "@types/nprogress@^0.2.0":
   version "0.2.0"
   resolved "https://registry.npmjs.org/@types/nprogress/-/nprogress-0.2.0.tgz#86c593682d4199212a0509cc3c4d562bbbd6e45f"
@@ -447,6 +457,18 @@
   version "1.2.7"
   resolved "https://registry.npmjs.org/@vercel/ruby/-/ruby-1.2.7.tgz#516d1c45f4961619338f3d3bb518ee43b863a5da"
   integrity sha512-ZG2VxMHHSKocL57UWsfNc9UsblwYGm55/ujqGIBnkNUURnRgtUrwtWlEts1eJ4VHD754Lc/0/R1pfJXoN5SbRw==
+
+"@vicons/material@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.npmjs.org/@vicons/material/-/material-0.11.0.tgz#2c209121f3ff6a46450f4968397df6c3008df8d1"
+  integrity sha512-ZQVs6Z5AjSSKqeN4GrG+5fRbi4rbvLwio06Nsjs5NGDuHCB57QHN2rwkooxeoRUbiFT4GCCKatsoWbjqE6BSZg==
+
+"@vicons/utils@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@vicons/utils/-/utils-0.1.4.tgz#accea9226ff0078ebd80d00dcb63ef5e74b210ff"
+  integrity sha512-OHI19qVNN6i+uPQ+Y3f2s0dUxwsYnOCcKBW7XOU4yXXO1aU3ZoKpblCc3+4N0qmgoJs5rWKRAaMisipqEXJwAg==
+  dependencies:
+    "@xicons/utils" "^0.1.4"
 
 "@vitejs/plugin-vue@^1.9.3":
   version "1.9.3"
@@ -683,6 +705,13 @@
     semver "^6.0.0"
     toml "^3.0.0"
     upath "^1.1.0"
+
+"@xicons/utils@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@xicons/utils/-/utils-0.1.4.tgz#cece50613b34d4b4c71e73bb0be92981067e11e1"
+  integrity sha512-uXxKDLz9abr80yJC05XSTq6wlyFcdW+N/1IYJkeHjzzXVc4VQ0sEYMoMMTjAH7HQBOyOkzOB4pf5NGF72lwa8Q==
+  dependencies:
+    css-render "^0.13.2"
 
 acorn@^7.1.1:
   version "7.4.1"
@@ -1168,6 +1197,15 @@ crypto-random-string@^2.0.0:
   resolved "https://registry.npmjs.org/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
 
+css-render@^0.13.2:
+  version "0.13.9"
+  resolved "https://registry.npmjs.org/css-render/-/css-render-0.13.9.tgz#56f28c180a83a10ec610a12a9ad9fec087ac9dc1"
+  integrity sha512-n3C4ZH59rveBrUlAD7n0Ze9/gUMKa4dlH1C9CWKpGcIHR/xRcIVXzBGy1iw8WWq2ySmn2/ZqOpySQNAK5Pb6sw==
+  dependencies:
+    "@emotion/hash" "~0.8.0"
+    "@types/node" "~14.14.31"
+    csstype "~3.0.5"
+
 cssfilter@0.0.10:
   version "0.0.10"
   resolved "https://registry.npmjs.org/cssfilter/-/cssfilter-0.0.10.tgz#c6d2672632a2e5c83e013e6864a42ce8defd20ae"
@@ -1177,6 +1215,11 @@ csstype@^2.6.8:
   version "2.6.18"
   resolved "https://registry.npmjs.org/csstype/-/csstype-2.6.18.tgz#980a8b53085f34af313410af064f2bd241784218"
   integrity sha512-RSU6Hyeg14am3Ah4VZEmeX8H7kLwEEirXe6aU2IPfKNvhXwTflK5HQRDNI0ypQXoqmm+QPyG2IaPuQE5zMwSIQ==
+
+csstype@~3.0.5:
+  version "3.0.9"
+  resolved "https://registry.npmjs.org/csstype/-/csstype-3.0.9.tgz#6410af31b26bd0520933d02cbc64fce9ce3fbf0b"
+  integrity sha512-rpw6JPxK6Rfg1zLOYCSwle2GFOOsnjmDYDaBwEcwoOg4qlsIVCN789VkBZDJAGi4T07gI4YSutR43t9Zz4Lzuw==
 
 d3-array@1, d3-array@^1.1.1, d3-array@^1.2.0:
   version "1.2.4"
@@ -3460,10 +3503,10 @@ semver@^6.0.0, semver@^6.2.0, semver@^6.3.0:
   resolved "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
 
-serverless-kit@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/serverless-kit/-/serverless-kit-0.1.4.tgz#01565f07d80b533bb621f38d09e271c78f4b285e"
-  integrity sha512-SJRrW28XOsjQWbiGNmoFFc5kiUYLbpo41vTi3KKYBiUNSXKM3AWk/gllZLf50iHDtkfrAzJisJB1UUlsoqsmTg==
+serverless-kit@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.npmjs.org/serverless-kit/-/serverless-kit-0.1.6.tgz#27a726297a1e0225c15dda849931d3edd908a3d5"
+  integrity sha512-N3NmaCA1LWEVtweKkKqYfuolEBeT1BjMWWyROYf55m/K+7VNPE83FPa2YvZmIn5o228PnmSxzCKPt62GWhjlaw==
   dependencies:
     axios "^0.22.0"
     mongodb "^4.1.2"

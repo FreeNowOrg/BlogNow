@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@kangc/v-md-editor": "^2.3.10",
+    "@vicons/material": "^0.11.0",
+    "@vicons/utils": "^0.1.4",
     "axios": "^0.22.0",
     "highlight.js": "^11.2.0",
     "js-cookie": "^3.0.1",
@@ -24,7 +26,7 @@
     "nprogress": "^0.2.0",
     "pug": "^3.0.2",
     "sass": "^1.42.1",
-    "serverless-kit": "^0.1.4",
+    "serverless-kit": "^0.1.6",
     "tslib": "^2.3.1",
     "uuid": "^8.3.2",
     "vue": "^3.2.20",

@@ -10,12 +10,16 @@
     "prefix": "vercel-node",
     "description": "Init serverless module",
     "body": [
-      "import { VercelRequest, VercelResponse } from '@vercel/node'",
-      "import { HandleResponse } from 'serverless-kit'",
+      "import { router } from './utils'",
+      "import {} from './config'",
       "",
-      "export default async (req: VercelRequest, res: VercelResponse) => {",
-      "  const http = new HandleResponse(req, res)",
+      "export default (req, res) => {",
+      "  router.endpoint('/api')",
+      "  // router.beforeEach((ctx) => initCol(ctx, ''))",
+      "",
       "  $0",
+      "",
+      "  return router.init(req, res)",
       "}"
     ]
   }
