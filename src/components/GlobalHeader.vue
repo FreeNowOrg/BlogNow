@@ -18,9 +18,8 @@ nav#global-header.flex.gap-1
         .avatar
           img(src='https://i.loli.net/2021/03/26/QPOtzh1XbF2eujd.png')
         .angle
-          //- icon
-          //-   angle-down
-          | ›
+          icon
+            arrow-drop-down-filled
       transition(
         name='fade',
         mode='out-in',
@@ -66,6 +65,7 @@ nav#global-header.flex.gap-1
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { userData } from './userData'
+import { ArrowDropDownFilled } from '@vicons/material'
 
 const userDropdownShow = ref(false)
 const router = useRouter()
@@ -151,11 +151,11 @@ onMounted(() => {
             width: 2rem
             height: 2rem
             box-shadow: 0 0 0 2px #fff
-        // .angle svg
-        //   transition: all 0.12s ease
-        .angle
+        .angle svg
           transition: all 0.12s ease
-          transform: rotateZ(90deg)
+        // .angle
+        //   transition: all 0.12s ease
+        //   transform: rotateZ(90deg)
         &:hover
           .avatar
             img
@@ -164,10 +164,10 @@ onMounted(() => {
           .avatar
             img
               box-shadow: 0 0 0 2px var(--theme-accent-color)
-          // .angle svg
-          //   transform: rotateZ(180deg)
-          .angle
-            transform: rotateZ(270deg)
+          .angle svg
+            transform: rotateZ(180deg)
+          // .angle
+          //   transform: rotateZ(270deg)
 
       .dropdown-content
         position: absolute

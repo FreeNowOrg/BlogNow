@@ -12,6 +12,10 @@ app.use(router)
 // Style
 import './styles/index.sass'
 
+// Icon
+import { Icon } from '@vicons/utils'
+app.component('Icon', Icon)
+
 // LazyLoad
 import Lazyload from './components/Lazyload.vue'
 app.component('Lazyload', Lazyload)

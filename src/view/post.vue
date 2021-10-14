@@ -33,13 +33,20 @@
 
         #post-tools-container
           #post-tools
+            //- @note Please use the RegExp constructor instead of literal
             router-link.plain(
-              :to='{ name: "post-edit", params: { uuid: post?.uuid || $route.params.uuid } }'
-            ) E
+              :to='`${$route.path.replace(new RegExp("/$"), "")}/edit`'
+            )
+              icon
+                edit-filled
               .tooltip {{ userData && userData.authority >= 2 ? "Edit this post" : "View source" }}
-            button M
+            button
+              icon
+                menu-filled
               .tooltip Toggle menu
-            button D
+            button
+              icon
+                delete-filled
               .tooltip Delete this post
       global-aside
         template(#top)
@@ -52,8 +59,9 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { EditFilled, MenuFilled, DeleteFilled } from '@vicons/material'
 import { userData } from '../components/userData'
 import GlobalAside from '../components/GlobalAside.vue'
 import { setTitle } from '../utils/setTitle'
