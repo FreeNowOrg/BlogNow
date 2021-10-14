@@ -30,7 +30,11 @@
           input.site-style(v-model='username')
         label
           strong Password
-          input.site-style(v-model='password', type='password')
+          input.site-style(
+            v-model='password',
+            type='password',
+            autocomplete='current-password'
+            )
         .btn
           button(@click.prevent='handleLogin') Login
 
@@ -88,6 +92,8 @@ function handleLogout() {
   window.Cookies.remove('BLOG_NOW_TOKEN')
   location.reload()
 }
+
+function handleRegister() { }
 
 onMounted(() => {
   setTitle('Authorization')
