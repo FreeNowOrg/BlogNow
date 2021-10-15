@@ -6,7 +6,6 @@
       .bread-crumb(v-if='uuid')
         router-link(:to='{ name: "post", params: { uuid } }') ← back to post
       .edit-area(:class='{ "loading-cover": loading }')
-
         //- title
         .title-area
           label

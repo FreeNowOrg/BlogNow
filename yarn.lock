@@ -725,6 +725,11 @@ agent-base@6:
   dependencies:
     debug "4"
 
+animated-scroll-to@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/animated-scroll-to/-/animated-scroll-to-2.2.0.tgz#0aea20d4d800e3e8bfd1504041091276f9593360"
+  integrity sha512-VVhwrii9tMXwP1GlQacLplUrh/0x2IbU/JxTUMBvzam6lJpJ9jMCw8PKHOvqMJ52vYmBDfcf9lNDuSeoWCD/mw==
+
 ansi-align@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npmjs.org/ansi-align/-/ansi-align-3.0.1.tgz#0cdf12e111ace773a86e9a1fad1225c43cb19a59"
@@ -3503,10 +3508,10 @@ semver@^6.0.0, semver@^6.2.0, semver@^6.3.0:
   resolved "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
 
-serverless-kit@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.npmjs.org/serverless-kit/-/serverless-kit-0.1.6.tgz#27a726297a1e0225c15dda849931d3edd908a3d5"
-  integrity sha512-N3NmaCA1LWEVtweKkKqYfuolEBeT1BjMWWyROYf55m/K+7VNPE83FPa2YvZmIn5o228PnmSxzCKPt62GWhjlaw==
+serverless-kit@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.npmjs.org/serverless-kit/-/serverless-kit-0.2.3.tgz#da04b8e86e2f989df729b118f705aaf5e934f387"
+  integrity sha512-R94B0IJqa0U5hEDsVgSdLDO06H23FwJ/hoFQnnJ0iJtcLKYSiw1ZCNZaSfBSazROfBAzUr5sS43igV0PlBjvpQ==
   dependencies:
     axios "^0.22.0"
     mongodb "^4.1.2"
@@ -3804,7 +3809,7 @@ typescript@4.3.4:
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.3.4.tgz#3f85b986945bcf31071decdd96cf8bfa65f9dcbc"
   integrity sha512-uauPG7XZn9F/mo+7MrsRjyvbxFpzemRjKEZXS4AK83oP2KKOJPvb+9cO/gmnv8arWZvhnjVOXz7B49m1l0e9Ew==
 
-typescript@^4.0.3, typescript@^4.4.3:
+typescript@^4.0.3, typescript@^4.4.4:
   version "4.4.4"
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.4.4.tgz#2cd01a1a1f160704d3101fd5a58ff0f9fcb8030c"
   integrity sha512-DqGhF5IKoBl8WNf8C1gu8q0xZSInh9j1kJJMqT3a94w1JzVaBU4EXOSMrz9yDqMT0xt3selp83fuFMQ0uzv6qA==

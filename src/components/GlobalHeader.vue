@@ -19,7 +19,7 @@ nav#global-header.flex.gap-1
           img(src='https://i.loli.net/2021/03/26/QPOtzh1XbF2eujd.png')
         .angle
           icon
-            arrow-drop-down-filled
+            keyboard-arrow-down-round
       transition(
         name='fade',
         mode='out-in',
@@ -65,7 +65,7 @@ nav#global-header.flex.gap-1
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { userData } from './userData'
-import { ArrowDropDownFilled } from '@vicons/material'
+import { KeyboardArrowDownRound } from '@vicons/material'
 
 const userDropdownShow = ref(false)
 const router = useRouter()
@@ -230,7 +230,9 @@ onMounted(() => {
   .global-header
     .nav-links > .item
       display: none
+</style>
 
+<style lang="sass">
 // Animate
 .fadeInUp
   animation: fadeInUp 0.24s ease

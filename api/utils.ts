@@ -1,11 +1,58 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import { MongoClient } from 'mongodb'
-import { HandeleRouter, HandleResponse } from 'serverless-kit'
+import { Collection, Db, MongoClient } from 'mongodb'
+import {
+  HandleRouter,
+  HandleResponse,
+  Route,
+  RouteContextDefaults,
+} from 'serverless-kit'
+import { DbUserDoc } from '../src/types/Database'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
 
+// HandleRouter.prototype.setCollection = function (colName) {
+//   console.log('setCol')
+//   this.beforeEach((ctx) => {
+//     ctx.col = ctx.db.collection(colName)
+//   })
+//   return this
+// }
+
+// Route.prototype.checkAuth = function (required) {
+//   this.check((ctx) => {
+//     if (ctx.user.authority < required) {
+//       ctx.status = 403
+//       ctx.message = 'Permission denied'
+//       ctx.body = {
+//         authcheck: {
+//           required,
+//           recived: ctx.user.authority,
+//         },
+//       }
+//       return false
+//     }
+//   })
+//   return this
+// }
+
+// Route.prototype.checkLogin = function () {
+//   this.check((ctx) => {
+//     if (!ctx.user.uuid || ctx.user.uid < 0) {
+//       ctx.status = 401
+//       ctx.message = 'Please login'
+//       return false
+//     }
+//   })
+//   return this
+// }
+
 // Router
-const router = new HandeleRouter()
+const router = new HandleRouter<{
+  mongoClient: MongoClient
+  db: Db
+  col?: Collection
+  user: DbUserDoc
+}>()
 // Connect db
 router.beforeEach(initMongo)
 // Close db
@@ -13,7 +60,9 @@ router.afterEach(closeMongo)
 // Pre fetch userData
 router.beforeEach(initUserData)
 export { router }
-export default router.init
+export default (req, res) => {
+  return router.init(req, res)
+}
 
 export async function initMongo(ctx) {
   const client = new MongoClient(
