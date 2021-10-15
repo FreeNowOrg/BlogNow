@@ -1,8 +1,9 @@
+import { VercelRequest, VercelResponse } from '@vercel/node'
 import { COLNAME } from './config'
 import { getPostModel } from './post'
 import { router } from './utils'
 
-export default (req, res) => {
+export default (req: VercelRequest, res: VercelResponse) => {
   router.endpoint('/api')
 
   // GET /site/meta

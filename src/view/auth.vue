@@ -34,7 +34,7 @@
             v-model='password',
             type='password',
             autocomplete='current-password'
-            )
+          )
         .btn
           button(@click.prevent='handleLogin') Login
 
@@ -51,8 +51,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { userLogin, userData } from '../components/userData'
-import { setTitle } from '../utils/setTitle'
+import { setTitle, userLogin, userData } from '../utils'
 import { useRoute, useRouter } from 'vue-router'
 
 const [route, router] = [useRoute(), useRouter()]
@@ -93,7 +92,7 @@ function handleLogout() {
   location.reload()
 }
 
-function handleRegister() { }
+function handleRegister() {}
 
 onMounted(() => {
   setTitle('Authorization')

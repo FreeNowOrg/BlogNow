@@ -55,10 +55,7 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import slugify from 'slugify'
-import { getErrMsg } from '../utils/getErrMsg'
-import { userData } from '../components/userData'
-import { setTitle } from '../utils/setTitle'
-import { getPost } from '../utils'
+import { getErrMsg, getPost, setTitle, userData } from '../utils'
 import { API_BASE } from '../config'
 
 const route = useRoute()

@@ -64,7 +64,7 @@ nav#global-header.flex.gap-1
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { userData } from './userData'
+import { userData } from '../utils'
 import { KeyboardArrowDownRound } from '@vicons/material'
 
 const userDropdownShow = ref(false)

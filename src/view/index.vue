@@ -35,8 +35,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { userData } from '../components/userData'
-import { setTitle, getRecentPosts, siteCache } from '../utils'
+import { setTitle, getRecentPosts } from '../utils'
 import GlobalAside from '../components/GlobalAside.vue'
 
 const recents = ref<any[]>([])

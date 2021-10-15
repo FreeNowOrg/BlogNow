@@ -4,6 +4,7 @@ import { checkLogin, router, sortKeys, initCol } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
+import { VercelRequest, VercelResponse } from '@vercel/node'
 
 /**
  * @desc authority ```
@@ -75,9 +76,9 @@ function getPasswordHash(salt: string, password: string) {
     .digest('hex')
 }
 
-export default (req, res) => {
+export default (req: VercelRequest, res: VercelResponse) => {
   router.endpoint('/api/user')
-  router.beforeEach((ctx) => initCol(ctx, COLNAME.USER))
+  router.setCollection(COLNAME.USER)
 
   router
     .addRoute()
@@ -115,7 +116,7 @@ export default (req, res) => {
     .method('GET')
     .path('auth')
     .path('profile')
-    .check(checkLogin)
+    .checkLogin()
     .action(async (ctx) => {
       ctx.body = {
         profile: getUserModel(ctx.user, true),

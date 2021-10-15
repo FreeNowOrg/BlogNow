@@ -116,10 +116,8 @@ import {
   PostAddFilled,
 } from '@vicons/material'
 import scrollTo from 'animated-scroll-to'
-import { userData } from '../components/userData'
 import GlobalAside from '../components/GlobalAside.vue'
-import { setTitle } from '../utils/setTitle'
-import { getPost } from '../utils'
+import { getPost, setTitle, userData } from '../utils'
 import type { DbPostDoc } from '../types/Database'
 
 const route = useRoute()

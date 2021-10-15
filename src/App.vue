@@ -12,12 +12,20 @@ import { onMounted } from 'vue'
 import GlobalHeader from './components/GlobalHeader.vue'
 import GlobalFooter from './components/GlobalFooter.vue'
 
-import { userData, initUserData } from './components/userData'
+import {
+  userData,
+  initUserData,
+  siteMeta,
+  getSiteMeta,
+} from './utils'
 
 onMounted(() => {
   if (!userData.value) {
     console.log('init user')
-    initUserData().then((i) => console.info(i))
+    initUserData().then((i) => console.info('Current user', i))
+  }
+  if (!siteMeta.value) {
+    getSiteMeta().then((i) => console.info('Site stats', i))
   }
 })
 </script>

@@ -12,13 +12,13 @@ aside#global-aside
     .stats.flex.gap-1
       .flex-1
         .key Posts
-        .val -
+        .val {{ siteMeta?.total_posts || "-" }}
       .flex-1
         .key Tags
-        .val -
+        .val {{ siteMeta?.total_tags || "-" }}
       .flex-1
         .key Users
-        .val -
+        .val {{ siteMeta?.total_users || "-" }}
   .card
     h4 Announcement
     p Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -28,6 +28,7 @@ aside#global-aside
 
 <script setup lang="ts">
 import {} from 'vue'
+import { siteMeta } from '../utils'
 </script>
 
 <style scoped lang="sass">

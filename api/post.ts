@@ -3,6 +3,7 @@ import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
 import { checkAuth, checkLogin, initCol, router, sortKeys } from './utils'
 import slugify from 'slugify'
+import { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
   uuid: '',
@@ -25,9 +26,9 @@ export function getPostModel(payload: Partial<DbPostDoc>) {
   return post
 }
 
-export default (req, res) => {
+export default (req: VercelRequest, res: VercelResponse) => {
   router.endpoint('/api/post')
-  router.beforeEach((ctx) => initCol(ctx, COLNAME.POST))
+  router.setCollection(COLNAME.POST)
 
   // GET /post/:selector/:scope
   router
@@ -59,7 +60,10 @@ export default (req, res) => {
     .method('GET')
     .path('list')
     .path(/recents?/)
-    .check((ctx) => {
+    .check<{
+      offset: number
+      limit: number
+    }>((ctx) => {
       ctx.offset = parseInt((ctx.req.query.offset as string) || '0')
       ctx.limit = Math.min(
         25,
@@ -93,8 +97,8 @@ export default (req, res) => {
     .addRoute()
     .method('POST')
     .path(['create', 'new'])
-    .check(checkLogin)
-    .check((ctx) => checkAuth(2, ctx))
+    .checkLogin()
+    .checkAuth(2)
     .check((ctx) => {
       ctx.req.body = ctx.req.body || {}
       const { title, content } = ctx.req.body
@@ -150,7 +154,7 @@ export default (req, res) => {
     .method('PATCH')
     .path(['uuid'], 'filterKey')
     .path(/.+/, 'filterVal')
-    .check(checkLogin)
+    .checkLogin()
     // Validate body
     .check((ctx) => {
       ctx.req.body = ctx.req.body || {}
@@ -162,10 +166,12 @@ export default (req, res) => {
       }
     })
     // Find target post
-    .check(async (ctx) => {
+    .check<{
+      post: DbPostDoc
+    }>(async (ctx) => {
       const filter = {}
       filter[ctx.params.filterKey] = ctx.params.filterVal
-      ctx.post = await ctx.col.findOne(filter)
+      ctx.post = await ctx.col.findOne(filter) as DbPostDoc
 
       if (!ctx.post) {
         ctx.status = 404

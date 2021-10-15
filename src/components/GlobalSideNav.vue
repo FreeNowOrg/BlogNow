@@ -1,20 +1,20 @@
 <template lang="pug">
-aside#global-side-nav(:class="{ 'is-hidden': isHidden }")
-  .backdrop(@click="isHidden = true")
+aside#global-side-nav(:class='{ "is-hidden": isHidden }')
+  .backdrop(@click='isHidden = true')
   .inner
     #global-side-nav-top
     #global-side-nav-bottom
       ul#global-side-nav-items
-        li(v-for="item in sidebarItems") {{ item }}
+        li(v-for='item in sidebarItems') {{ item }}
 </template>
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { userData } from './userData'
+// import { userData } from '../utils'
 const router = useRouter()
 const isHidden = ref(true) // maybe need to move outside
 const sidebarItems = ref<any[]>([])
-router.afterEach(() => isHidden.value = true)
+router.afterEach(() => (isHidden.value = true))
 onMounted(() => {
   document.addEventListener('keypress', ({ key }) => {
     if (key == 'Escape') isHidden.value = true
@@ -23,8 +23,7 @@ onMounted(() => {
 watch(isHidden, (val) => {
   if (!val) {
     document.body.classList.add('global-side-nav-show', 'lock-scroll')
-  }
-  else {
+  } else {
     document.body.classList.remove('global-side-nav-show', 'lock-scroll')
   }
 })

@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs'
 import { initCol, router } from './utils'
+import { VercelRequest, VercelResponse } from '@vercel/node'
 
 router.endpoint('/api/config')
 
@@ -27,9 +28,9 @@ export function getLocalConfig(key: string) {
   return process.env[key.toUpperCase()] || fileJSON[key] || null
 }
 
-export default (req, res) => {
+export default (req: VercelRequest, res: VercelResponse) => {
   router.endpoint('/api/config')
-  router.beforeEach((ctx) => initCol(ctx, COLNAME.CONFIG))
+  router.setCollection(COLNAME.CONFIG)
 
   return router.init(req, res)
 }
