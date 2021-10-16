@@ -29,7 +29,7 @@ nav#global-header.flex.gap-1
         .dropdown-content(v-show='userDropdownShow')
           ul
             //- notLogIn
-            li(v-if='!userData')
+            li(v-if='!isLoggedIn')
               .nav-user-card
                 .top
                   .banner-bg
@@ -39,7 +39,7 @@ nav#global-header.flex.gap-1
                   .uid Please login~
 
             //- isLogedIn
-            li(v-if='userData')
+            li(v-if='isLoggedIn')
               .nav-user-card
                 .top
                   .banner-bg
@@ -60,7 +60,7 @@ nav#global-header.flex.gap-1
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { userData } from '../utils'
+import { userData, isLoggedIn } from '../utils'
 import { KeyboardArrowDownRound } from '@vicons/material'
 
 const userDropdownShow = ref(false)

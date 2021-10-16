@@ -1,10 +1,13 @@
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { getErrMsg, globalInitErrors } from '.'
 import { API_BASE } from '../config'
 import { DbUserDoc } from '../types/Database'
 
-export const userData = ref<DbUserDoc | null>(null)
+export const userData = ref({} as DbUserDoc)
+export const isLoggedIn = computed<boolean>(
+  () => !!(userData.value && userData.value.uid > 0 && userData.value.uuid)
+)
 
 export async function userLogin({
   username,

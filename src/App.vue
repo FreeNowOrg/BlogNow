@@ -2,7 +2,9 @@
 #full-container
   n-progress
   global-header
-  #init-view(v-if='globalInitErrors.length || !userData || !siteMeta')
+  #init-view(
+    v-if='SITE_ENV !== "dev" && (globalInitErrors.length || !userData || !siteMeta)'
+  )
     global-placeholder
   #router-view(v-else)
     router-view
@@ -11,6 +13,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { SITE_ENV } from './config'
 
 import GlobalHeader from './components/GlobalHeader.vue'
 import GlobalFooter from './components/GlobalFooter.vue'

@@ -1,5 +1,5 @@
 <template lang="pug">
-#post-edit-container
+#edit-post-container
   main#edit-main
     .body-inner
       h1 {{ isCreate ? "Create new post" : "Edit post" }}
@@ -52,10 +52,10 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import slugify from 'slugify'
-import { getErrMsg, getPost, setTitle, userData } from '../utils'
+import { getErrMsg, getPost, isLoggedIn, setTitle, userData } from '../utils'
 import { API_BASE } from '../config'
 
 const route = useRoute()
@@ -69,7 +69,7 @@ const slug = ref('')
 const loading = ref(false)
 const error = ref('')
 
-const canEdit = ref(userData.value && userData.value.authority >= 2)
+const canEdit = computed(() => isLoggedIn && userData.value.authority >= 2)
 
 function fetchPost() {
   loading.value = true
@@ -157,7 +157,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="sass">
-#post-edit-container
+#edit-post-container
   margin-top: calc(60px + 1rem)
 .edit-area
   > div

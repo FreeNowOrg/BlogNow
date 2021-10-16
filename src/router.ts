@@ -50,13 +50,13 @@ router.addRoute({
 // Post edit
 router.addRoute({
   path: '/post/:uuid/edit',
-  name: 'post-edit',
-  component: () => import('./view/post-edit.vue'),
+  name: 'edit-post',
+  component: () => import('./view/edit-post.vue'),
 })
 router.addRoute({
   path: '/post/new',
-  name: 'post-create',
-  component: () => import('./view/post-edit.vue'),
+  name: 'edit-post-create',
+  component: () => import('./view/edit-post.vue'),
 })
 
 // User

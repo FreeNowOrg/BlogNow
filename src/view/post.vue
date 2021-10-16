@@ -63,7 +63,7 @@
           #post-tools(v-if='post')
             //- @note Please use the RegExp constructor instead of literal
             router-link.plain.tool-btn(
-              :to='{ name: "post-edit", params: { uuid: post.uuid } }'
+              :to='{ name: "edit-post", params: { uuid: post.uuid } }'
             )
               icon
                 edit-filled
@@ -105,8 +105,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   DeleteFilled,
   EditFilled,
@@ -121,29 +121,36 @@ import { getPost, setTitle, userData } from '../utils'
 import type { DbPostDoc } from '../types/Database'
 
 const route = useRoute()
+const router = useRouter()
 
-let filter = ref({} as { key: 'uuid' | 'pid' | 'slug'; val: string })
-if (route.params.uuid) {
-  filter.value.key = 'uuid'
-  filter.value.val = route.params.uuid as string
-} else if (route.params.pid) {
-  filter.value.key = 'pid'
-  filter.value.val = route.params.pid as string
-} else if (route.params.slug) {
-  filter.value.key = 'slug'
-  filter.value.val = route.params.slug as string
-}
+let filter = computed(() => {
+  let [key, val] = ['', '']
+  if (route.params.uuid) {
+    key = 'uuid'
+    val = route.params.uuid as string
+  } else if (route.params.pid) {
+    key = 'pid'
+    val = route.params.pid as string
+  } else if (route.params.slug) {
+    key = 'slug'
+    val = route.params.slug as string
+  }
+  return { key, val } as { key: 'uuid' | 'pid' | 'slug'; val: string }
+})
 
 const post = ref<DbPostDoc | null>(null)
-const bgImg = ref(
-  `url(https://api.daihan.top/api/acg?_random=${
-    post.value?.uuid || route.params.uuid
-  })`
+const bgImg = computed(
+  () =>
+    `url(https://api.daihan.top/api/acg?_random=${
+      post.value?.uuid || route.params.uuid
+    })`
 )
 const notFound = ref(false)
 const menuShow = ref(false)
 
 function init() {
+  post.value = null
+  notFound.value = false
   getPost(filter.value.key, filter.value.val, !!route.query.noCache).then(
     (data) => {
       setTitle(data.title)
@@ -182,6 +189,13 @@ function handleAnchorClick(line: string) {
   })
   menuShow.value = false
 }
+
+router.afterEach((to, from) => {
+  console.info({ to, from })
+  if ((to.name as string)?.startsWith('post') && to !== from) {
+    init()
+  }
+})
 
 onMounted(() => {
   init()

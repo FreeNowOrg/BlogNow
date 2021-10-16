@@ -2,7 +2,7 @@
 #global-init-container
   #on-loading.body-inner.align-center(v-if='!globalInitErrors.length')
     placeholder
-    h1 The blog is initializing
+    h1 Application is initializing
     .info-area
       p.user
         .is-loading(v-if='!userData') Init user data{{ dot }}
