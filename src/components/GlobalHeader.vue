@@ -58,15 +58,18 @@ nav#global-header.flex.gap-1
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { userData } from '../utils'
 import { KeyboardArrowDownRound } from '@vicons/material'
 
 const userDropdownShow = ref(false)
 const router = useRouter()
-const avatar = ref(
-  `${userData?.value || 'https://gravatar.loli.net/avatar/'}?d=identicon`
+const avatar = computed(
+  () =>
+    `${
+      userData.value?.avatar || 'https://gravatar.loli.net/avatar/'
+    }?d=identicon`
 )
 
 router.beforeEach(() => {
