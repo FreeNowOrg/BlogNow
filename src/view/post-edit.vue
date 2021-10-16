@@ -47,16 +47,12 @@
         .title Submit faild
           a.pointer(style='float: right', @click='error = ""') ×
         p {{ error }}
-      button(
-        v-if='canEdit',
-        @click='handleSubmit',
-        :disabled='loading',
-      ) {{ isCreate ? "Publish" : "Update" }}
+      button(v-if='canEdit', @click='handleSubmit', :disabled='loading') {{ isCreate ? "Publish" : "Update" }}
 </template>
 
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import slugify from 'slugify'
 import { getErrMsg, getPost, setTitle, userData } from '../utils'
@@ -150,13 +146,16 @@ function handleUpdate() {
     })
 }
 
+watch(userData, () => {
+  if (userData.value && userData.value.authority >= 2) {
+    canEdit.value = true
+  }
+})
+
 onMounted(() => {
   console.log({ isCreate })
   if (!isCreate) {
     fetchPost()
-  }
-  if (userData.value && userData.value.authority >= 2) {
-    canEdit.value = true
   }
   setTitle('Edit post')
 })
