@@ -36,7 +36,7 @@
             )
 
     .btn-area
-      .info.warn(v-if='!userData || userData.authority < 2')
+      .info.warn(v-if='!canEdit')
         .title {{ userData ? "No permision" : "Authority error" }}
         p(v-if='!userData')
           | Please
@@ -47,7 +47,11 @@
         .title Submit faild
           a.pointer(style='float: right', @click='error = ""') ×
         p {{ error }}
-      button(@click='handleSubmit', :disabled='loading') {{ isCreate ? "Publish" : "Update" }}
+      button(
+        v-if='canEdit',
+        @click='handleSubmit',
+        :disabled='loading',
+      ) {{ isCreate ? "Publish" : "Update" }}
 </template>
 
 <script setup lang="ts">
@@ -68,6 +72,7 @@ const content = ref('')
 const slug = ref('')
 const loading = ref(false)
 const error = ref('')
+const canEdit = ref(false)
 
 function fetchPost() {
   loading.value = true
@@ -149,6 +154,9 @@ onMounted(() => {
   console.log({ isCreate })
   if (!isCreate) {
     fetchPost()
+  }
+  if (userData.value && userData.value.authority >= 2) {
+    canEdit.value = true
   }
   setTitle('Edit post')
 })
