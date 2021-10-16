@@ -36,7 +36,7 @@
             )
 
     .btn-area
-      .info.warn(v-if='!canEdit()')
+      .info.warn(v-if='!canEdit')
         .title {{ userData ? "No permision" : "Authority error" }}
         p(v-if='!userData')
           | Please
@@ -47,7 +47,7 @@
         .title Submit faild
           a.pointer(style='float: right', @click='error = ""') ×
         p {{ error }}
-      button(v-if='canEdit()', @click='handleSubmit', :disabled='loading') {{ isCreate ? "Publish" : "Update" }}
+      button(v-if='canEdit', @click='handleSubmit', :disabled='loading') {{ isCreate ? "Publish" : "Update" }}
 </template>
 
 <script setup lang="ts">
