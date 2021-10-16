@@ -34,7 +34,7 @@ export const AUTHORITY_DEFAULTS: Record<DbAuthorityKeys, number> = {
 export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
 export const USERDATA_DEFAULTS: DbUserDoc = {
   authority: 0,
-  // avatar: '',
+  avatar: '',
   created_at: '',
   gender: 'other',
   nickname: '',
@@ -126,7 +126,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('GET')
-    .path('users')
+    .endpoint('/api/users')
     .path(['uuid', 'uid'], 'selector')
     .path(/.+/, 'rawList')
     .action(async (ctx) => {
@@ -144,7 +144,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
             ctx.params.selector === 'uid' ? parseInt(i) : i,
         })),
       }
-      const users = await ctx.col.find(find)
+      const users = await ctx.col.find(find).toArray()
       ctx.message = 'Get users'
       ctx.body = {
         users: users.map((i) => getUserModel(i, true)),

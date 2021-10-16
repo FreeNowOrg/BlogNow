@@ -78,7 +78,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   return router.init(req, res)
 }
 
-export async function initMongo(ctx) {
+export async function initMongo(ctx: any) {
   const client = new MongoClient(
     getLocalConfig('MONGO_URI') || 'mongodb://localhost'
   )
@@ -99,7 +99,7 @@ export function initCol(ctx: any, colName: string) {
   ctx.col = ctx.db.collection(colName)
 }
 
-export async function closeMongo(ctx) {
+export async function closeMongo(ctx: any) {
   await ctx.mongoClient.close()
 }
 
@@ -113,7 +113,7 @@ export async function initUserData(ctx: any) {
   ctx.user = getUserModel(user)
 }
 
-export async function checkLogin(ctx) {
+export async function checkLogin(ctx: any) {
   if (!ctx.user.uuid || ctx.user.uid < 0) {
     ctx.status = 401
     ctx.message = 'Please login'
@@ -121,7 +121,7 @@ export async function checkLogin(ctx) {
   }
 }
 
-export function checkAuth(required: number, ctx) {
+export function checkAuth(required: number, ctx: any) {
   if (ctx.user.authority < required) {
     ctx.status = 403
     ctx.message = 'Permission denied'
