@@ -1,7 +1,7 @@
 import { v4 as UUID } from 'uuid'
 import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { checkAuth, checkLogin, initCol, router, sortKeys } from './utils'
+import { router, sortKeys } from './utils'
 import slugify from 'slugify'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 
@@ -171,7 +171,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     }>(async (ctx) => {
       const filter = {}
       filter[ctx.params.filterKey] = ctx.params.filterVal
-      ctx.post = await ctx.col.findOne(filter) as DbPostDoc
+      ctx.post = (await ctx.col.findOne(filter)) as DbPostDoc
 
       if (!ctx.post) {
         ctx.status = 404
@@ -181,7 +181,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     })
     // User authentication
     .check((ctx) => {
-      if (ctx.post.author_uuid !== ctx.user.uuid && ctx.user.authority <= 3) {
+      if (ctx.post.author_uuid !== ctx.user.uuid && ctx.user.authority <= 4) {
         ctx.status = 403
         ctx.message = 'Permission denied'
         return false

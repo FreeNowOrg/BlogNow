@@ -16,7 +16,7 @@ nav#global-header.flex.gap-1
         @click='userDropdownShow = !userDropdownShow'
       )
         .avatar
-          img(src='https://i.loli.net/2021/03/26/QPOtzh1XbF2eujd.png')
+          img(:src='avatar')
         .angle
           icon
             keyboard-arrow-down-round
@@ -33,9 +33,7 @@ nav#global-header.flex.gap-1
               .nav-user-card
                 .top
                   .banner-bg
-                  img.avatar(
-                    src='https://i.loli.net/2021/03/26/QPOtzh1XbF2eujd.png'
-                  )
+                  img.avatar(:src='avatar')
                 .details
                   a.user-name Anonymous
                   .uid Please login~
@@ -46,9 +44,7 @@ nav#global-header.flex.gap-1
                 .top
                   .banner-bg
                   router-link.plain.name(to='/user/@me')
-                    img.avatar(
-                      src='https://i.loli.net/2021/03/26/QPOtzh1XbF2eujd.png'
-                    )
+                    img.avatar(:src='avatar')
                 .details
                   router-link.plain.user-name(to='/user/@me') {{ userData.username }}
                   .uid {{ userData.email }}
@@ -69,6 +65,9 @@ import { KeyboardArrowDownRound } from '@vicons/material'
 
 const userDropdownShow = ref(false)
 const router = useRouter()
+const avatar = ref(
+  `${userData?.value || 'https://gravatar.loli.net/avatar/'}?d=identicon`
+)
 
 router.beforeEach(() => {
   userDropdownShow.value = false

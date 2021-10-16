@@ -1,6 +1,6 @@
 import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { checkLogin, router, sortKeys, initCol } from './utils'
+import { router } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
@@ -34,9 +34,8 @@ export const AUTHORITY_DEFAULTS: Record<DbAuthorityKeys, number> = {
 export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
 export const USERDATA_DEFAULTS: DbUserDoc = {
   authority: 0,
-  avatar: '',
+  // avatar: '',
   created_at: '',
-  email: '',
   gender: 'other',
   nickname: '',
   slogan: '',
@@ -45,6 +44,7 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
   username: '',
   uuid: '',
   // sensitive
+  email: '',
   password_hash: '',
   salt: '',
   token: '',
@@ -54,19 +54,27 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
 export function getUserModel(
   payload: Partial<DbUserDoc>,
   removeSensitive?: boolean
-): DbUserDoc | Partial<DbUserDoc> {
+): DbUserDoc & { avatar: string } {
   const data = {
     ...USERDATA_DEFAULTS,
     ...payload,
   }
+
+  // Handle avatar
+  const email_hash = crypto
+    .createHash('md5')
+    .update(data.email || '')
+    .digest('hex')
+  data.avatar = `https://gravatar.loli.net/avatar/${email_hash}`
+
   if (removeSensitive) {
+    delete data.email
     delete data.password_hash
     delete data.token
     delete data.token_expires
     delete data.salt
-    return data as Partial<DbUserDoc>
   }
-  return data as DbUserDoc
+  return data
 }
 
 // Utils
