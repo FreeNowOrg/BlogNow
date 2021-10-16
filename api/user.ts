@@ -129,7 +129,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .path('users')
     .path(['uuid', 'uid'], 'selector')
     .path(/.+/, 'rawList')
-    .action((ctx) => {
+    .action(async (ctx) => {
       const list = unique(ctx.params.rawList.split(/[|,]/))
       if (list.length > 25) {
         ctx.customBody = {
