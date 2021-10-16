@@ -54,7 +54,7 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
 export function getUserModel(
   payload: Partial<DbUserDoc>,
   removeSensitive?: boolean
-) {
+): DbUserDoc | Partial<DbUserDoc> {
   const data = {
     ...USERDATA_DEFAULTS,
     ...payload,
@@ -64,8 +64,9 @@ export function getUserModel(
     delete data.token
     delete data.token_expires
     delete data.salt
+    return data as Partial<DbUserDoc>
   }
-  return data
+  return data as DbUserDoc
 }
 
 // Utils

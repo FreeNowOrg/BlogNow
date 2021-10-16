@@ -32,11 +32,13 @@ export async function initUserData(): Promise<DbUserDoc> {
     },
     (e) => {
       if (e?.response?.status === 401) {
-        console.info('Anonymous')
-        return e?.response?.data?.body?.profile
+        const profile = e?.response?.data?.body?.profile
+        console.info('Anonymous', profile)
+        userData.value = profile
+        return profile
       } else {
         const content = getErrMsg(e)
-        console.warn(content)
+        console.warn('Failed to get user data', e)
         globalInitErrors.value.push({
           title: 'Failed to get user data',
           content,
