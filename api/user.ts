@@ -33,22 +33,22 @@ export const AUTHORITY_DEFAULTS: Record<DbAuthorityKeys, number> = {
 
 export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
 export const USERDATA_DEFAULTS: DbUserDoc = {
-  uuid: '',
+  authority: 0,
+  avatar: '',
+  created_at: '',
+  email: '',
+  gender: 'other',
+  nickname: '',
+  slogan: '',
+  title: '',
   uid: -1,
   username: '',
-  nickname: '',
-  email: '',
-  title: '',
-  slogan: '',
-  gender: 'other',
-  created_at: '',
-  avatar: '',
-  authority: 0,
+  uuid: '',
   // sensitive
   password_hash: '',
+  salt: '',
   token: '',
   token_expires: 0,
-  salt: '',
 }
 
 export function getUserModel(
@@ -65,7 +65,7 @@ export function getUserModel(
     delete data.token_expires
     delete data.salt
   }
-  return sortKeys(data)
+  return data
 }
 
 // Utils
@@ -116,7 +116,16 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .method('GET')
     .path('auth')
     .path('profile')
-    .checkLogin()
+    .check((ctx) => {
+      if (!ctx.user.uuid || ctx.user.uid < 0) {
+        ctx.status = 401
+        ctx.message = 'Please login'
+        ctx.body = {
+          profile: getUserModel(ctx.user, true),
+        }
+        return false
+      }
+    })
     .action(async (ctx) => {
       ctx.body = {
         profile: getUserModel(ctx.user, true),

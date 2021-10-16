@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { version } from '../package.json'
 
-export const ENV = process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
+export const SITE_ENV = process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
 export const API_BASE =
-  ENV === 'prod' ? '/api' : 'http://localhost:3000/api'
+  SITE_ENV === 'prod' ? '/api' : 'http://localhost:3000/api'
 export const PROJECT_NAME = 'Blog Now'
 export const VERSION = version
 
@@ -19,7 +19,7 @@ export const COPYRIGHT_STR =
 // Inject axios
 axios.interceptors.request.use(
   (req) => {
-    if (ENV !== 'prod') {
+    if (SITE_ENV !== 'prod') {
       req.headers = req.headers || {}
       try {
         req.headers.authorization = window.Cookies.get('BLOG_NOW_TOKEN') || ''

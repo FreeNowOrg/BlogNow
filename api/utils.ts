@@ -15,10 +15,8 @@ declare module '../node_modules/serverless-kit/lib/modules/HandleRouter' {
     setCollection: (col: string) => HandleRouter<{ col: Collection }>
   }
   interface Route<ContextT extends unknown = RouteContextDefaults> {
-    checkAuth: <T = {}>(
-      required: number
-    ) => Route<RouteContextDefaults & ContextT & T>
-    checkLogin: <T = {}>() => Route<RouteContextDefaults & ContextT & T>
+    checkAuth: (required: number) => Route<RouteContextDefaults & ContextT>
+    checkLogin: () => Route<RouteContextDefaults & ContextT>
   }
 }
 
@@ -65,12 +63,16 @@ const router = new HandleRouter<{
   col?: Collection
   user: DbUserDoc
 }>()
+// Make sure the body exists
+router.beforeEach((ctx) => {
+  ctx.body = ctx.body || {}
+})
 // Connect db
 router.beforeEach(initMongo)
-// Close db
-router.afterEach(closeMongo)
 // Pre fetch userData
 router.beforeEach(initUserData)
+// Close db
+router.afterEach(closeMongo)
 export { router }
 export default (req: VercelRequest, res: VercelResponse) => {
   return router.init(req, res)
@@ -81,24 +83,29 @@ export async function initMongo(ctx) {
     getLocalConfig('MONGO_URI') || 'mongodb://localhost'
   )
   const db = client.db(getLocalConfig('BLOGNOW_DB') || 'blog_now')
-  await client.connect()
+  try {
+    await client.connect()
+  } catch (e) {
+    ctx.status = 501
+    ctx.message =
+      'Unable to connect to the database or the MONGODB_URI is incorrectly configured.'
+    return false
+  }
   ctx.mongoClient = client
   ctx.db = db
-  console.log('DB Connected')
 }
 
-export function initCol(ctx, colName: string) {
+export function initCol(ctx: any, colName: string) {
   ctx.col = ctx.db.collection(colName)
 }
 
 export async function closeMongo(ctx) {
   await ctx.mongoClient.close()
-  console.log('DB Closed')
 }
 
-export async function initUserData(ctx) {
+export async function initUserData(ctx: any) {
   const token = getTokenFromReq(ctx.req)
-  const col = ctx.db.collection(COLNAME.USER)
+  const col = (ctx.db as Db).collection(COLNAME.USER)
   const user = await col.findOne({
     token,
     token_expires: { $gt: Date.now() },

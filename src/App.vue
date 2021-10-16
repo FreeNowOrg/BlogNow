@@ -1,7 +1,10 @@
 <template lang="pug">
 #full-container
+  n-progress
   global-header
-  .router-view
+  #init-view(v-if='globalInitErrors.length || !userData || !siteMeta')
+    global-placeholder
+  #router-view(v-else)
     router-view
   global-footer
 </template>
@@ -17,15 +20,17 @@ import {
   initUserData,
   siteMeta,
   getSiteMeta,
+  globalInitErrors,
 } from './utils'
+import GlobalPlaceholder from './components/GlobalPlaceholder.vue'
+import NProgress from './components/NProgress.vue'
 
 onMounted(() => {
   if (!userData.value) {
-    console.log('init user')
-    initUserData().then((i) => console.info('Current user', i))
+    initUserData()
   }
   if (!siteMeta.value) {
-    getSiteMeta().then((i) => console.info('Site stats', i))
+    getSiteMeta()
   }
 })
 </script>
@@ -36,6 +41,7 @@ onMounted(() => {
   flex-direction: column
   min-height: 100vh
 
-  .router-view
+  #init-view,
+  #router-view
     flex: 1
 </style>

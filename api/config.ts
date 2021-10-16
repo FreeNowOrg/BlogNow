@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import { initCol, router } from './utils'
+import { router } from './utils'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 
 router.endpoint('/api/config')
@@ -7,6 +7,7 @@ router.endpoint('/api/config')
 export const COLNAME = {
   COMMENT: 'comments',
   CONFIG: 'config',
+  LOG: 'logs',
   USER: 'users',
   POST: 'posts',
   TAG: 'tags',

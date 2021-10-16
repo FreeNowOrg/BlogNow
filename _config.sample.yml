@@ -1,7 +1,6 @@
 # 设定保存的方式暂时未确定，可能会变更
 
 # Site meta
-
 site_mame: Blog Now
 site_desc: This is a blog built by BlogNow engine.
 site_logo: https://www.wjghj.cn/public/icons/wiki-wordmark.svg
@@ -22,6 +21,15 @@ site_menu:
 # Footer
 footer_top: global footer
 footer_bottom: Powered by <a href="https://github.com/FreeNowOrg/BlogNow">BlogNow</a>
+
+# Scheme
+link_scheme:
+  post: /post/:uuid
+  post_pid: /pid/:pid
+  post_slug: /-/:slug
+  archives: /archives/:year/:month/:day
+  user: /user/:uuid
+  user_self: /user/@me
 
 # Custom
 insert_head_end: # e.g. <link rel="stylesheet" href="...">

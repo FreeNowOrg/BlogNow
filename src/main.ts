@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import Cookies from 'js-cookie'
+import { SITE_ENV } from './config'
 
 // Create App
 import App from './App.vue'
@@ -46,5 +47,5 @@ app.use(VMdEditor)
 
 // Mount
 app.mount('#app')
-
+document.body?.setAttribute('data-env', SITE_ENV)
 window.Cookies = Cookies

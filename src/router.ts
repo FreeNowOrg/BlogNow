@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { initUserData, getSiteMeta, userData, siteMeta } from './utils'
 
 const router = createRouter({
   history: createWebHistory(),
