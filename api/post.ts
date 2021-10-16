@@ -34,14 +34,15 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('GET')
-    .path(['uuid', 'pid', 'slug'], 'filterKey')
-    .path(/.+/, 'filterVal')
+    .path(['uuid', 'pid', 'slug'], 'selector')
+    .path(/.+/, 'target')
     .action(async (ctx) => {
-      const filter = {}
-      filter[ctx.params.filterKey] =
-        ctx.params.filterKey === 'pid'
-          ? parseInt(ctx.params.filterVal)
-          : ctx.params.filterVal
+      const filter = {
+        [ctx.params.selector]:
+          ctx.params.selector === 'pid'
+            ? parseInt(ctx.params.target)
+            : ctx.params.target,
+      }
 
       const post = await ctx.col.findOne(filter)
 
@@ -152,8 +153,8 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('PATCH')
-    .path(['uuid'], 'filterKey')
-    .path(/.+/, 'filterVal')
+    .path(['uuid', 'pid', 'slug'], 'selector')
+    .path(/.+/, 'target')
     .checkLogin()
     // Validate body
     .check((ctx) => {
@@ -169,8 +170,12 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .check<{
       post: DbPostDoc
     }>(async (ctx) => {
-      const filter = {}
-      filter[ctx.params.filterKey] = ctx.params.filterVal
+      const filter = {
+        [ctx.params.selector]:
+          ctx.params.selector === 'pid'
+            ? parseInt(ctx.params.target)
+            : ctx.params.target,
+      }
       ctx.post = (await ctx.col.findOne(filter)) as DbPostDoc
 
       if (!ctx.post) {
@@ -217,7 +222,12 @@ export default (req: VercelRequest, res: VercelResponse) => {
       )
 
       ctx.message = 'Post updated'
-      ctx.body = dbRes
+      ctx.body = {
+        ...dbRes,
+        uuid: ctx.post.uuid,
+        pid: ctx.post.pid,
+        slug: slug ?? ctx.post.slug,
+      }
     })
 
   return router.init(req, res)

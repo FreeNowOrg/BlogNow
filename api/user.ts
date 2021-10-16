@@ -1,6 +1,6 @@
 import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { router } from './utils'
+import { router, unique } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
@@ -89,17 +89,19 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router.endpoint('/api/user')
   router.setCollection(COLNAME.USER)
 
+  // Get single user
   router
     .addRoute()
     .method('GET')
     .path(['uuid', 'uid'], 'selector')
-    .path(/.+/, 'val')
+    .path(/.+/, 'target')
     .action(async (ctx) => {
-      const filter: Record<string, any> = {}
-      filter[ctx.params.selector] =
-        ctx.params.selector === 'uid'
-          ? parseInt(ctx.params.val)
-          : ctx.params.val
+      const filter = {
+        [ctx.params.selector]:
+          ctx.params.selector === 'uid'
+            ? parseInt(ctx.params.target)
+            : ctx.params.target,
+      }
 
       const user = await ctx.col.findOne(filter)
 
@@ -120,6 +122,37 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
     })
 
+  // Get users list
+  router
+    .addRoute()
+    .method('GET')
+    .path('users')
+    .path(['uuid', 'uid'], 'selector')
+    .path(/.+/, 'rawList')
+    .action((ctx) => {
+      const list = unique(ctx.params.rawList.split(/[|,]/))
+      if (list.length > 25) {
+        ctx.customBody = {
+          info: 'Too many requests, only the first 25 users are returned',
+          has_next: true,
+          next_uuids: list.slice(25 - list.length),
+        }
+      }
+      const find = {
+        $or: list.slice(0, 25).map((i) => ({
+          [ctx.params.selector]:
+            ctx.params.selector === 'uid' ? parseInt(i) : i,
+        })),
+      }
+      const users = await ctx.col.find(find)
+      ctx.message = 'Get users'
+      ctx.body = {
+        users: users.map((i) => getUserModel(i, true)),
+        uuids: list.slice(0, 25),
+      }
+    })
+
+  // Verify current user
   router
     .addRoute()
     .method('GET')
@@ -244,6 +277,51 @@ export default (req: VercelRequest, res: VercelResponse) => {
       )
 
       ctx.body = { token, profile: getUserModel(profile, true) }
+    })
+
+  // Get user posts
+  router
+    .addRoute()
+    .method('GET')
+    .path('user')
+    .path(['uuid', 'uid'], 'selector')
+    .path(/.+/, 'target')
+    .path(/posts?/)
+    .check<{
+      offset: number
+      limit: number
+    }>((ctx) => {
+      ctx.offset = parseInt((ctx.req.query.offset as string) || '0')
+      ctx.limit = Math.min(
+        25,
+        parseInt((ctx.req.query.limit as string) || '10')
+      )
+    })
+    .action(async (ctx) => {
+      const posts = await ctx.col
+        .find({
+          [ctx.params.selector]:
+            ctx.params.selector === 'uid'
+              ? parseInt(ctx.params.target)
+              : ctx.params.target,
+        })
+        .sort({ pid: -1 })
+        .skip(ctx.offset)
+        .limit(ctx.limit)
+        .toArray()
+
+      let hasNext = false
+      if (posts.length > ctx.limit) {
+        hasNext = true
+        posts.pop()
+      }
+
+      ctx.body = {
+        posts: posts.map(getPostModel),
+        hasNext,
+        limit: ctx.limit,
+        offset: ctx.offset,
+      }
     })
 
   return router.init(req, res)

@@ -164,3 +164,7 @@ export function sortKeys<T extends Object>(obj: T): T {
   })
   return copy
 }
+
+export function unique<T>(arr: T[]) {
+  return Array.from(new Set(arr))
+}
