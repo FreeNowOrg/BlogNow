@@ -2,7 +2,7 @@
 #full-container
   n-progress
   global-header
-  #router-view(v-if='SITE_ENV === "dev" && globalInitDone')
+  #router-view(v-if='SITE_ENV === "dev" || globalInitDone')
     router-view
   #init-view(v-else)
     global-placeholder
