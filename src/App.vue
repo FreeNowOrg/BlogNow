@@ -2,12 +2,10 @@
 #full-container
   n-progress
   global-header
-  #init-view(
-    v-if='SITE_ENV !== "dev" && (globalInitErrors.length || !userData || !siteMeta)'
-  )
-    global-placeholder
-  #router-view(v-else)
+  #router-view(v-if='SITE_ENV === "dev" && globalInitDone')
     router-view
+  #init-view(v-else)
+    global-placeholder
   global-footer
 </template>
 
@@ -18,23 +16,13 @@ import { SITE_ENV } from './config'
 import GlobalHeader from './components/GlobalHeader.vue'
 import GlobalFooter from './components/GlobalFooter.vue'
 
-import {
-  userData,
-  initUserData,
-  siteMeta,
-  getSiteMeta,
-  globalInitErrors,
-} from './utils'
+import { initUserData, getSiteMeta, globalInitDone } from './utils'
 import GlobalPlaceholder from './components/GlobalPlaceholder.vue'
 import NProgress from './components/NProgress.vue'
 
 onMounted(() => {
-  if (!userData.value) {
-    initUserData()
-  }
-  if (!siteMeta.value) {
-    getSiteMeta()
-  }
+  initUserData()
+  getSiteMeta()
 })
 </script>
 

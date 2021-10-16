@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ref } from 'vue'
-import { getErrMsg } from '.'
+import { computed, ref } from 'vue'
+import { getErrMsg, userData } from '.'
 import { API_BASE } from '../config'
 import type { DbPostDoc } from '../types/Database'
 
@@ -28,4 +28,7 @@ export async function getSiteMeta(): Promise<SiteMetaType> {
   )
 }
 
+export const globalInitDone = computed(
+  () => !!(userData.value.uuid !== undefined && siteMeta.value)
+)
 export const globalInitErrors = ref<{ title?: string; content: string }[]>([])

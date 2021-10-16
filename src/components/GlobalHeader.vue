@@ -48,13 +48,13 @@ nav#global-header.flex.gap-1
                 .details
                   router-link.plain.user-name(to='/user/@me') {{ userData.username }}
                   .uid {{ userData.email }}
-            li(v-if='userData')
+            li(v-if='isLoggedIn')
               router-link.plain(to='/user/@me/posts') My Posts
-            li(v-if='userData')
+            li(v-if='isLoggedIn')
               router-link.plain(to='/post/new') Add new post
 
             li(v-if='$route.path !== "/auth"')
-              router-link.plain(to='/auth') {{ userData ? "Logout" : "Login" }}
+              router-link.plain(to='/auth') {{ isLoggedIn ? "Logout" : "Login" }}
 </template>
 
 <script setup lang="ts">
