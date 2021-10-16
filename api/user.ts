@@ -165,9 +165,22 @@ export default (req: VercelRequest, res: VercelResponse) => {
     })
     .action(async (ctx) => {
       const { username, password } = ctx.req.body || {}
+
+      const [lastUser] = await ctx.col
+        .find()
+        .sort({ uid: -1 })
+        .project({ uid: 1 })
+        .limit(1)
+        .toArray()
+      const uid = isNaN(lastUser?.pid)
+        ? (await ctx.col.countDocuments()) + 10000
+        : (lastUser.pid as number) + 1
+
       const salt = nanoid(32)
       const insert: DbUserDoc = getUserModel({
+        authority: 1,
         username,
+        uid,
         uuid: UUID(),
         password_hash: getPasswordHash(salt, password),
         salt,
