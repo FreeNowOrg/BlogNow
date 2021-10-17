@@ -1,11 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { Collection, Db, MongoClient } from 'mongodb'
-import {
-  HandleRouter,
-  HandleResponse,
-  Route,
-} from 'serverless-kit'
-import { DbUserDoc } from '../src/types/Database'
+import { HandleRouter, HandleResponse, Route } from 'serverless-kit'
+import { DbPostDoc, DbUserDoc } from '../src/types/Database'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
 
@@ -154,6 +150,32 @@ export function getTokenFromReq(req: VercelRequest) {
     req.cookies[TOKEN_COOKIE_NAME] ||
     ''
   )
+}
+
+export async function attachUsersToPosts(
+  ctx: { db: Db },
+  posts: DbPostDoc[]
+): Promise<
+  (DbPostDoc & { author: DbUserDoc | null; editor: DbUserDoc | null })[]
+> {
+  if (posts.length < 1) return []
+  const findList: string[] = []
+  posts.forEach(({ author_uuid, editor_uuid }) => {
+    findList.push(author_uuid, editor_uuid)
+  })
+  const users = await ctx.db
+    .collection(COLNAME.USER)
+    .find({
+      $or: unique(findList)
+        .filter((i) => !!i)
+        .map((uuid) => ({ uuid })),
+    })
+    .toArray()
+  return posts.map((i) => {
+    i.author = users.find(i.author_uuid)
+    i.editor = users.find(i.editor_uuid)
+    return i
+  })
 }
 
 export function sortKeys<T extends Object>(obj: T): T {

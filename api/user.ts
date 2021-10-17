@@ -1,6 +1,6 @@
 import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { router, unique } from './utils'
+import { attachUsersToPosts, router, unique } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
@@ -359,7 +359,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
 
       ctx.body = {
-        posts: posts.map(getPostModel),
+        posts: await attachUsersToPosts(posts.map(getPostModel)),
         has_next,
         limit: ctx.limit,
         offset: ctx.offset,

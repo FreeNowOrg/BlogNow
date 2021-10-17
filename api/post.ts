@@ -1,7 +1,7 @@
 import { v4 as UUID } from 'uuid'
 import { DbPostDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { router, sortKeys } from './utils'
+import { attachUsersToPosts, router, sortKeys } from './utils'
 import slugify from 'slugify'
 import { VercelRequest, VercelResponse } from '@vercel/node'
 
@@ -52,7 +52,10 @@ export default (req: VercelRequest, res: VercelResponse) => {
       } else {
         ctx.message = 'Get post by filter'
       }
-      ctx.body = { post, filter }
+
+      const [post1] = await attachUsersToPosts(ctx, [post])
+
+      ctx.body = { post: post1, filter }
     })
 
   // GET /post/list/recent
@@ -86,7 +89,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
 
       ctx.body = {
-        posts: posts.map(getPostModel),
+        posts: await attachUsersToPosts(ctx, posts.map(getPostModel)),
         has_next,
         limit: ctx.limit,
         offset: ctx.offset,
