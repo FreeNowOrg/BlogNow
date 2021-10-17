@@ -125,8 +125,8 @@ export default (req: VercelRequest, res: VercelResponse) => {
       ctx.status = 200
       ctx.message = 'Get user by filter'
       ctx.body = {
+        user: getUserModel(user, true),
         filter,
-        profile: getUserModel(user, true),
       }
     })
 

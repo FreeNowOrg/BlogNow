@@ -5,7 +5,7 @@
     h1 Application is initializing
     .info-area
       p.user
-        .is-loading(v-if='!userData') Init user data{{ dot }}
+        .is-loading(v-if='userData.uuid === undefined') Init user data{{ dot }}
         .is-ok(v-else) User data - OK
       p.site
         .is-loading(v-if='!siteMeta') Init site meta{{ dot }}

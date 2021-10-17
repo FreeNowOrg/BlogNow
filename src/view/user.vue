@@ -6,9 +6,13 @@
       h3 Filter
       pre {{ filter }}
       h3 User
-      p
-        strong isMe
-        span {{ isMe }}
+      ul
+        li
+          strong isMe
+          span &nbsp;{{ isMe }}
+        li
+          strong notFound
+          span &nbsp;{{ notFound }}
       pre {{ user }}
       h3 Posts
       pre {{ posts }}
@@ -45,7 +49,7 @@ function init() {
   getUser(filter.value.selector, filter.value.targrt).then(
     (data) => {
       user.value = data
-      setTitle(user.value.username, 'User')
+      setTitle(data.username, 'User')
       return initUserPosts()
     },
     (e) => {
