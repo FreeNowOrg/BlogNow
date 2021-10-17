@@ -34,11 +34,11 @@ nav#global-header.flex.gap-1
               .nav-user-card
                 .top
                   .banner-bg
-                  router-link.plain.name(:to='`/user/@${userData.username}`')
+                  router-link.plain.name(:to='`/@${userData.username}`')
                     img.avatar(:src='avatar')
                 .details
                   router-link.plain.user-name(
-                    :to='`/user/@${userData.username}`'
+                    :to='`/@${userData.username}`'
                   ) {{ userData.username }}
                   .uid {{ userData.title }}
             //- Not logged in

@@ -326,15 +326,27 @@ export default (req: VercelRequest, res: VercelResponse) => {
         parseInt((ctx.req.query.limit as string) || '10')
       )
     })
+    .check<{ author_uuid: string }>(async (ctx) => {
+      const user: DbUserDoc = await ctx.db.collection(COLNAME.USER).findOne({
+        [ctx.params.selector]:
+          ctx.params.selector === 'uid'
+            ? parseInt(ctx.params.target)
+            : ctx.params.target,
+      })
+      if (!user) {
+        ctx.status = 404
+        ctx.message = 'Reqested user not found'
+        ctx.body = {
+          posts: [],
+        }
+        return false
+      }
+      ctx.author_uuid = user.uuid
+    })
     .action(async (ctx) => {
       const posts = await ctx.db
         .collection(COLNAME.POST)
-        .find({
-          [ctx.params.selector]:
-            ctx.params.selector === 'uid'
-              ? parseInt(ctx.params.target)
-              : ctx.params.target,
-        })
+        .find({ author_uuid: ctx.author_uuid })
         .sort({ pid: -1 })
         .skip(ctx.offset)
         .limit(ctx.limit)
