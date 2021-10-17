@@ -44,7 +44,7 @@
           router-link(:to='{ name: "auth", query: { backto: $route.path } }') Login
         p(v-else) Please contact site admin
       .info.error(v-if='error')
-        .title Submit faild
+        .title Submit failed
           a.pointer(style='float: right', @click='error = ""') ×
         p {{ error }}
       button(v-if='canEdit', @click='handleSubmit', :disabled='loading') {{ isCreate ? "Publish" : "Update" }}
