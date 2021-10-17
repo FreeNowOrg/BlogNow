@@ -15,6 +15,10 @@
           span &nbsp;{{ notFound }}
       pre {{ user }}
       h3 Posts
+      ul
+        li
+          strong postLoading
+          span &nbsp;{{ postLoading }}
       pre {{ posts }}
 </template>
 

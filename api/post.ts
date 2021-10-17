@@ -79,15 +79,15 @@ export default (req: VercelRequest, res: VercelResponse) => {
         .limit(ctx.limit)
         .toArray()
 
-      let hasNext = false
+      let has_next = false
       if (posts.length > ctx.limit) {
-        hasNext = true
+        has_next = true
         posts.pop()
       }
 
       ctx.body = {
         posts: posts.map(getPostModel),
-        hasNext,
+        has_next,
         limit: ctx.limit,
         offset: ctx.offset,
       }

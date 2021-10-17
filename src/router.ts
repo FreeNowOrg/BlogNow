@@ -74,6 +74,11 @@ router.addRoute({
   component: () => import('./view/user.vue'),
 })
 router.addRoute({
+  path: '/u/:uid',
+  name: 'user-uid',
+  component: () => import('./view/user.vue'),
+})
+router.addRoute({
   path: '/@:username',
   name: 'user-username',
   component: () => import('./view/user.vue'),
