@@ -69,6 +69,7 @@
                 edit-filled
               .tooltip {{ userData && userData.authority >= 2 ? "Edit this post" : "View source" }}
             button#post-float-menu-btn.tool-btn(
+              v-if='titles.length >= 3',
               @click.stop='menuShow = !menuShow'
             )
               icon
@@ -105,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   DeleteFilled,
@@ -123,19 +124,13 @@ import type { DbPostDoc } from '../types/Database'
 const route = useRoute()
 const router = useRouter()
 
-let filter = computed(() => {
-  let [key, val] = ['', '']
-  if (route.params.uuid) {
-    key = 'uuid'
-    val = route.params.uuid as string
-  } else if (route.params.pid) {
-    key = 'pid'
-    val = route.params.pid as string
-  } else if (route.params.slug) {
-    key = 'slug'
-    val = route.params.slug as string
-  }
-  return { key, val } as { key: 'uuid' | 'pid' | 'slug'; val: string }
+const filter = computed(() => {
+  const selector = (route.name as string).split('-')[1] as
+    | 'uuid'
+    | 'pid'
+    | 'slug'
+  const target = route.params[selector] as string
+  return { selector, targrt: selector === 'pid' ? parseInt(target) : target }
 })
 
 const post = ref<DbPostDoc | null>(null)
@@ -151,7 +146,11 @@ const menuShow = ref(false)
 function init() {
   post.value = null
   notFound.value = false
-  getPost(filter.value.key, filter.value.val, !!route.query.noCache).then(
+  getPost(
+    filter.value.selector,
+    filter.value.targrt,
+    !!route.query.noCache
+  ).then(
     (data) => {
       setTitle(data.title)
       post.value = data
@@ -190,11 +189,8 @@ function handleAnchorClick(line: string) {
   menuShow.value = false
 }
 
-router.afterEach((to, from) => {
-  console.info({ to, from })
-  if ((to.name as string)?.startsWith('post') && to !== from) {
-    init()
-  }
+watch(filter, () => {
+  if (filter.value.targrt) init()
 })
 
 onMounted(() => {

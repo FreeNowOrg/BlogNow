@@ -463,6 +463,11 @@
   resolved "https://registry.npmjs.org/@vercel/ruby/-/ruby-1.2.7.tgz#516d1c45f4961619338f3d3bb518ee43b863a5da"
   integrity sha512-ZG2VxMHHSKocL57UWsfNc9UsblwYGm55/ujqGIBnkNUURnRgtUrwtWlEts1eJ4VHD754Lc/0/R1pfJXoN5SbRw==
 
+"@vicons/fa@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.npmjs.org/@vicons/fa/-/fa-0.11.0.tgz#dc6780b25b7943734e7c75d74df2f4443b0572ae"
+  integrity sha512-Mlv4sxlghqAPu+RM+6w0/GIcsQFK/fx1syw1HkABS6MJRLwHOqbmImCYZQam7OMAYhZBs82YpY5cp2NFSgwkOA==
+
 "@vicons/material@^0.11.0":
   version "0.11.0"
   resolved "https://registry.npmjs.org/@vicons/material/-/material-0.11.0.tgz#2c209121f3ff6a46450f4968397df6c3008df8d1"
@@ -1039,6 +1044,11 @@ character-parser@^2.2.0:
   integrity sha1-x84o821LzZdE5f/CxfzeHHMmH8A=
   dependencies:
     is-regex "^1.0.3"
+
+check-password-strength@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/check-password-strength/-/check-password-strength-2.0.3.tgz#fed038b1c457ac11a2999bd96f3185af34e88895"
+  integrity sha512-UW3YgMUne9QuejgnNWjWwYi4QhWArVj+1OXqDR1NkEQcmMKKO74O3P5ZvXr9JZNbTBfcwlK3yurYCMuJsck83A==
 
 "chokidar@>=3.0.0 <4.0.0":
   version "3.5.2"

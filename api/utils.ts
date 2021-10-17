@@ -4,12 +4,12 @@ import {
   HandleRouter,
   HandleResponse,
   Route,
-  RouteContextDefaults,
 } from 'serverless-kit'
 import { DbUserDoc } from '../src/types/Database'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
 
+// type gymnastics
 declare module '../node_modules/serverless-kit/lib/modules/HandleRouter' {
   interface HandleRouter {
     setCollection: (col: string) => HandleRouter<{ col: Collection }>
@@ -56,11 +56,11 @@ Route.prototype.checkLogin = function () {
   return this
 }
 
-// Router
+// Constuct a router
 const router = new HandleRouter<{
   mongoClient: MongoClient
   db: Db
-  col?: Collection
+  col: Collection
   user: DbUserDoc
 }>()
 // Make sure the body exists

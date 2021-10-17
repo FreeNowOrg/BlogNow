@@ -1,13 +1,18 @@
 <template lang="pug">
 #auth-container
   .body-inner
-    form#auth-form.card(v-if='!userData', :class='{ "loadin-cover": loading }')
+    form#auth-form.card(
+      v-if='!isLoggedIn',
+      :class='{ "loadin-cover": loading }'
+    )
       #logo-area
         .logo-placeholder LOGO
 
       #info-area
         .info.error(v-if='errorMsg')
-          .title {{ errorTitle }}
+          .title
+            a.pointer(@click='errorMsg = ""', style='float: right') ×
+            | {{ errorTitle }}
           p {{ errorMsg }}
 
       #tabber-area
@@ -39,19 +44,20 @@
           button(@click.prevent='handleLogin') Login
 
       #register(v-else)
-        p You can't regist at this time
+        p You cannot register at this time
 
     #user-info(v-else)
-      h1 hello, {{ userData.username }}~
       .card
-        pre {{ userData }}
-        .btn
-          button(@click='handleLogout') Logout
+        h2 Hello, {{ userData.username }}~
+        .align-center
+          p Are you sure you want to log out?
+          .btn
+            button(@click='handleLogout') Logout
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { setTitle, userLogin, userData } from '../utils'
+import { setTitle, userLogin, userData, isLoggedIn } from '../utils'
 import { useRoute, useRouter } from 'vue-router'
 
 const [route, router] = [useRoute(), useRouter()]

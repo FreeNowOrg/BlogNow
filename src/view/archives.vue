@@ -22,8 +22,9 @@ import { onMounted, ref } from 'vue'
 import { setTitle } from '../utils/setTitle'
 import GlobalAside from '../components/GlobalAside.vue'
 import { getRecentPosts } from '../utils'
+import type { DbPostDoc } from '../types/Database'
 
-const posts = ref<any[]>([])
+const posts = ref<DbPostDoc[]>([])
 
 function init() {
   getRecentPosts(true).then((list) => {

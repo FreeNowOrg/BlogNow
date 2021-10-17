@@ -17,6 +17,10 @@ import './styles/index.sass'
 import { Icon } from '@vicons/utils'
 app.component('Icon', Icon)
 
+// ExternamLink
+import ExternamLink from './components/ExternalLink.vue'
+app.component('ELink', ExternamLink)
+
 // LazyLoad
 import Lazyload from './components/Lazyload.vue'
 app.component('Lazyload', Lazyload)

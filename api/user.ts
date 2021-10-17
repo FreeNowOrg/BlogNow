@@ -4,7 +4,12 @@ import { router, unique } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
+import {
+  passwordStrength,
+  defaultOptions as passwordStrengthOptions,
+} from 'check-password-strength'
 import { VercelRequest, VercelResponse } from '@vercel/node'
+import { getPostModel } from './post'
 
 /**
  * @desc authority ```
@@ -32,6 +37,7 @@ export const AUTHORITY_DEFAULTS: Record<DbAuthorityKeys, number> = {
 }
 
 export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
+
 export const USERDATA_DEFAULTS: DbUserDoc = {
   authority: 0,
   avatar: '',
@@ -50,6 +56,8 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
   token: '',
   token_expires: 0,
 }
+
+export const PASSWORD_STENGTH: 0 | 1 | 2 | 3 = 1
 
 export function getUserModel(
   payload: Partial<DbUserDoc>,
@@ -93,7 +101,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('GET')
-    .path(['uuid', 'uid'], 'selector')
+    .path(['uuid', 'uid', 'username'], 'selector')
     .path(/.+/, 'target')
     .action(async (ctx) => {
       const filter = {
@@ -127,7 +135,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .addRoute()
     .method('GET')
     .endpoint('/api/users')
-    .path(['uuid', 'uid'], 'selector')
+    .path(['uuid', 'uid', 'username'], 'selector')
     .path(/.+/, 'rawList')
     .action(async (ctx) => {
       const list = unique(ctx.params.rawList.split(/[|,]/))
@@ -189,15 +197,37 @@ export default (req: VercelRequest, res: VercelResponse) => {
     })
     .check((ctx) => {
       const { username, password } = ctx.req.body || {}
-      if (username.length < 4 || password.length < 4) {
+      if (
+        !/^[\s\-\.0-9A-Z_`'"a-z~\u0080-\uFFFF]+$/.test(username) ||
+        username.length <= 5
+      ) {
         ctx.status = 400
-        ctx.message = 'Username or password too short'
+        ctx.message = 'Invalid username.'
+        ctx.body = {
+          invalid_item: 'username',
+          item_required: {
+            allowed_symbols: ['_', '-', '.', '~', "'", '"', '`'],
+            min_length: 5,
+          },
+        }
+        return false
+      }
+      if (passwordStrength(password).id <= PASSWORD_STENGTH) {
+        ctx.status = 400
+        ctx.message = 'Password is too weak.'
+        ctx.body = {
+          invalid_item: 'password',
+          strength_options: passwordStrengthOptions,
+          item_required: passwordStrengthOptions[PASSWORD_STENGTH],
+        }
         return false
       }
     })
     .check(async (ctx) => {
       const { username } = ctx.req.body || {}
-      const already = await ctx.col.findOne({ username })
+      const already = await ctx.col.findOne({
+        username: new RegExp(username, 'i'),
+      })
       if (already) {
         ctx.status = 409
         ctx.message = 'Username has been taken'
@@ -283,8 +313,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('GET')
-    .path('user')
-    .path(['uuid', 'uid'], 'selector')
+    .path(['uuid', 'uid', 'username'], 'selector')
     .path(/.+/, 'target')
     .path(/posts?/)
     .check<{

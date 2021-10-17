@@ -1,14 +1,16 @@
 import axios from 'axios'
 import { ref } from 'vue'
 import { API_BASE } from '../config'
-import { DbPostDoc } from '../types/Database'
+import { DbPostDoc, DbUserDoc } from '../types/Database'
 
 export const siteCache = ref({
   meta: {} as Record<string, any>,
   posts: [] as DbPostDoc[],
+  users: [] as DbUserDoc[],
   recents: [] as string[],
 })
 
+// Post
 export function setPostCache(post: DbPostDoc) {
   const index = siteCache.value.posts.findIndex(
     ({ uuid }) => uuid === post.uuid
@@ -24,18 +26,18 @@ export function setPostCache(post: DbPostDoc) {
 }
 
 export async function getPost(
-  controller: 'uuid' | 'pid' | 'slug',
-  scope: string | number,
+  selector: 'uuid' | 'pid' | 'slug',
+  target: string | number,
   noCache?: boolean
 ): Promise<DbPostDoc> {
-  const cache = siteCache.value.posts.find((i) => i[controller] === scope)
+  const cache = siteCache.value.posts.find((i) => i[selector] === target)
   if (cache && !noCache) {
     console.info('[CACHE]', 'Get post from cache')
     return cache
   }
   console.info('[CACHE]', 'Get post from origin')
   const { data }: any = await axios.get(
-    `${API_BASE}/post/${controller}/${scope}`
+    `${API_BASE}/post/${selector}/${target}`
   )
   setPostCache(data.body.post)
   return data.body.post
@@ -75,4 +77,52 @@ export async function getRecentPosts(noCache?: boolean) {
     return list
   }
   return getPostList({ limit: 25, offset: 0 })
+}
+
+// User
+export function setUserCache(user: DbUserDoc) {
+  const index = siteCache.value.users.findIndex(
+    ({ uuid }) => uuid === user.uuid
+  )
+  if (index < 0) {
+    console.info('[CACHE]', 'Update user cache')
+    siteCache.value.users.push(user)
+  } else {
+    console.info('[CACHE]', 'Set user cache')
+    siteCache.value.users[index] = user
+  }
+  return true
+}
+
+export async function getUser(
+  selector: 'uuid' | 'uid' | 'username',
+  target: string | number,
+  noCache?: boolean
+): Promise<DbUserDoc> {
+  const cache = siteCache.value.users.find((i) => i[selector] === target)
+  if (cache && !noCache) {
+    console.info('[CACHE]', 'Get user from cache')
+    return cache
+  }
+  console.info('[CACHE]', 'Get user from origin')
+  const { data }: any = await axios.get(
+    `${API_BASE}/user/${selector}/${target}`
+  )
+  setUserCache(data.body.user)
+  return data.body.user
+}
+
+export async function getUserList(
+  selector: 'uuid' | 'uid' | 'username',
+  users: string[]
+) {
+  const { data }: any = await axios.get(
+    `${API_BASE}/users/${selector}/${users.join(',')}`
+  )
+
+  const list: DbUserDoc[] = data.body.users || []
+
+  list.forEach(setUserCache)
+
+  return list
 }

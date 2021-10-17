@@ -1,34 +1,28 @@
-<template>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    version="1.1"
-    class="svgspinner"
-    width="400"
-    height="300"
-  >
-    <g class="spingroup" transform="matrix(1,0,0,1,200,150)">
-      <circle
-        class="spincircle"
-        r="36"
-        stroke-width="5"
-        stroke="#3697e7"
-        fill="none"
-        stroke-linecap="round"
-      />
-    </g>
-  </svg>
+<template lang="pug">
+svg.spinner(
+  xmlns='http://www.w3.org/2000/svg',
+  version='1.1',
+  width='400',
+  height='300'
+)
+  g.group
+    circle.circle(r='36')
 </template>
 
 <script></script>
 
 <style scoped lang="sass">
-.svgspinner
+.spinner
   max-width: 100%
-
-  .spincircle
-    animation: loading-round 1.2s infinite linear, loading-dash 2s infinite linear alternate
-    stroke-dasharray: 236
-    stroke: var(--theme-accent-color)
+  .group
+    transform: translate(50%, 50%)
+    .circle
+      fill: none
+      stroke: var(--theme-accent-color)
+      stroke-width: 5
+      stroke-dasharray: 236
+      stroke-linecap: round
+      animation: loading-round 1.2s infinite linear, loading-dash 2s infinite linear alternate
 
 @keyframes loading-round
   0%

@@ -28,31 +28,34 @@ nav#global-header.flex.gap-1
       )
         .dropdown-content(v-show='userDropdownShow')
           ul
-            //- notLogIn
-            li(v-if='!isLoggedIn')
+            //- User Card
+            //- Is logged in
+            li(v-if='isLoggedIn')
+              .nav-user-card
+                .top
+                  .banner-bg
+                  router-link.plain.name(:to='`/user/@${userData.username}`')
+                    img.avatar(:src='avatar')
+                .details
+                  router-link.plain.user-name(
+                    :to='`/user/@${userData.username}`'
+                  ) {{ userData.username }}
+                  .uid {{ userData.title }}
+            //- Not logged in
+            li(v-else)
               .nav-user-card
                 .top
                   .banner-bg
                   img.avatar(:src='avatar')
                 .details
-                  a.user-name Anonymous
-                  .uid Please login~
+                  router-link.plain.name(to='/auth') Guest
+                  .uid Welcome to the blog~
 
-            //- isLogedIn
-            li(v-if='isLoggedIn')
-              .nav-user-card
-                .top
-                  .banner-bg
-                  router-link.plain.name(to='/user/@me')
-                    img.avatar(:src='avatar')
-                .details
-                  router-link.plain.user-name(to='/user/@me') {{ userData.username }}
-                  .uid {{ userData.email }}
-            li(v-if='isLoggedIn')
-              router-link.plain(to='/user/@me/posts') My Posts
+            //- Links
             li(v-if='isLoggedIn')
               router-link.plain(to='/post/new') Add new post
-
+            li(v-if='userData.authority >= 4')
+              router-link.plain(to='/dashboard') Admin dashboard
             li(v-if='$route.path !== "/auth"')
               router-link.plain(to='/auth') {{ isLoggedIn ? "Logout" : "Login" }}
 </template>

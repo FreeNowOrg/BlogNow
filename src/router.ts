@@ -37,7 +37,7 @@ router.addRoute({
   component: () => import('./view/post.vue'),
 })
 router.addRoute({
-  path: '/pid/:pid',
+  path: '/p-:pid',
   name: 'post-pid',
   component: () => import('./view/post.vue'),
 })
@@ -59,19 +59,25 @@ router.addRoute({
   component: () => import('./view/edit-post.vue'),
 })
 
-// User
+// Auth
 router.addRoute({
   path: '/auth',
-  alias: ['/login'],
+  alias: ['/login', '/sign-in', '/logout'],
   name: 'auth',
   component: () => import('./view/auth.vue'),
 })
 
-// router.addRoute({
-//   path: '/user/:uuid',
-//   name: 'user',
-//   component: () => import('./view/user.vue'),
-// })
+// User
+router.addRoute({
+  path: '/user/:uuid',
+  name: 'user-uuid',
+  component: () => import('./view/user.vue'),
+})
+router.addRoute({
+  path: '/@:username',
+  name: 'user-username',
+  component: () => import('./view/user.vue'),
+})
 
 // Search
 // router.addRoute({
