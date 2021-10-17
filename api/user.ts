@@ -327,7 +327,8 @@ export default (req: VercelRequest, res: VercelResponse) => {
       )
     })
     .action(async (ctx) => {
-      const posts = await ctx.col
+      const posts = await ctx.db
+        .collection(COLNAME.POST)
         .find({
           [ctx.params.selector]:
             ctx.params.selector === 'uid'
