@@ -189,8 +189,8 @@ function handleAnchorClick(line: string) {
   menuShow.value = false
 }
 
-watch(filter, () => {
-  if (filter.value.targrt) init()
+router.afterEach((to, from) => {
+  if ((to.name as string)?.startsWith('post') && to !== from) init()
 })
 
 onMounted(() => {

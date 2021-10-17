@@ -24,13 +24,13 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { API_BASE } from '../config'
 import type { DbPostDoc, DbUserDoc } from '../types/Database'
 import { getUser, setTitle, userData } from '../utils'
 
-const route = useRoute()
+const [route, router] = [useRoute(), useRouter()]
 
 type UserSelector = 'uuid' | 'uid' | 'username'
 const filter = computed(() => {
@@ -77,8 +77,8 @@ function initUserPosts() {
     })
 }
 
-watch(filter, () => {
-  if (filter.value.selector) init()
+router.afterEach((to, from) => {
+  if ((to.name as string)?.startsWith('user') && to !== from) init()
 })
 
 onMounted(() => {
