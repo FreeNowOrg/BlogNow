@@ -361,7 +361,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
 
       ctx.body = {
-        posts: await attachUsersToPosts(posts.map(getPostModel)),
+        posts: await attachUsersToPosts(ctx, posts.map(getPostModel)),
         has_next,
         limit: ctx.limit,
         offset: ctx.offset,
