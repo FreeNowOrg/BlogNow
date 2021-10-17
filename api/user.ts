@@ -62,7 +62,7 @@ export const PASSWORD_STENGTH: 0 | 1 | 2 | 3 = 1
 export function getUserModel(
   payload: Partial<DbUserDoc>,
   removeSensitive?: boolean
-): DbUserDoc & { avatar: string } {
+): DbUserDoc & { avatar: string; not_exist?: boolean } {
   const data = {
     ...USERDATA_DEFAULTS,
     ...payload,
@@ -74,6 +74,8 @@ export function getUserModel(
     .update(data.email || '')
     .digest('hex')
   data.avatar = `https://gravatar.loli.net/avatar/${email_hash}`
+
+  if (data.uid < 0) data.not_exist = true
 
   if (removeSensitive) {
     delete data.email

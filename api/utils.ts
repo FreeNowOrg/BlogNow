@@ -17,7 +17,6 @@ declare module '../node_modules/serverless-kit/lib/modules/HandleRouter' {
 }
 
 HandleRouter.prototype.setCollection = function (colName) {
-  console.log('setCol')
   this.beforeEach((ctx) => {
     ctx.col = ctx.db.collection(colName)
   })
@@ -87,6 +86,7 @@ export async function initMongo(ctx: any) {
       'Unable to connect to the database or the MONGODB_URI is incorrectly configured.'
     return false
   }
+  console.log('DB connected')
   ctx.mongoClient = client
   ctx.db = db
 }
@@ -97,6 +97,7 @@ export function initCol(ctx: any, colName: string) {
 
 export async function closeMongo(ctx: any) {
   await ctx.mongoClient.close()
+  console.log('DB closed')
 }
 
 export async function initUserData(ctx: any) {
@@ -163,7 +164,7 @@ export async function attachUsersToPosts(
   posts.forEach(({ author_uuid, editor_uuid }) => {
     findList.push(author_uuid, editor_uuid)
   })
-  const users = await ctx.db
+  const users: DbUserDoc[] = await ctx.db
     .collection(COLNAME.USER)
     .find({
       $or: unique(findList)
@@ -172,8 +173,14 @@ export async function attachUsersToPosts(
     })
     .toArray()
   return posts.map((i) => {
-    i.author = users.find(i.author_uuid)
-    i.editor = users.find(i.editor_uuid)
+    i.author = getUserModel(
+      users.find(({ uuid }) => uuid === i.author_uuid),
+      true
+    )
+    i.editor = getUserModel(
+      users.find(({ uuid }) => uuid === i.editor_uuid),
+      true
+    )
     return i
   })
 }
