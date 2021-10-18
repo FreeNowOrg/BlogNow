@@ -65,19 +65,6 @@ function init() {
       if (e?.response?.status === 404) {
         notFound.value = true
       }
-      user.value = {
-        authority: 4,
-        avatar:
-          'https://gravatar.loli.net/avatar/7e17d0b4b93472b346ab2a698442660d',
-        created_at: '2021-10-09T11:27:47.682Z',
-        gender: 'other',
-        nickname: '',
-        slogan: '',
-        title: '最最最伟大的总执事',
-        uid: 10000,
-        username: 'XiaoYuJunDesu',
-        uuid: '2083c0b2-c4bf-49c9-9b4e-b1345727daca',
-      }
     }
   )
 }
