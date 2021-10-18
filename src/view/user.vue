@@ -1,28 +1,42 @@
 <template lang="pug">
 #user-container
-  header#user-header
-    .inner
+  nav#user-header
 
-  .body-inner
-    h1 User
-    .card
-      h3 Filter
-      pre {{ filter }}
-      h3 User
-      ul
-        li
-          strong isMe
-          span &nbsp;{{ isMe }}
-        li
-          strong notFound
-          span &nbsp;{{ notFound }}
-      pre {{ user }}
-      h3 Posts
-      ul
-        li
-          strong postLoading
-          span &nbsp;{{ postLoading }}
-      pre {{ posts }}
+  header#user-info.body-inner.flex.flex-auto.gap-1
+    .avatar
+      img(:src='getAvatar(user?.avatar, { width: 200 })')
+    .user-meta.flex-1
+      h1.nickname(v-if='!notFound && !user') Loading user...
+      h1.nickname(v-if='user') {{ user.nickname || user.username }}
+      h1.nickname(v-if='notFound') User not found
+      .username(v-if='user?.nickname') @{{ user.username }}
+      .uuid(v-if='user') UID{{ user.uid }}
+
+  main#user-main.body-inner
+    .main-flex
+      #user-loading.card.loading(v-if='!user && !notFound')
+        placeholder
+      #user-not-found.card(v-if='notFound') User not found
+
+      article#user-content.flex-1.card(v-if='!notFound && user')
+        #user-details
+          h3 Slogan
+          p {{ user.slogan || "-" }}
+        hr
+        #user-posts
+          h3 Posts
+          #post-loading.loading(v-if='postLoading')
+            placeholder
+          ul#post-list
+            li(v-for='item in posts')
+              .title 
+                strong {{ item.title }}
+              .link
+                router-view(
+                  :to='{ name: "post", params: { uuid: item.uuid } }'
+                ) view
+
+      global-aside
 </template>
 
 <script setup lang="ts">
@@ -31,7 +45,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { API_BASE } from '../config'
 import type { DbPostDoc, DbUserDoc } from '../types/Database'
-import { getUser, isLoggedIn, setTitle, userData } from '../utils'
+import { getAvatar, getUser, isLoggedIn, setTitle, userData } from '../utils'
+import GlobalAside from '../components/GlobalAside.vue'
 
 const [route, router] = [useRoute(), useRouter()]
 
@@ -100,12 +115,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="sass">
-// #user-container
-//   padding-top: 60px
 #user-header
   position: relative
-  text-align: center
-  color: #fff
   height: 300px
   background-image: v-bind(bgImg)
   background-position: center
@@ -121,12 +132,47 @@ onMounted(() => {
     height: 100%
     background-color: rgba(0, 0, 0, 0.5)
     z-index: 0
-  .inner
+
+#user-info
+  position: relative
+  margin-bottom: 1rem
+  .avatar
     position: absolute
-    top: 50%
-    left: 0
-    transform: translateY(-50%)
-    width: 100%
+    top: -60px
+    img
+      width: 120px
+      height: 120px
+      border-radius: 50%
+      box-shadow: 0 0 0 4px #fff
+  .user-meta
+    margin-left: calc(120px + 1rem)
+    .nickname
+      font-size: 2rem
+      margin: 1rem 0 0 0
+      font-weight: 600
+    .uuid
+      font-size: 0.75rem
+      color: #ccc
+
+@media screen and (max-width:900px)
+  #user-header
+    height: 25vh
+  #user-info
+    text-align: center
+    .avatar
+      position: absolute
+      left: 50%
+      transform: translateX(-50%)
+      img
+        box-shadow: 0 0 0 6px #fff
+    .user-meta
+      margin-left: 0
+      margin-top: calc(60px + 1rem)
+      .nickname
+        margin: 0
+
+pre
+  white-space: break-spaces
 </style>
 
 <style lang="sass">

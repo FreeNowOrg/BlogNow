@@ -1,3 +1,4 @@
+export * from './getAvatar'
 export * from './getErrMsg'
 export * from './globalStates'
 export * from './setTitle'
