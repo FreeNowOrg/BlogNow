@@ -16,5 +16,26 @@
       "source": "/api(.*)",
       "destination": "/api/index"
     }
+  ],
+  "headers": [
+    {
+      "source": "/api(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "localhost"
+        },
+        {
+          "type": "host",
+          "value": "127.0.0.1"
+        }
+      ],
+      "headers": [
+        {
+          "key": "access-control-allow-origin",
+          "value": "*"
+        }
+      ]
+    }
   ]
 }

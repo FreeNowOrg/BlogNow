@@ -62,8 +62,8 @@ export const PASSWORD_STENGTH: 0 | 1 | 2 | 3 = 1
 export function getUserModel(
   payload: Partial<DbUserDoc>,
   removeSensitive?: boolean
-): DbUserDoc & { avatar: string; not_exist?: boolean } {
-  const data = {
+) {
+  const data: DbUserDoc & { avatar: string; not_exist?: boolean } = {
     ...USERDATA_DEFAULTS,
     ...payload,
   }
@@ -329,12 +329,12 @@ export default (req: VercelRequest, res: VercelResponse) => {
       )
     })
     .check<{ author_uuid: string }>(async (ctx) => {
-      const user: DbUserDoc = await ctx.db.collection(COLNAME.USER).findOne({
+      const user = (await ctx.db.collection(COLNAME.USER).findOne({
         [ctx.params.selector]:
           ctx.params.selector === 'uid'
             ? parseInt(ctx.params.target)
             : ctx.params.target,
-      })
+      })) as DbUserDoc
       if (!user) {
         ctx.status = 404
         ctx.message = 'Reqested user not found'

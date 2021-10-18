@@ -13,6 +13,24 @@ app.use(router)
 // Style
 import './styles/index.sass'
 
+// Inject axios
+import axios from 'axios'
+axios.interceptors.request.use(
+  (req) => {
+    if (SITE_ENV !== 'prod') {
+      req.headers = req.headers || {}
+      try {
+        req.headers.authorization = window.Cookies.get('BLOG_NOW_TOKEN') || ''
+        console.info('[Axios]', 'Request with local token')
+      } catch (err) {
+        console.warn('[Axios]', 'Inject error', err)
+      }
+    }
+    return req
+  },
+  (e) => Promise.reject(e)
+)
+
 // Icon
 import { Icon } from '@vicons/utils'
 app.component('Icon', Icon)

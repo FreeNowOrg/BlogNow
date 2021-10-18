@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { Collection, Db, MongoClient } from 'mongodb'
 import { HandleRouter, HandleResponse, Route } from 'serverless-kit'
+import { SITE_ENV } from '../src/config'
 import { DbPostDoc, DbUserDoc } from '../src/types/Database'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
@@ -164,15 +165,15 @@ export async function attachUsersToPosts(
   posts.forEach(({ author_uuid, editor_uuid }) => {
     findList.push(author_uuid, editor_uuid)
   })
-  const users: DbUserDoc[] = await ctx.db
+  const users = (await ctx.db
     .collection(COLNAME.USER)
     .find({
       $or: unique(findList)
         .filter((i) => !!i)
         .map((uuid) => ({ uuid })),
     })
-    .toArray()
-  return posts.map((i) => {
+    .toArray()) as DbUserDoc[]
+  return posts.map((i: any) => {
     i.author = getUserModel(
       users.find(({ uuid }) => uuid === i.author_uuid),
       true
