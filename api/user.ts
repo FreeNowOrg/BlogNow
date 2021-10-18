@@ -147,13 +147,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .path(['uuid', 'uid', 'username'], 'selector')
     .path(/.+/, 'rawList')
     .action(async (ctx) => {
-      const list = unique(
-        ctx.params.rawList
-          .split(/[|,]/)
-          .map((i) =>
-            ctx.params.selector === 'username' ? trimUsername(i) : i.trim()
-          )
-      )
+      const list = unique(ctx.params.rawList.split(/[|,]/).map((i) => i.trim()))
       if (list.length > 25) {
         ctx.customBody = {
           info: 'Too many requests, only the first 25 users are returned',
@@ -298,7 +292,10 @@ export default (req: VercelRequest, res: VercelResponse) => {
       const dbRes = await ctx.col.insertOne(insert)
 
       ctx.message = 'User created'
-      ctx.body = dbRes
+      ctx.body = {
+        ...dbRes,
+        username,
+      }
     })
 
   router
@@ -317,7 +314,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .action(async (ctx) => {
       const { username, password } = ctx.req.body || {}
       const profile = await ctx.col.findOne({
-        username: new RegExp(trimUsername(username), 'i'),
+        username,
       })
       if (!profile) {
         ctx.status = 403
