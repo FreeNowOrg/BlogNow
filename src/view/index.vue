@@ -5,6 +5,9 @@
       h1.home-site-name Blog Now
       .meta-data
         p Blah, Blah, Blah, Blah, Blah...
+    a#jump-btn.pointer.plain(@click='handleJumpToMain')
+      icon
+        angle-down
 
   main#home-main.body-inner
     .main-flex
@@ -36,9 +39,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { setTitle, getRecentPosts } from '../utils'
+import { AngleDown } from '@vicons/fa'
+import scrollTo from 'animated-scroll-to'
 import GlobalAside from '../components/GlobalAside.vue'
 
 const recents = ref<any[]>([])
+
+function handleJumpToMain() {
+  scrollTo(document.documentElement.clientHeight - 60)
+}
 
 onMounted(() => {
   setTitle()
@@ -85,11 +94,19 @@ onMounted(() => {
     z-index: 1
   .inner
     position: absolute
-    top: calc(50% + 60px)
+    top: calc(50% + 30px)
     left: 0
     transform: translateY(-50%)
     width: 100%
     z-index: 2
+  #jump-btn
+    --color: #fff
+    position: absolute
+    z-index: 2
+    bottom: 2rem
+    left: 50%
+    transform: translateX(-50%)
+    font-size: 2rem
 
 #home-post-list
   gap: 1.5rem
@@ -138,4 +155,15 @@ onMounted(() => {
   background-color: #fff
   position: relative
   z-index: 1
+</style>
+
+<style lang="sass">
+#global-header
+  transition: all 0.24s ease
+[data-at-top='true'][data-route='home']
+  #global-header
+    background-color: transparent
+    box-shadow: none
+    a
+      --color: #fff
 </style>

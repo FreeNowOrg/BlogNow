@@ -80,7 +80,7 @@ function handleLogin() {
     .then(
       () => {
         if (route.query.backto) {
-          router.push(route.query.backto as string)
+          router.push((route.query.backto as string) || '/')
         }
       },
       (e): any => {

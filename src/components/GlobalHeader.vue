@@ -19,7 +19,7 @@ nav#global-header.flex.gap-1
           img(:src='avatar')
         .angle
           icon
-            keyboard-arrow-down-round
+            angle-down
       transition(
         name='fade',
         mode='out-in',
@@ -37,9 +37,7 @@ nav#global-header.flex.gap-1
                   router-link.plain.name(:to='`/@${userData.username}`')
                     img.avatar(:src='avatar')
                 .details
-                  router-link.plain.user-name(
-                    :to='`/@${userData.username}`'
-                  ) {{ userData.username }}
+                  router-link.plain.user-name(:to='`/@${userData.username}`') {{ userData.username }}
                   .uid {{ userData.title }}
             //- Not logged in
             li(v-else)
@@ -64,7 +62,7 @@ nav#global-header.flex.gap-1
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { userData, isLoggedIn } from '../utils'
-import { KeyboardArrowDownRound } from '@vicons/material'
+import { AngleDown } from '@vicons/fa'
 
 const userDropdownShow = ref(false)
 const router = useRouter()
@@ -83,6 +81,16 @@ onMounted(() => {
   document.body.addEventListener('click', () => {
     userDropdownShow.value = false
   })
+  document.addEventListener('scroll', () => {
+    document.body.setAttribute(
+      'data-at-top',
+      `${document.documentElement.scrollTop < 60}`
+    )
+  })
+  document.body.setAttribute(
+    'data-at-top',
+    `${document.documentElement.scrollTop < 60}`
+  )
 })
 </script>
 

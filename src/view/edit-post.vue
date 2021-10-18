@@ -37,8 +37,8 @@
 
     .btn-area
       .info.warn(v-if='!canEdit')
-        .title {{ userData ? "No permision" : "Authority error" }}
-        p(v-if='!userData')
+        .title {{ isLoggedIn ? "No permision" : "Authority error" }}
+        p(v-if='!isLoggedIn')
           | Please
           |
           router-link(:to='{ name: "auth", query: { backto: $route.path } }') Login

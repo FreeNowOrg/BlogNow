@@ -1,17 +1,17 @@
 import axios from 'axios'
 import { ref } from 'vue'
 import { API_BASE } from '../config'
-import { DbPostDoc, DbUserDoc } from '../types/Database'
+import type { ApiResponsePost, ApiResponseUser } from '../types'
 
 export const siteCache = ref({
   meta: {} as Record<string, any>,
-  posts: [] as DbPostDoc[],
-  users: [] as DbUserDoc[],
+  posts: [] as ApiResponsePost[],
+  users: [] as ApiResponseUser[],
   recents: [] as string[],
 })
 
 // Post
-export function setPostCache(post: DbPostDoc) {
+export function setPostCache(post: ApiResponsePost) {
   const index = siteCache.value.posts.findIndex(
     ({ uuid }) => uuid === post.uuid
   )
@@ -29,7 +29,7 @@ export async function getPost(
   selector: 'uuid' | 'pid' | 'slug',
   target: string | number,
   noCache?: boolean
-): Promise<DbPostDoc> {
+): Promise<ApiResponsePost> {
   const cache = siteCache.value.posts.find((i) => i[selector] === target)
   if (cache && !noCache) {
     console.info('[CACHE]', 'Get post from cache')
@@ -48,7 +48,7 @@ export async function getPostList({ limit = 25, offset = 0 }) {
     params: { limit, offset },
   })
 
-  const posts: DbPostDoc[] = data.body.posts || []
+  const posts: ApiResponsePost[] = data.body.posts || []
 
   if (offset === 0 && posts.length > 0) {
     console.info('[CACHE]', 'Set recents')
@@ -61,7 +61,7 @@ export async function getPostList({ limit = 25, offset = 0 }) {
 }
 
 export async function getRecentPosts(noCache?: boolean) {
-  const list: DbPostDoc[] = []
+  const list: ApiResponsePost[] = []
   if (siteCache.value.recents.length > 0 && !noCache) {
     console.info('[CACHE]', 'Get recents from cache')
     siteCache.value.recents.forEach((uuid) => {
@@ -80,7 +80,7 @@ export async function getRecentPosts(noCache?: boolean) {
 }
 
 // User
-export function setUserCache(user: DbUserDoc) {
+export function setUserCache(user: ApiResponseUser) {
   const index = siteCache.value.users.findIndex(
     ({ uuid }) => uuid === user.uuid
   )
@@ -98,7 +98,7 @@ export async function getUser(
   selector: 'uuid' | 'uid' | 'username',
   target: string | number,
   noCache?: boolean
-): Promise<DbUserDoc> {
+): Promise<ApiResponseUser> {
   const cache = siteCache.value.users.find((i) => i[selector] === target)
   if (cache && !noCache) {
     console.info('[CACHE]', 'Get user from cache')
@@ -120,7 +120,7 @@ export async function getUserList(
     `${API_BASE}/users/${selector}/${users.join(',')}`
   )
 
-  const list: DbUserDoc[] = data.body.users || []
+  const list: ApiResponseUser[] = data.body.users || []
 
   list.forEach(setUserCache)
 

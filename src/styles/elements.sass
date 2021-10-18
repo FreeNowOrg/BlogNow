@@ -164,12 +164,11 @@ table
   border-radius: 8px
 
   tr:nth-of-type(2n)
-    background-color: rgba(0, 0, 0, 0.1)
+    background-color: rgba(var(--theme-accent-color--rgb), 0.1)
 
   td
     padding: 0.5rem
     border-bottom: 1px solid #ccc
-    border-radius: 8px
 
 // Loading
 .loading-cover
@@ -194,6 +193,9 @@ table
     left: 0
     background-color: rgba(200,200,200,0.2)
     z-index: 5
+
+.xicon
+  vertical-align: middle
 
 // Code
 pre:not(.hljs)
