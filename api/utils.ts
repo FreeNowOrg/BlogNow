@@ -67,6 +67,14 @@ router.beforeEach((ctx) => {
 router.beforeEach(initMongo)
 // Pre fetch userData
 router.beforeEach(initUserData)
+// For dev
+// router.beforeEach((ctx) => {
+//   if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(ctx.req.headers.origin)) {
+//     console.info('Local dev request')
+//     ctx.res.setHeader('access-control-allow-origin', ctx.req.headers.origin)
+//     ctx.res.setHeader('access-control-allow-credentials', 'true')
+//   }
+// })
 // Close db
 router.afterEach(closeMongo)
 export { router }
@@ -84,7 +92,7 @@ export async function initMongo(ctx: any) {
   } catch (e) {
     ctx.status = 501
     ctx.message =
-      'Unable to connect to the database or the MONGODB_URI is incorrectly configured.'
+      'Unable to connect to the database or the MONGO_URI is incorrectly configured.'
     return false
   }
   console.log('DB connected')

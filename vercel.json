@@ -24,18 +24,17 @@
         {
           "type": "header",
           "key": "origin",
-          "value": "localhost"
-        },
-        {
-          "type": "header",
-          "key": "origin",
-          "value": "127.0.0.1"
+          "value": "http://localhost:3000"
         }
       ],
       "headers": [
         {
           "key": "access-control-allow-origin",
-          "value": "*"
+          "value": "http://localhost:3000"
+        },
+        {
+          "key": "access-control-allow-credentials",
+          "value": "true"
         }
       ]
     }
