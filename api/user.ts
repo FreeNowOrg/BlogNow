@@ -127,6 +127,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
         ctx.message = 'User not found'
         ctx.body = {
           filter,
+          user: null,
         }
         return
       }

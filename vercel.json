@@ -22,11 +22,13 @@
       "source": "/api(.*)",
       "has": [
         {
-          "type": "host",
+          "type": "header",
+          "key": "origin",
           "value": "localhost"
         },
         {
-          "type": "host",
+          "type": "header",
+          "key": "origin",
           "value": "127.0.0.1"
         }
       ],
