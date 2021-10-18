@@ -46,7 +46,9 @@ import GlobalAside from '../components/GlobalAside.vue'
 const recents = ref<any[]>([])
 
 function handleJumpToMain() {
-  scrollTo(document.documentElement.clientHeight - 60)
+  scrollTo(document.getElementById('home-main') as HTMLElement, {
+    verticalOffset: -(60 + 16),
+  })
 }
 
 onMounted(() => {

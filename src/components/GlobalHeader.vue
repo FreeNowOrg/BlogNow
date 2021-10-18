@@ -16,7 +16,7 @@ nav#global-header.flex.gap-1
         @click='userDropdownShow = !userDropdownShow'
       )
         .avatar
-          img(:src='avatar')
+          img(:src='getAvatar(userData.avatar)')
         .angle
           icon
             angle-down
@@ -35,7 +35,7 @@ nav#global-header.flex.gap-1
                 .top
                   .banner-bg
                   router-link.plain.name(:to='`/@${userData.username}`')
-                    img.avatar(:src='avatar')
+                    img.avatar(:src='getAvatar(userData.avatar)')
                 .details
                   router-link.plain.user-name(:to='`/@${userData.username}`') {{ userData.username }}
                   .uid {{ userData.title }}
@@ -44,7 +44,7 @@ nav#global-header.flex.gap-1
               .nav-user-card
                 .top
                   .banner-bg
-                  img.avatar(:src='avatar')
+                  img.avatar(:src='getAvatar(userData.avatar)')
                 .details
                   router-link.plain.name(to='/auth') Guest
                   .uid Welcome to the blog~
@@ -59,19 +59,13 @@ nav#global-header.flex.gap-1
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { userData, isLoggedIn } from '../utils'
+import { getAvatar, userData, isLoggedIn } from '../utils'
 import { AngleDown } from '@vicons/fa'
 
 const userDropdownShow = ref(false)
 const router = useRouter()
-const avatar = computed(
-  () =>
-    `${
-      userData.value?.avatar || 'https://gravatar.loli.net/avatar/'
-    }?d=identicon`
-)
 
 router.beforeEach(() => {
   userDropdownShow.value = false

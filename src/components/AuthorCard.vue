@@ -4,7 +4,7 @@
     .top.flex.gap-1
       .left
         router-link.avatar.plain(:to='`/@${user.username}`')
-          img(:src='user.avatar')
+          img(:src='getAvatar(user.avatar)')
       .right.flex-1
         router-link.username(:to='`/@${user.username}`') {{ user.username }}
         .special-title(v-if='user.title', title='Special title') {{ user.title }}
@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue'
+import { getAvatar } from '../utils'
 import type { ApiResponseUser } from '../types'
 const props = defineProps<{ user: ApiResponseUser }>()
 </script>
