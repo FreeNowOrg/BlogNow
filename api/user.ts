@@ -57,7 +57,7 @@ export const USERDATA_DEFAULTS: DbUserDoc = {
   token_expires: 0,
 }
 
-export const PASSWORD_STENGTH: 0 | 1 | 2 | 3 = 1
+export const PASSWORD_STRENGTH: 0 | 1 | 2 | 3 = 1
 
 export function getUserModel(
   payload: Partial<DbUserDoc>,
@@ -93,6 +93,13 @@ function getPasswordHash(salt: string, password: string) {
     .createHash('sha256')
     .update(`salt=${salt},password=${password}`)
     .digest('hex')
+}
+
+function trimUsername(str: string) {
+  return str
+    .replace(/^[\s_\-\.~]+/, '')
+    .replace(/[\s_\-\.~]+$/, '')
+    .replace(/\s+/g, ' ')
 }
 
 export default (req: VercelRequest, res: VercelResponse) => {
@@ -140,7 +147,13 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .path(['uuid', 'uid', 'username'], 'selector')
     .path(/.+/, 'rawList')
     .action(async (ctx) => {
-      const list = unique(ctx.params.rawList.split(/[|,]/))
+      const list = unique(
+        ctx.params.rawList
+          .split(/[|,]/)
+          .map((i) =>
+            ctx.params.selector === 'username' ? trimUsername(i) : i.trim()
+          )
+      )
       if (list.length > 25) {
         ctx.customBody = {
           info: 'Too many requests, only the first 25 users are returned',
@@ -190,43 +203,65 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .path('auth')
     .path('register')
     .check((ctx) => {
-      const { username, password } = ctx.req.body || {}
-      if (!username || !password) {
+      const { username, password, password_repeat } = ctx.req.body || {}
+      if (!username || !password || !password_repeat) {
         ctx.status = 400
         ctx.message = 'Missing params'
         return false
       }
     })
-    .check((ctx) => {
-      const { username, password } = ctx.req.body || {}
-      if (
-        !/^[\s\-\.0-9A-Z_`'"a-z~\u0080-\uFFFF]+$/.test(username) ||
-        username.length <= 5
-      ) {
+    .check<{
+      username: string
+      password: string
+    }>((ctx) => {
+      let { username, password, password_repeat } = ctx.req.body || {}
+
+      // Trim username
+      username = trimUsername(username)
+
+      const usernameTest = /^[_\-\.~\s0-9A-Za-z\u0080-\uFFFF]+$/
+      if (!usernameTest.test(username) || username.length <= 5) {
         ctx.status = 400
         ctx.message = 'Invalid username.'
         ctx.body = {
           invalid_item: 'username',
+          item_standard: username,
+          item_test: false,
           item_required: {
-            allowed_symbols: ['_', '-', '.', '~', "'", '"', '`'],
+            allowed_symbols: ['_', '-', '.', '~', ' '],
+            regexp: usernameTest.toString(),
             min_length: 5,
           },
         }
         return false
       }
-      if (passwordStrength(password).id <= PASSWORD_STENGTH) {
+
+      if (password !== password_repeat) {
+        ctx.status = 400
+        ctx.message = 'Entered passwords differ!'
+        ctx.body = {
+          invalid_item: 'password_repeat',
+        }
+        return false
+      }
+
+      const passwordTest = passwordStrength(password)
+      if (passwordTest.id < PASSWORD_STRENGTH) {
         ctx.status = 400
         ctx.message = 'Password is too weak.'
         ctx.body = {
           invalid_item: 'password',
-          strength_options: passwordStrengthOptions,
-          item_required: passwordStrengthOptions[PASSWORD_STENGTH],
+          item_test: passwordTest,
+          item_required: passwordStrengthOptions[PASSWORD_STRENGTH],
         }
         return false
       }
+
+      ctx.username = username
+      ctx.password = password
     })
     .check(async (ctx) => {
-      const { username } = ctx.req.body || {}
+      const { username } = ctx
       const already = await ctx.col.findOne({
         username: new RegExp(username, 'i'),
       })
@@ -237,17 +272,17 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
     })
     .action(async (ctx) => {
-      const { username, password } = ctx.req.body || {}
+      const { username, password } = ctx
 
-      const [lastUser] = await ctx.col
+      const [lastUser] = (await ctx.col
         .find()
         .sort({ uid: -1 })
         .project({ uid: 1 })
         .limit(1)
-        .toArray()
-      const uid = isNaN(lastUser?.pid)
+        .toArray()) as DbUserDoc[]
+      const uid = isNaN(lastUser?.uid)
         ? (await ctx.col.countDocuments()) + 10000
-        : (lastUser.pid as number) + 1
+        : lastUser.uid + 1
 
       const salt = nanoid(32)
       const insert: DbUserDoc = getUserModel({
@@ -281,7 +316,9 @@ export default (req: VercelRequest, res: VercelResponse) => {
     })
     .action(async (ctx) => {
       const { username, password } = ctx.req.body || {}
-      const profile = await ctx.col.findOne({ username })
+      const profile = await ctx.col.findOne({
+        username: new RegExp(trimUsername(username), 'i'),
+      })
       if (!profile) {
         ctx.status = 403
         ctx.message = 'Invalid username'

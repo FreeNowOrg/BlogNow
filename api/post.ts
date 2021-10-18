@@ -49,6 +49,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       if (!post) {
         ctx.status = 404
         ctx.message = 'Post not found'
+        return
       } else {
         ctx.message = 'Get post by filter'
       }
