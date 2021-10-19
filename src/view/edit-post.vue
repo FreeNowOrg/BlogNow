@@ -111,7 +111,10 @@ function handleCreate() {
     })
     .then(
       ({ data }: any) => {
-        router.push({ name: 'post', params: { uuid: data.body.uuid } })
+        router.push({
+          name: data.body.slug ? 'post-slug' : 'post-uuid',
+          params: { uuid: data.body.uuid, slug: data.body.slug },
+        })
       },
       (e) => {
         error.value = getErrMsg(e)
@@ -131,10 +134,10 @@ function handleUpdate() {
       slug: slug.value,
     })
     .then(
-      () => {
+      ({ data }: any) => {
         router.push({
-          name: 'post',
-          params: { uuid },
+          name: data.body.slug ? 'post-slug' : 'post-uuid',
+          params: { uuid: data.body.uuid, slug: data.body.slug },
           query: { noCache: 1 },
         })
       },
