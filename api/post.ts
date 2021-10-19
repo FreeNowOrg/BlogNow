@@ -11,9 +11,9 @@ export const POSTDATA_DEFAULTS: DbPostDoc = {
   slug: '',
   title: '',
   content: '',
-  created_at: '',
+  created_at: new Date(0),
   author_uuid: '',
-  edited_at: '',
+  edited_at: new Date(0),
   editor_uuid: '',
 }
 
@@ -23,6 +23,11 @@ export function getPostModel(payload: Partial<DbPostDoc>) {
     ...payload,
   })
   post.slug = slugify(post.slug, { lower: true })
+  post.created_at = new Date(post.created_at)
+  post.edited_at =
+    new Date(post.edited_at).getTime() !== 0
+      ? new Date(post.edited_at)
+      : new Date(post.created_at)
   return post
 }
 

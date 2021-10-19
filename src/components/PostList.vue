@@ -22,7 +22,7 @@ ul.posts-list
             icon
               calendar-alt
             time {{ new Date(item.created_at).toLocaleString() }}
-          span.edited-date(v-if='item.edited_at', title='Edited date')
+          span.edited-date(v-if='item.editor_uuid', title='Edited date')
             | &nbsp;·&nbsp;
             icon
               pen-nib

@@ -41,7 +41,7 @@ export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
 export const USERDATA_DEFAULTS: DbUserDoc = {
   authority: 0,
   avatar: '',
-  created_at: '',
+  created_at: new Date(0),
   gender: 'other',
   nickname: '',
   slogan: '',
@@ -67,6 +67,8 @@ export function getUserModel(
     ...USERDATA_DEFAULTS,
     ...payload,
   }
+
+  data.created_at = new Date(data.created_at)
 
   // Handle avatar
   const email_hash = crypto

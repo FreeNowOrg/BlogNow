@@ -11,9 +11,9 @@ export interface DbPostDoc {
   slug: string
   title: string
   content: string
-  created_at: string
+  created_at: Date
   author_uuid: string
-  edited_at: string
+  edited_at: Date
   editor_uuid: string
 }
 
@@ -22,7 +22,7 @@ export interface DbUserDoc {
   uid: number
   username: string
   email: string
-  created_at: string
+  created_at: Date
   nickname: string
   slogan: string
   gender: 'male' | 'female' | 'other'
