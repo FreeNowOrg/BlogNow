@@ -4,7 +4,7 @@ ul.posts-list
     .flex.gap-1
       .left
         router-link.thumb.plain(
-          :to='{ name: "post", params: { uuid: item.uuid } }'
+          :to='{ name: "post-uuid", params: { uuid: item.uuid } }'
         )
           img(
             :src='item.cover || "https://api.daihan.top/api/acg?_random=" + item.uuid'

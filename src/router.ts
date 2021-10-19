@@ -33,11 +33,12 @@ router.addRoute({
 // Post
 router.addRoute({
   path: '/post/:uuid',
-  name: 'post',
+  name: 'post-uuid',
   component: () => import('./view/post.vue'),
 })
 router.addRoute({
-  path: '/p-:pid',
+  path: '/pid/:pid',
+  alias: ['/p-:pid'],
   name: 'post-pid',
   component: () => import('./view/post.vue'),
 })

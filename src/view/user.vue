@@ -33,7 +33,7 @@
                 strong {{ item.title }}
               .link
                 router-link(
-                  :to='{ name: "post", params: { uuid: item.uuid } }'
+                  :to='{ name: "post-uuid", params: { uuid: item.uuid } }'
                 ) view
 
       global-aside
@@ -59,6 +59,14 @@ const notFound = ref(false)
 const isMe = computed(
   () => isLoggedIn.value && userData.value.uuid === user.value?.uuid
 )
+const filter = computed(() => {
+  const selector = (route.name as string).split('-')[1] as UserSelector
+  const target = route.params[selector] as string
+  return {
+    selector,
+    target,
+  }
+})
 
 function init() {
   user.value = undefined
@@ -66,10 +74,7 @@ function init() {
   notFound.value = false
   postLoading.value = true
 
-  const selector = (route.name as string).split('-')[1] as UserSelector
-  const target = route.params[selector] as string
-
-  getUser(selector, target).then(
+  getUser(filter.value.selector, filter.value.target).then(
     (data) => {
       user.value = data
       setTitle(data.username, 'User')
@@ -84,11 +89,10 @@ function init() {
 }
 
 function initUserPosts() {
-  const selector = (route.name as string).split('-')[1] as UserSelector
-  const target = route.params[selector] as string
-
   axios
-    .get(`${API_BASE}/user/${selector}/${target}/posts`)
+    .get(
+      `${API_BASE}/user/${filter.value.selector}/${filter.value.target}/posts`
+    )
     .then(({ data }: any) => {
       posts.value = data.body.posts
     })

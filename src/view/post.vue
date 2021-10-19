@@ -146,18 +146,24 @@ const bgImg = computed(
 )
 const notFound = ref(false)
 const menuShow = ref(false)
-
-function init() {
-  post.value = undefined
-  notFound.value = false
-
+const filter = computed(() => {
   const selector = (route.name as string).split('-')[1] as
     | 'uuid'
     | 'pid'
     | 'slug'
   const target = route.params[selector] as string
+  return { selector, target }
+})
 
-  getPost(selector, target, !!route.query.noCache).then(
+function init() {
+  post.value = undefined
+  notFound.value = false
+
+  getPost(
+    filter.value.selector,
+    filter.value.target,
+    !!route.query.noCache
+  ).then(
     (data) => {
       setTitle(data.title)
       post.value = data
