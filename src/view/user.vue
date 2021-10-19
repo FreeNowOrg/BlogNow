@@ -32,7 +32,7 @@
               .title 
                 strong {{ item.title }}
               .link
-                router-view(
+                router-link(
                   :to='{ name: "post", params: { uuid: item.uuid } }'
                 ) view
 
@@ -51,11 +51,6 @@ import GlobalAside from '../components/GlobalAside.vue'
 const [route, router] = [useRoute(), useRouter()]
 
 type UserSelector = 'uuid' | 'uid' | 'username'
-const filter = computed(() => {
-  const selector = (route.name as string).split('-')[1] as UserSelector
-  const target = route.params[selector] as string
-  return { selector, targrt: selector === 'uid' ? parseInt(target) : target }
-})
 
 const user = ref<DbUserDoc>()
 const posts = ref<DbPostDoc[]>([])
@@ -70,7 +65,11 @@ function init() {
   posts.value = []
   notFound.value = false
   postLoading.value = true
-  getUser(filter.value.selector, filter.value.targrt).then(
+
+  const selector = (route.name as string).split('-')[1] as UserSelector
+  const target = route.params[selector] as string
+
+  getUser(selector, target).then(
     (data) => {
       user.value = data
       setTitle(data.username, 'User')
@@ -85,10 +84,11 @@ function init() {
 }
 
 function initUserPosts() {
+  const selector = (route.name as string).split('-')[1] as UserSelector
+  const target = route.params[selector] as string
+
   axios
-    .get(
-      `${API_BASE}/user/${filter.value.selector}/${filter.value.targrt}/posts`
-    )
+    .get(`${API_BASE}/user/${selector}/${target}/posts`)
     .then(({ data }: any) => {
       posts.value = data.body.posts
     })

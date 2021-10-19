@@ -137,15 +137,6 @@ import type { ApiResponsePost } from '../types'
 const route = useRoute()
 const router = useRouter()
 
-const filter = computed(() => {
-  const selector = (route.name as string).split('-')[1] as
-    | 'uuid'
-    | 'pid'
-    | 'slug'
-  const target = route.params[selector] as string
-  return { selector, targrt: selector === 'pid' ? parseInt(target) : target }
-})
-
 const post = ref<ApiResponsePost>()
 const bgImg = computed(
   () =>
@@ -159,11 +150,14 @@ const menuShow = ref(false)
 function init() {
   post.value = undefined
   notFound.value = false
-  getPost(
-    filter.value.selector,
-    filter.value.targrt,
-    !!route.query.noCache
-  ).then(
+
+  const selector = (route.name as string).split('-')[1] as
+    | 'uuid'
+    | 'pid'
+    | 'slug'
+  const target = route.params[selector] as string
+
+  getPost(selector, target, !!route.query.noCache).then(
     (data) => {
       setTitle(data.title)
       post.value = data

@@ -52,7 +52,10 @@ import { siteMeta } from '../utils'
       margin: 1rem 0 0.4rem 0
     .stats
       .key
+        font-weight: 400
+      .val
         font-weight: 600
+        font-size: 1.125rem
 
 @media screen and(max-width: 900px)
   #global-aside-hr

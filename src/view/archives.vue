@@ -4,16 +4,14 @@
     .main-flex.body-inner
       #archive-post-list.flex-1
         .card
-          h1 Posts
+          h1 Recent posts
           .loading(v-if='posts.length < 1')
             placeholder
-          ul
-            li(v-for='item in posts')
-              .title {{ item.title }}
-              .link
-                router-link.title(
-                  :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
-                ) view
+          post-list(:posts='posts')
+
+          .next-btn.align-center(v-if='hasNext')
+            a.button(@click='handleLoadMore') {{ nextLoading ? "Loading..." : "Load more" }}
+
       global-aside
 </template>
 
@@ -21,15 +19,31 @@
 import { onMounted, ref } from 'vue'
 import { setTitle } from '../utils/setTitle'
 import GlobalAside from '../components/GlobalAside.vue'
-import { getRecentPosts } from '../utils'
-import type { DbPostDoc } from '../types/Database'
+import { getPostList, getRecentPosts } from '../utils'
+import type { ApiResponsePost } from '../types'
+import PostList from '../components/PostList.vue'
 
-const posts = ref<DbPostDoc[]>([])
+const posts = ref<ApiResponsePost[]>([])
+const hasNext = ref(false)
+const nextLoading = ref(false)
 
 function init() {
   getRecentPosts(true).then((list) => {
     posts.value = list
+    hasNext.value = true
   })
+}
+
+function handleLoadMore() {
+  if (nextLoading.value) return
+  nextLoading.value = true
+  getPostList({ offset: posts.value.length })
+    .then((list) => {
+      posts.value.push(...list)
+    })
+    .finally(() => {
+      nextLoading.value = false
+    })
 }
 
 onMounted(() => {

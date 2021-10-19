@@ -10,6 +10,7 @@ export type ApiResponse<
 } & CUSTOM_BODY
 
 export type ApiResponsePost = DbPostDoc & {
+  cover: string
   author: DbUserDoc & { not_exist?: true }
   editor: DbUserDoc & { not_exist?: true }
 }

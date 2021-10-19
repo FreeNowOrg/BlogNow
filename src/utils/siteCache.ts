@@ -60,7 +60,9 @@ export async function getPostList({ limit = 25, offset = 0 }) {
   return posts
 }
 
-export async function getRecentPosts(noCache?: boolean) {
+export async function getRecentPosts(
+  noCache?: boolean
+): Promise<ApiResponsePost[]> {
   const list: ApiResponsePost[] = []
   if (siteCache.value.recents.length > 0 && !noCache) {
     console.info('[CACHE]', 'Get recents from cache')
