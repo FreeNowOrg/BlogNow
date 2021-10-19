@@ -17,7 +17,7 @@
           style='padding: 0'
         )
           .post-cover
-            router-link.title(
+            router-link.plain.title(
               :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
             )
               img.cover-img(
@@ -136,6 +136,7 @@ onMounted(() => {
     &:hover
       .cover-img
         transform: scale(1.1)
+        filter: blur(1px)
     .post-meta
       padding: 2rem 1rem
       flex: 1
@@ -144,7 +145,7 @@ onMounted(() => {
         font-weight: 600
         --color: var(--theme-accent-color)
 
-@media screen and(max-width: 900px)
+@media screen and (max-width: 900px)
   #home-post-list
     .home-post-card
       flex-direction: column !important
