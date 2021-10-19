@@ -4,7 +4,7 @@ ul.posts-list
     .flex.gap-1
       .left
         router-link.thumb.plain(
-          :to='{ name: "post-uuid", params: { uuid: item.uuid } }'
+          :to='{ name: item.slug ? "post-slug" : "post-uuid", params: { slug: item.slug, uuid: item.uuid } }'
         )
           img(
             :src='item.cover || "https://api.daihan.top/api/acg?_random=" + item.uuid'
@@ -12,11 +12,11 @@ ul.posts-list
       .right.flex-1.flex.flex-column
         .title
           router-link(
-            :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
+            :to='{ name: item.slug ? "post-slug" : "post-uuid", params: { slug: item.slug, uuid: item.uuid } }'
           ) {{ item.title }}
-        .author-link
+        .author-link(v-if='!item.author.not_exist')
           img.avatar(:src='getAvatar(item.author.avatar)')
-          router-link(:to='`/@${item.author.username}`') {{ item.author.nickname || item.author.username || "-" }}
+          router-link(:to='`/@${item.author.username}`') {{ item.author.nickname || item.author.username }}
         .post-date
           span.created-date(title='Created date')
             icon

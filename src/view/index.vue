@@ -18,14 +18,14 @@
         )
           .post-cover
             router-link.plain.title(
-              :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
+              :to='{ name: item.slug ? "post-slug" : "post-uuid", params: { slug: item.slug, uuid: item.uuid } }'
             )
               img.cover-img(
                 :src='item.cover || "https://api.daihan.top/api/acg?_random=" + item.uuid'
               )
           .post-meta
             router-link.title(
-              :to='{ name: item.slug ? "post-slug" : "post", params: { slug: item.slug, uuid: item.uuid } }'
+              :to='{ name: item.slug ? "post-slug" : "post-uuid", params: { slug: item.slug, uuid: item.uuid } }'
             ) {{ item.title }}
             .time Created at {{ new Date(item.created_at).toLocaleString() }}
             p.preview {{ item.content.length > 120 ? item.content.slice(0, 120) + "..." : item.content }}
