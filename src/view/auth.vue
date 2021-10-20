@@ -3,7 +3,7 @@
   .body-inner
     form#auth-form.card(
       v-if='!isLoggedIn',
-      :class='{ "loadin-cover": loading }'
+      :class='{ "loading-cover": loading }'
     )
       #logo-area
         .logo-placeholder LOGO
