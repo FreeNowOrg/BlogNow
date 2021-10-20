@@ -44,6 +44,23 @@
           button(@click.prevent='handleLogin') Login
 
       #register(v-else)
+        label
+          strong Username
+          input.site-style(v-model='username')
+        label
+          strong Password
+          input.site-style(
+            v-model='password',
+            type='password',
+            autocomplete='new-password'
+          )
+        label
+          strong Repeat password
+          input.site-style(
+            v-model='repeatPassword',
+            type='password',
+            autocomplete='new-password'
+          )
         p You cannot register at this time
 
     #user-info(v-else)
@@ -64,6 +81,7 @@ const [route, router] = [useRoute(), useRouter()]
 
 const username = ref('')
 const password = ref('')
+const repeatPassword = ref('')
 const loading = ref(false)
 const tab = ref('login')
 const errorTitle = ref('')
@@ -98,7 +116,16 @@ function handleLogout() {
   location.reload()
 }
 
-function handleRegister() {}
+function handleRegister() {
+  loading.value = true
+  errorMsg.value = ''
+
+  if (password.value !== repeatPassword.value) {
+    errorTitle.value = 'Password error'
+    errorMsg.value = 'Your repeated password is not the same as the primary one.'
+  }
+  loading.value = false
+}
 
 onMounted(() => {
   setTitle('Authorization')

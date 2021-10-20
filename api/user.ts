@@ -200,8 +200,8 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .path('auth')
     .path('register')
     .check((ctx) => {
-      const { username, password, password_repeat } = ctx.req.body || {}
-      if (!username || !password || !password_repeat) {
+      const { username, password } = ctx.req.body || {}
+      if (!username || !password) {
         ctx.status = 400
         ctx.message = 'Missing params'
         return false
@@ -211,7 +211,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       username: string
       password: string
     }>((ctx) => {
-      let { username, password, password_repeat } = ctx.req.body || {}
+      let { username, password } = ctx.req.body || {}
 
       // Trim username
       username = trimUsername(username)
@@ -229,15 +229,6 @@ export default (req: VercelRequest, res: VercelResponse) => {
             regexp: usernameTest.toString(),
             min_length: 5,
           },
-        }
-        return false
-      }
-
-      if (password !== password_repeat) {
-        ctx.status = 400
-        ctx.message = 'Entered passwords differ!'
-        ctx.body = {
-          invalid_item: 'password_repeat',
         }
         return false
       }
@@ -289,7 +280,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
         uuid: UUID(),
         password_hash: getPasswordHash(salt, password),
         salt,
-        created_at: new Date().toISOString(),
+        created_at: new Date(),
       })
 
       const dbRes = await ctx.col.insertOne(insert)
