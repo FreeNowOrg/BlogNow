@@ -50,5 +50,23 @@ export default (req: VercelRequest, res: VercelResponse) => {
       ctx.message = 'Get site meta'
     })
 
+  // Easter eggs
+  router
+    .addRoute()
+    .method('GET')
+    .path(/(coffee|café|easter[_\-\s]egg)/i)
+    .action((ctx) => {
+      ctx.status = 418
+      ctx.message = `Well, I think I need to remind you that I'm just a blog backend.`
+    })
+  router
+    .addRoute()
+    .method('GET')
+    .path(/(password|secrets?)/i)
+    .action((ctx) => {
+      ctx.status = 403
+      ctx.message = `Hey, don't even think about it.`
+    })
+
   return router.init(req, res)
 }

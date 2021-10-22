@@ -5,6 +5,7 @@ export interface DbConfigDoc {
 
 export type DbConfigCol = DbConfigDoc[]
 
+// Post
 export interface DbPostDoc {
   uuid: string
   pid: number
@@ -15,8 +16,15 @@ export interface DbPostDoc {
   author_uuid: string
   edited_at: Date
   editor_uuid: string
+  allow_comment: boolean
+  is_deleted: boolean
+  deleted_by: string
+  is_private: boolean
+  allowed_users: string[]
+  allowed_authority: number
 }
 
+// User
 export interface DbUserDoc {
   uuid: string
   uid: number
@@ -33,6 +41,7 @@ export interface DbUserDoc {
   token_expires: number
   authority: number
   title: string
+  allow_comment: boolean
 }
 
 export interface DbAuthorityDoc {
@@ -60,3 +69,16 @@ export type DbAuthorityKeys =
   | AuthorityPost
   | AuthorityUser
   | AuthoritySite
+
+// Comment
+export interface DbCommentDoc {
+  target_type: 'user' | 'post'
+  target_uuid: string
+  uuid: string
+  content: string
+  created_at: Date
+  author_uuid: string
+  edited_at: Date
+  editor_uuid: string
+  is_deleted: boolean
+}

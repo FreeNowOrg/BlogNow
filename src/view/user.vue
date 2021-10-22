@@ -24,17 +24,10 @@
           p {{ user.slogan || "-" }}
         hr
         #user-posts
-          h3 Posts
+          h3 Posts by user
           #post-loading.loading(v-if='postLoading')
             placeholder
-          ul#post-list
-            li(v-for='item in posts')
-              .title 
-                strong {{ item.title }}
-              .link
-                router-link(
-                  :to='{ name: "post-uuid", params: { uuid: item.uuid } }'
-                ) view
+          post-list(v-else :posts='posts')
 
       global-aside
 </template>
@@ -44,16 +37,17 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { API_BASE } from '../config'
-import type { DbPostDoc, DbUserDoc } from '../types/Database'
 import { getAvatar, getUser, isLoggedIn, setTitle, userData } from '../utils'
 import GlobalAside from '../components/GlobalAside.vue'
+import PostList from '../components/PostList.vue'
+import type { ApiResponsePost, ApiResponseUser } from '../types'
 
 const [route, router] = [useRoute(), useRouter()]
 
 type UserSelector = 'uuid' | 'uid' | 'username'
 
-const user = ref<DbUserDoc>()
-const posts = ref<DbPostDoc[]>([])
+const user = ref<ApiResponseUser>()
+const posts = ref<ApiResponsePost[]>([])
 const postLoading = ref(false)
 const notFound = ref(false)
 const isMe = computed(

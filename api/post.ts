@@ -1,9 +1,11 @@
 import { v4 as UUID } from 'uuid'
-import { DbPostDoc } from '../src/types/Database'
+import { DbPostDoc, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { attachUsersToPosts, router, sortKeys } from './utils'
+import { attachUsers, router, sortKeys } from './utils'
 import slugify from 'slugify'
 import { VercelRequest, VercelResponse } from '@vercel/node'
+import { RouteContextDefaults } from 'serverless-kit'
+import { Db } from 'mongodb'
 
 export const POSTDATA_DEFAULTS: DbPostDoc = {
   uuid: '',
@@ -15,6 +17,12 @@ export const POSTDATA_DEFAULTS: DbPostDoc = {
   author_uuid: '',
   edited_at: new Date(0),
   editor_uuid: '',
+  allow_comment: true,
+  is_deleted: false,
+  deleted_by: '',
+  is_private: false,
+  allowed_users: [],
+  allowed_authority: 0,
 }
 
 export function getPostModel(payload: Partial<DbPostDoc>) {
@@ -63,7 +71,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
         ctx.message = 'Get post by filter'
       }
 
-      const [post1] = await attachUsersToPosts(ctx, [post])
+      const [post1] = await attachUsers(ctx, [post])
 
       ctx.body = { post: post1, filter }
     })
@@ -99,7 +107,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
 
       ctx.body = {
-        posts: await attachUsersToPosts(ctx, posts.map(getPostModel)),
+        posts: await attachUsers(ctx, posts.map(getPostModel)),
         has_next,
         limit: ctx.limit,
         offset: ctx.offset,
@@ -244,4 +252,64 @@ export default (req: VercelRequest, res: VercelResponse) => {
     })
 
   return router.init(req, res)
+}
+
+async function checkCanView(
+  ctx: RouteContextDefaults & { db: Db; user: DbUserDoc; post: DbPostDoc }
+) {
+  let display_reason
+
+  if (ctx.post.is_deleted) {
+    if (
+      ctx.user.uuid === ctx.post.author_uuid &&
+      ctx.user.uuid === ctx.post.deleted_by
+    ) {
+      display_reason = 'deleted_by_self'
+    } else if (ctx.user.authority >= 3) {
+      display_reason = 'moderator'
+    } else {
+      ctx.status = 404
+      ctx.message = 'Post not found'
+      return false
+    }
+  }
+
+  if (ctx.post.is_private) {
+    if (ctx.user.uuid === ctx.post.author_uuid) {
+      display_reason = 'author'
+    } else if (ctx.post.allowed_users.includes(ctx.user.uuid)) {
+      display_reason = 'allowed_user'
+    } else if (ctx.user.authority >= 4) {
+      display_reason = 'moderator'
+    } else {
+      ctx.statue = 404
+      ctx.message = 'Private post'
+      return false
+    }
+  }
+
+  ctx.customBody = {
+    display_reason,
+  }
+}
+
+async function checkCanDelete(
+  ctx: RouteContextDefaults & { db: Db; user: DbUserDoc; post: DbPostDoc }
+) {
+  if (ctx.post.author_uuid === ctx.user.uuid) {
+    // Is author
+  } else {
+    // Not author
+    if (ctx.user.authority < 3) {
+      ctx.status = 403
+      ctx.message = 'Permission denied'
+      return false
+    }
+  }
+
+  if (ctx.post.is_deleted) {
+    ctx.status = 406
+    ctx.message = 'The post has already been deleted'
+    return false
+  }
 }

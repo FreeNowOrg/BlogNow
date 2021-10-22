@@ -1,6 +1,11 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { Collection, Db, MongoClient } from 'mongodb'
-import { HandleRouter, HandleResponse, Route } from 'serverless-kit'
+import {
+  HandleRouter,
+  HandleResponse,
+  Route,
+  getProjectSrotFromStr,
+} from 'serverless-kit'
 import { SITE_ENV } from '../src/config'
 import { DbPostDoc, DbUserDoc } from '../src/types/Database'
 import { COLNAME, getLocalConfig } from './config'
@@ -14,6 +19,14 @@ declare module '../node_modules/serverless-kit/lib/modules/HandleRouter' {
   interface Route<ContextT extends unknown = RouteContextDefaults> {
     checkAuth: (required: number) => Route<RouteContextDefaults & ContextT>
     checkLogin: () => Route<RouteContextDefaults & ContextT>
+    parseOffsetLimitSort: () => Route<
+      RouteContextDefaults &
+        ContextT & {
+          offset: number
+          limit: number
+          sort: Record<string, -1 | 1>
+        }
+    >
   }
 }
 
@@ -52,6 +65,15 @@ Route.prototype.checkLogin = function () {
   return this
 }
 
+Route.prototype.parseOffsetLimitSort = function () {
+  this.check((ctx) => {
+    ctx.offset = parseInt((ctx.req.query.offset as string) || '0')
+    ctx.limit = Math.min(25, parseInt((ctx.req.query.limit as string) || '10'))
+    ctx.sort = getProjectSrotFromStr((ctx.req.sort as string) || '!_id')
+  })
+  return this
+}
+
 // Constuct a router
 const router = new HandleRouter<{
   mongoClient: MongoClient
@@ -62,19 +84,12 @@ const router = new HandleRouter<{
 // Make sure the body exists
 router.beforeEach((ctx) => {
   ctx.body = ctx.body || {}
+  ctx.req.body = ctx.req.body || {}
 })
 // Connect db
 router.beforeEach(initMongo)
 // Pre fetch userData
 router.beforeEach(initUserData)
-// For dev
-// router.beforeEach((ctx) => {
-//   if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(ctx.req.headers.origin)) {
-//     console.info('Local dev request')
-//     ctx.res.setHeader('access-control-allow-origin', ctx.req.headers.origin)
-//     ctx.res.setHeader('access-control-allow-credentials', 'true')
-//   }
-// })
 // Close db
 router.afterEach(closeMongo)
 export { router }
@@ -162,15 +177,15 @@ export function getTokenFromReq(req: VercelRequest) {
   )
 }
 
-export async function attachUsersToPosts(
+export async function attachUsers(
   ctx: { db: Db },
-  posts: DbPostDoc[]
+  docs: DbPostDoc[] | DbCommentDoc[]
 ): Promise<
   (DbPostDoc & { author: DbUserDoc | null; editor: DbUserDoc | null })[]
 > {
-  if (posts.length < 1) return []
+  if (docs.length < 1) return []
   const findList: string[] = []
-  posts.forEach(({ author_uuid, editor_uuid }) => {
+  docs.forEach(({ author_uuid, editor_uuid }) => {
     findList.push(author_uuid, editor_uuid)
   })
   const users = (await ctx.db
@@ -181,7 +196,7 @@ export async function attachUsersToPosts(
         .map((uuid) => ({ uuid })),
     })
     .toArray()) as DbUserDoc[]
-  return posts.map((i: any) => {
+  return docs.map((i: any) => {
     i.author = getUserModel(
       users.find(({ uuid }) => uuid === i.author_uuid),
       true

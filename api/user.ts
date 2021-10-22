@@ -1,6 +1,6 @@
 import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
 import { COLNAME } from './config'
-import { attachUsersToPosts, router, unique } from './utils'
+import { attachUsers, router, unique } from './utils'
 import * as crypto from 'crypto'
 import { v4 as UUID } from 'uuid'
 import { nanoid } from 'nanoid'
@@ -39,6 +39,7 @@ export const AUTHORITY_DEFAULTS: Record<DbAuthorityKeys, number> = {
 export const TOKEN_COOKIE_NAME = 'BLOG_NOW_TOKEN'
 
 export const USERDATA_DEFAULTS: DbUserDoc = {
+  allow_comment: true,
   authority: 0,
   avatar: '',
   created_at: new Date(0),
@@ -389,7 +390,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
       }
 
       ctx.body = {
-        posts: await attachUsersToPosts(ctx, posts.map(getPostModel)),
+        posts: await attachUsers(ctx, posts.map(getPostModel)),
         has_next,
         limit: ctx.limit,
         offset: ctx.offset,
