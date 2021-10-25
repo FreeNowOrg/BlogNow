@@ -67,11 +67,18 @@
         #post-after(v-if='post')
           hr
           #comment-area
-            h4 Comments
-            .desc Total {{ comments.length }} {{ comments.length > 1 ? "comments" : "comment" }}
-            comment-list(:comments='comments')
-              template(#before)
-                comment-edit(target_type='post', :target_uuid='post.uuid')
+            h4 Latest commets
+            .loading(v-if='commentsLoading && comments.length < 1')
+              placeholder
+            #comments-main(v-else)
+              .desc Total {{ total_comments }} {{ total_comments > 1 ? "comments" : "comment" }}
+              comment-list(:comments='comments')
+                template(#before)
+                  comment-edit(
+                    target_type='post',
+                    :target_uuid='post.uuid',
+                    @created='handleCommentCreated'
+                  )
 
         #post-tools-container
           #post-tools(v-if='post')
@@ -139,10 +146,16 @@ import AuthorCard from '../components/AuthorCard.vue'
 import CommentEdit from '../components/CommentEdit.vue'
 import CommentList from '../components/CommentList.vue'
 import GlobalAside from '../components/GlobalAside.vue'
-import { getPost, setTitle, userData, isLoggedIn } from '../utils'
-import type { ApiResponse, ApiResponseComment, ApiResponsePost } from '../types'
+import { getPost, setTitle, userData } from '../utils'
+import type {
+  ApiResponse,
+  ApiResponseComment,
+  ApiResponseCommentList,
+  ApiResponsePost,
+} from '../types'
 import axios from 'axios'
 import { API_BASE } from '../config'
+import Placeholder from '../components/Placeholder.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -216,15 +229,32 @@ function handleAnchorClick(line: string) {
 
 // Comments
 const comments = ref<ApiResponseComment[]>([])
+const total_comments = ref(0)
 const commentsLoading = ref(false)
 function initComments() {
+  if (!post.value || commentsLoading.value) {
+    return
+  }
+  commentsLoading.value = true
   axios
-    .get<ApiResponse<{ comments: ApiResponseComment[] }>>(
-      `${API_BASE}/comment/post/${post.value.uuid}`
+    .get<ApiResponse<ApiResponseCommentList>>(
+      `${API_BASE}/comment/post/${post.value.uuid}`,
+      {
+        params: {
+          sort: '!_id',
+        },
+      }
     )
     .then(({ data }) => {
       comments.value = data.body.comments
+      total_comments.value = data.body.total_comments
     })
+    .finally(() => {
+      commentsLoading.value = false
+    })
+}
+function handleCommentCreated(data: ApiResponseComment) {
+  comments.value.unshift(data)
 }
 
 router.afterEach((to, from) => {

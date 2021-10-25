@@ -16,6 +16,13 @@ export interface ApiAttachedUser {
 }
 
 export type ApiResponseComment = DbCommentDoc & ApiAttachedUser
+export type ApiResponseCommentList = {
+  comments: ApiResponseComment[]
+  total_comments: number
+  limit: number
+  offset: number
+  has_next: number
+}
 
 export type ApiResponsePost = DbPostDoc &
   ApiAttachedUser & {
