@@ -72,7 +72,7 @@ export type DbAuthorityKeys =
 
 // Comment
 export interface DbCommentDoc {
-  target_type: 'user' | 'post'
+  target_type: 'user' | 'post' | 'comment'
   target_uuid: string
   uuid: string
   content: string

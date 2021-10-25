@@ -107,8 +107,18 @@ onMounted(() => {
     z-index: 2
     bottom: 2rem
     left: 50%
+    width: 100%
     transform: translateX(-50%)
     font-size: 2rem
+    animation: jumpbtn 0.85s ease 0s infinite alternate
+
+@keyframes jumpbtn
+  from
+    bottom: 1rem
+    opacity: 0.4
+  to
+    bottom: 2rem
+    opacity: 1
 
 #home-post-list
   gap: 1.5rem

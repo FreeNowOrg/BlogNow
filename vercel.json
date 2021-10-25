@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/comment(.*)",
+      "destination": "/api/comment"
+    },
+    {
       "source": "/api/config(.*)",
       "destination": "/api/config"
     },

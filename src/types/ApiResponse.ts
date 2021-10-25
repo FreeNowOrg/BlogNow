@@ -1,3 +1,4 @@
+import { DbCommentDoc } from '.'
 import { DbPostDoc, DbUserDoc } from './Database'
 
 export type ApiResponse<
@@ -9,10 +10,16 @@ export type ApiResponse<
   body: BODY
 } & CUSTOM_BODY
 
-export type ApiResponsePost = DbPostDoc & {
-  cover: string
-  author: DbUserDoc & { not_exist?: true }
-  editor: DbUserDoc & { not_exist?: true }
+export interface ApiAttachedUser {
+  author: ApiResponseUser
+  editor: ApiResponseUser
 }
 
-export type ApiResponseUser = DbUserDoc
+export type ApiResponseComment = DbCommentDoc & ApiAttachedUser
+
+export type ApiResponsePost = DbPostDoc &
+  ApiAttachedUser & {
+    cover: string
+  }
+
+export type ApiResponseUser = DbUserDoc & { not_exist?: true }

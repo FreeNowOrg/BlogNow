@@ -69,7 +69,7 @@ Route.prototype.parseOffsetLimitSort = function () {
   this.check((ctx) => {
     ctx.offset = parseInt((ctx.req.query.offset as string) || '0')
     ctx.limit = Math.min(25, parseInt((ctx.req.query.limit as string) || '10'))
-    ctx.sort = getProjectSrotFromStr((ctx.req.sort as string) || '!_id')
+    ctx.sort = getProjectSrotFromStr((ctx.req.sort as string) || '')
   })
   return this
 }

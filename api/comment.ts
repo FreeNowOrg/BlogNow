@@ -33,7 +33,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('GET')
-    .path(['user', 'post'], 'target_type')
+    .path(['user', 'post', 'comment'], 'target_type')
     .path(/.+/, 'target_uuid')
     .parseOffsetLimitSort()
     .check(checkCanCreate)
@@ -51,9 +51,9 @@ export default (req: VercelRequest, res: VercelResponse) => {
         .limit(ctx.limit + 1)
         .toArray()
 
-      let has_next = true
+      let has_next = false
       if (comments.length > ctx.limit) {
-        has_next = false
+        has_next = true
         comments.pop()
       }
 
@@ -73,7 +73,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router
     .addRoute()
     .method('POST')
-    .path(['user', 'post'], 'target_type')
+    .path(['user', 'post', 'comment'], 'target_type')
     .path(/.+/, 'target_uuid')
     .checkLogin()
     .checkAuth(1)
@@ -94,6 +94,8 @@ export default (req: VercelRequest, res: VercelResponse) => {
         author_uuid: ctx.user.uuid,
         content: ctx.content,
         created_at: new Date(),
+        target_type: ctx.params.target_type as 'user' | 'post' | 'comment',
+        target_uuid: ctx.params.target_uuid,
         uuid: UUID(),
       })
       const dbRes = await ctx.col.insertOne(comment)

@@ -162,7 +162,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
         content,
         slug,
         author_uuid: ctx.user.uuid,
-        created_at: now.toISOString(),
+        created_at: now,
       })
       const dbRes = await ctx.col.insertOne(insert)
 
@@ -279,10 +279,10 @@ async function checkCanView(
       display_reason = 'author'
     } else if (ctx.post.allowed_users.includes(ctx.user.uuid)) {
       display_reason = 'allowed_user'
-    } else if (ctx.user.authority >= 4) {
+    } else if (ctx.user.authority = 4) {
       display_reason = 'moderator'
     } else {
-      ctx.statue = 404
+      ctx.status = 404
       ctx.message = 'Private post'
       return false
     }

@@ -28,16 +28,17 @@
       | dd
 
     .main-flex
-      article#post-content.card
+      article.card
         .loading(v-if='!post && !notFound')
           placeholder
 
-        v-md-editor(
-          v-if='post',
-          v-model='post.content',
-          mode='preview',
-          @change='updateMenu'
-        )
+        #post-content
+          v-md-editor(
+            v-if='post',
+            v-model='post.content',
+            mode='preview',
+            @change='updateMenu'
+          )
 
         #post-not-found(v-if='notFound')
           .align-center
@@ -65,7 +66,12 @@
 
         #post-after(v-if='post')
           hr
-          p Article after
+          #comment-area
+            h4 Comments
+            .desc Total {{ comments.length }} {{ comments.length > 1 ? "comments" : "comment" }}
+            comment-list(:comments='comments')
+              template(#before)
+                comment-edit(target_type='post', :target_uuid='post.uuid')
 
         #post-tools-container
           #post-tools(v-if='post')
@@ -130,9 +136,13 @@ import {
 } from '@vicons/fa'
 import scrollTo from 'animated-scroll-to'
 import AuthorCard from '../components/AuthorCard.vue'
+import CommentEdit from '../components/CommentEdit.vue'
+import CommentList from '../components/CommentList.vue'
 import GlobalAside from '../components/GlobalAside.vue'
 import { getPost, setTitle, userData, isLoggedIn } from '../utils'
-import type { ApiResponsePost } from '../types'
+import type { ApiResponse, ApiResponseComment, ApiResponsePost } from '../types'
+import axios from 'axios'
+import { API_BASE } from '../config'
 
 const route = useRoute()
 const router = useRouter()
@@ -167,15 +177,16 @@ function init() {
     (data) => {
       setTitle(data.title)
       post.value = data
+      initComments()
     },
     (e) => {
       if (e?.response?.status === 404) {
         notFound.value = true
       }
-    }
   )
 }
 
+// TOC
 const titles = ref<{ title: string; line: string; indent: number }[]>([])
 function updateMenu(text: string, html: string) {
   const el = document.createElement('div')
@@ -200,6 +211,15 @@ function handleAnchorClick(line: string) {
     verticalOffset: -100,
   })
   menuShow.value = false
+}
+
+// Comments
+const comments = ref<ApiResponseComment[]>([])
+const commentsLoading = ref(false)
+function initComments() {
+  axios.get<ApiResponse<{comments: ApiResponseComment[] }>>(`${API_BASE}/comment/post/${post.value.uuid}`).then(({data})=>{
+    comments.value = data.body.comments
+  })
 }
 
 router.afterEach((to, from) => {
@@ -250,8 +270,12 @@ onMounted(() => {
 #post-main
   margin: 3rem auto 4rem
 
-#post-content
+article
   padding: 2rem
+  position: relative
+
+#post-content
+  // padding: 2rem
   position: relative
 
 #post-not-found
@@ -285,15 +309,18 @@ onMounted(() => {
       position: relative
       display: block
       border-radius: 50%
-      background-color: var(--theme-accent-color)
-      --color: #fff
-      color: #fff
-      box-shadow: 0 0 6px #aaa
+      background-color: #fff
+      --color: var(--theme-accent-color)
+      color: var(--theme-accent-color)
+      box-shadow: 0 0 6px #ccc
       width: 2rem
       height: 2rem
       line-height: 2rem
       padding: 0
       text-align: center
+      transition: box-shadow 0.24s ease
+      &:hover
+        box-shadow: 0 0 8px #aaa
       .tooltip
         display: block
         position: absolute
