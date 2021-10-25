@@ -7,6 +7,7 @@ import {
   getProjectSrotFromStr,
 } from 'serverless-kit'
 import { SITE_ENV } from '../src/config'
+import { ApiAttachedUser } from '../src/types'
 import { DbPostDoc, DbUserDoc } from '../src/types/Database'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
@@ -177,12 +178,10 @@ export function getTokenFromReq(req: VercelRequest) {
   )
 }
 
-export async function attachUsers(
+export async function attachUsers<T>(
   ctx: { db: Db },
-  docs: DbPostDoc[] | DbCommentDoc[]
-): Promise<
-  (DbPostDoc & { author: DbUserDoc | null; editor: DbUserDoc | null })[]
-> {
+  docs: T[]
+): Promise<(T & ApiAttachedUser)[]> {
   if (docs.length < 1) return []
   const findList: string[] = []
   docs.forEach(({ author_uuid, editor_uuid }) => {

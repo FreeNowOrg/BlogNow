@@ -2,9 +2,10 @@ import { VercelRequest, VercelResponse } from '@vercel/node'
 import { DbCommentDoc, DbUserDoc } from '../src/types'
 import { COLNAME } from './config'
 import { v4 as UUID } from 'uuid'
-import { router } from './utils'
+import { attachUsers, router } from './utils'
 import { Db } from 'mongodb'
 import { RouteContextDefaults } from 'serverless-kit'
+import { getUserModel } from './user'
 
 const COMMENT_DEFAULTS: DbCommentDoc = {
   target_type: 'post',
@@ -59,7 +60,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
 
       ctx.message = 'Get comments by filter'
       ctx.body = {
-        comments,
+        comments: await attachUsers(ctx, comments),
         filter,
         total_comments,
         offset: ctx.offset,
@@ -102,7 +103,11 @@ export default (req: VercelRequest, res: VercelResponse) => {
 
       ctx.message = 'Comment created.'
       ctx.body = {
-        comment,
+        comment: {
+          ...comment,
+          author: getUserModel(ctx.user, true),
+          editor: getUserModel(null, true),
+        },
         ...dbRes,
       }
     })

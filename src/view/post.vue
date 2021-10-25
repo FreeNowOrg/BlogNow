@@ -255,6 +255,7 @@ function initComments() {
 }
 function handleCommentCreated(data: ApiResponseComment) {
   comments.value.unshift(data)
+  total_comments.value++
 }
 
 router.afterEach((to, from) => {
