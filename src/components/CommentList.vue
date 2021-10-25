@@ -3,10 +3,13 @@
   slot(name='before')
   ul.comment-list.flex.flex-column.gap-1
     slot(name='start')
-    li.comment-item(v-for='item in comments')
+    li.comment-item(
+      v-for='item in comments',
+      :class='{ "is-self": item.author_uuid === userData.uuid, "is-author": author_uuid === item.author_uuid }'
+    )
       .user
         img.avatar(:src='getAvatar(item.author.avatar)')
-        router-link.username(:to='`@${item.author.username}`') {{ item.author.username }}
+        router-link.username(:to='`/@${item.author.username}`') {{ item.author.username }}
       .content
         .content-main {{ item.content }}
         .time
@@ -18,10 +21,11 @@
 
 <script setup lang="ts">
 import {} from 'vue'
-import { getAvatar } from '../utils'
+import { getAvatar, userData } from '../utils'
 import type { ApiResponseComment } from '../types'
 const props = defineProps<{
   comments: ApiResponseComment[]
+  author_uuid?: string
 }>()
 </script>
 

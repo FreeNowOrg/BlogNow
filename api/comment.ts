@@ -81,13 +81,18 @@ export default (req: VercelRequest, res: VercelResponse) => {
     .check<{
       content: string
     }>((ctx) => {
-      const { content } = ctx.req.body
+      const content: string = ctx.req.body?.content || ''
       if (!content.trim()) {
         ctx.status = 400
         ctx.message = 'Missing content'
         return false
       }
-      ctx.content = '' + content
+      if (content.length > 350) {
+        ctx.status = 413
+        ctx.message = 'The content should be less than 350 words'
+        return false
+      }
+      ctx.content = content
     })
     .check(checkCanCreate)
     .action(async (ctx) => {
