@@ -183,6 +183,7 @@ function init() {
       if (e?.response?.status === 404) {
         notFound.value = true
       }
+    }
   )
 }
 
@@ -217,9 +218,13 @@ function handleAnchorClick(line: string) {
 const comments = ref<ApiResponseComment[]>([])
 const commentsLoading = ref(false)
 function initComments() {
-  axios.get<ApiResponse<{comments: ApiResponseComment[] }>>(`${API_BASE}/comment/post/${post.value.uuid}`).then(({data})=>{
-    comments.value = data.body.comments
-  })
+  axios
+    .get<ApiResponse<{ comments: ApiResponseComment[] }>>(
+      `${API_BASE}/comment/post/${post.value.uuid}`
+    )
+    .then(({ data }) => {
+      comments.value = data.body.comments
+    })
 }
 
 router.afterEach((to, from) => {
