@@ -5,7 +5,7 @@
       h1#post-title {{ post ? post.title : notFound ? "Post Not Found" : "Post title" }}
       #post-meta(v-if='post')
         .create-date Created at <time>{{ new Date(post.created_at).toLocaleString() }}</time>
-        .edited-date(v-if='post.edited_at') Edited at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
+        .edited-date(v-if='post.edited_at !== post.created_at') Edited at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
       #post-meta(v-if='!post')
         .desc {{ notFound ? "Oops..." : "Loading post..." }}
 
@@ -315,7 +315,7 @@ article
   position: relative
 
 #post-content
-  // padding: 2rem
+  min-height: 400px
   position: relative
 
 #post-not-found

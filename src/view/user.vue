@@ -14,20 +14,20 @@
 
   main#user-main.body-inner
     .main-flex
-      #user-loading.card.loading(v-if='!user && !notFound')
-        placeholder
-      #user-not-found.card(v-if='notFound') User not found
+      article.card
+        #user-loading.loading(v-if='!user && !notFound')
+          placeholder
+        #user-not-found(v-if='notFound') User not found
 
-      article#user-content.flex-1.card(v-if='!notFound && user')
-        #user-details
-          h3 Slogan
-          p {{ user.slogan || "-" }}
-        hr
-        #user-posts
-          h3 Posts by user
-          #post-loading.loading(v-if='postLoading')
-            placeholder
-          post-list(v-else :posts='posts')
+        #user-content(v-if='!notFound && user')
+          #user-details
+            p.pre {{ user.slogan || "-" }}
+          hr
+          #user-posts
+            h3 Posts by user
+            #post-loading.loading(v-if='postLoading')
+              placeholder
+            post-list(v-else :posts='posts')
 
       global-aside
 </template>

@@ -87,9 +87,9 @@ export default (req: VercelRequest, res: VercelResponse) => {
         ctx.message = 'Missing content'
         return false
       }
-      if (content.length > 350) {
+      if (content.length > 1000) {
         ctx.status = 413
-        ctx.message = 'The content should be less than 350 words'
+        ctx.message = 'The content should be less than 1000 words'
         return false
       }
       ctx.content = content

@@ -1,9 +1,7 @@
 #post-content,
-#post-edit-container .v-md-editor__preview-wrapper
+#edit-post-container.v-md-editor__preview-wrapper
   img
     max-width: 100%
-    width: 400px
-    margin: 0 auto
   blockquote
     margin: 0.2rem 0
     padding: 0.5rem 0.5rem 0.5rem 1rem
@@ -12,12 +10,12 @@
     p
       margin: 0.2rem
   h1
-    @include header-shared(2.2rem, #ef76a3)
+    @include header-shared(2.2rem, rgba(var(--theme-accent-color--rgb), 0.5))
     margin-top: 1rem
     margin-bottom: 1rem
     padding-bottom: none
     border: none
 
-#post-edit-container .v-md-editor__preview-wrapper
+#edit-post-container .v-md-editor__preview-wrapper
   padding: 1rem
   font-size: 14px

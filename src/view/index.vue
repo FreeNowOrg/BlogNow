@@ -165,7 +165,6 @@ onMounted(() => {
         width: 100%
 
 #home-main
-  background-color: #fff
   position: relative
   z-index: 1
 </style>

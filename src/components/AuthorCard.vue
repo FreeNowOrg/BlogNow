@@ -13,8 +13,8 @@
     .bottom
       ul.posts-list
         li.post-placeholder(v-for='item in 10') {{ item }}
-  .co-author(v-if='editor.uuid !== author.uuid')
-    | Co author:
+  .co-author(v-if='editor.uuid && editor.uuid !== author.uuid')
+    | Co author:&nbsp;
     user-link(:user='editor')
 </template>
 

@@ -44,8 +44,8 @@ import { siteMeta } from '../utils'
     .avatar
       img
         width: 110px
-        border-radius: 50%
-        box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2)
+        border-radius: 1em
+        box-shadow: 0 0 1rem rgba(0, 0, 0, 0.05)
     .title
       display: block
       font-size: 1.4rem

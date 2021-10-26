@@ -7,6 +7,7 @@
   #init-view(v-else)
     global-placeholder
   global-footer
+  #fluttering_ribbon
 </template>
 
 <script setup lang="ts">
