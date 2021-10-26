@@ -1,32 +1,33 @@
 <template lang="pug">
 .comment-list-container
-  slot(name='before')
   ul.comment-list.flex.flex-column.gap-1
-    slot(name='start')
     li.comment-item(
       v-for='item in comments',
-      :class='{ "is-self": item.author_uuid === userData.uuid, "is-author": author_uuid === item.author_uuid }'
+      :class='{ "is-self": isSelf(item), "is-author": isAuthor(item) }'
     )
       .user
-        img.avatar(:src='getAvatar(item.author.avatar)')
-        router-link.username(:to='`/@${item.author.username}`') {{ item.author.username }}
+        user-link(:user='item.author')
+        span.tag.self-tag(v-if='isSelf(item)') You
+        span.tag.author-tag(v-if='isSelf(item)') Author
       .content
         .content-main {{ item.content }}
         .time
           .created_at {{ new Date(item.created_at).toLocaleString() }}
-
-    slot(name='end')
-  slot(name='after')
 </template>
 
 <script setup lang="ts">
 import {} from 'vue'
-import { getAvatar, userData } from '../utils'
+import { userData } from '../utils'
 import type { ApiResponseComment } from '../types'
+import UserLink from './UserLink.vue'
 const props = defineProps<{
   comments: ApiResponseComment[]
   author_uuid?: string
 }>()
+const isSelf = (item: ApiResponseComment) =>
+  item.author_uuid === userData.value.uuid
+const isAuthor = (item: ApiResponseComment) =>
+  item.author_uuid === props.author_uuid
 </script>
 
 <style scoped lang="sass">

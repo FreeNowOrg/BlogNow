@@ -3,23 +3,28 @@
   .flex.flex-column.gap-1
     .top.flex.gap-1
       .left
-        router-link.avatar.plain(:to='`/@${user.username}`')
-          img(:src='getAvatar(user.avatar)')
+        router-link.avatar.plain(:to='`/@${author.username}`')
+          img(:src='getAvatar(author.avatar)')
       .right.flex-1
-        router-link.username(:to='`/@${user.username}`') {{ user.username }}
-        .special-title(v-if='user.title', title='Special title') {{ user.title }}
+        router-link.username(:to='`/@${author.username}`') {{ author.username }}
+        .special-title(v-if='author.title', title='Special title') {{ author.title }}
         .btn
           a.button Follow
     .bottom
       ul.posts-list
         li.post-placeholder(v-for='item in 10') {{ item }}
+  .co-author(v-if='editor.uuid !== author.uuid')
+    | Co author:
+    user-link(:user='editor')
 </template>
 
 <script setup lang="ts">
 import { defineProps } from 'vue'
 import { getAvatar } from '../utils'
 import type { ApiResponseUser } from '../types'
-const props = defineProps<{ user: ApiResponseUser }>()
+import UserLink from './UserLink.vue'
+const props =
+  defineProps<{ author: ApiResponseUser; editor: ApiResponseUser }>()
 </script>
 
 <style scoped lang="sass">
@@ -74,4 +79,8 @@ const props = defineProps<{ user: ApiResponseUser }>()
     flex: 1
     text-align: center
     line-height: 80px
+
+.co-author
+  font-size: 0.8rem
+  font-style: italic
 </style>

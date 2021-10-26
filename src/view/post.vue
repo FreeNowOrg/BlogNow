@@ -71,14 +71,14 @@
             .loading(v-if='commentsLoading && comments.length < 1')
               placeholder
             #comments-main(v-else)
+              comment-edit(
+                target_type='post',
+                :target_uuid='post.uuid',
+                :author_uuid='post.author_uuid',
+                @created='handleCommentCreated'
+              )
               .desc Total {{ total_comments }} {{ total_comments > 1 ? "comments" : "comment" }}
               comment-list(:comments='comments')
-                template(#before)
-                  comment-edit(
-                    target_type='post',
-                    :target_uuid='post.uuid',
-                    @created='handleCommentCreated'
-                  )
 
         #post-tools-container
           #post-tools(v-if='post')
@@ -120,7 +120,11 @@
               .tooltip Delete this post
       global-aside
         template(#top)
-          author-card(v-if='post', :user='post.author')
+          author-card(
+            v-if='post',
+            :author='post.author',
+            :editor='post.editor'
+          )
         template(#default)
           .card 123
     .card

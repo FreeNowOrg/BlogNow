@@ -146,7 +146,7 @@ onMounted(() => {
     &:hover
       .cover-img
         transform: scale(1.1)
-        filter: blur(1px)
+        // filter: blur(1px)
     .post-meta
       padding: 2rem 1rem
       flex: 1

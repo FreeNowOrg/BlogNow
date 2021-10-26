@@ -1,12 +1,21 @@
 <template lang="pug">
 .comment-edit
   .login-area(v-if='!isLoggedIn')
-    p Please login to comment.
+    p
+      | Please
+      |
+      router-link(:to='{ name: "auth", query: { backto: $route.path } }') login
+      |
+      | to comment.
   .info-area(v-else-if='userData.authority < 1')
     p Permission denied. Please contact site admin.
-  .edit-area(v-else, :class='{ "loading-cover": submitLoading }')
-    textarea.site-style(v-model='content')
-    button(@click='handleSubmit') Submit
+  .comment-edit-main(v-else, :class='{ "loading-cover": submitLoading }')
+    .user-area
+      user-link(:user='userData')
+    .edit-area
+      textarea.site-style(v-model='content')
+    .btn-area
+      button(@click='handleSubmit') Submit
 </template>
 
 <script setup lang="ts">
@@ -15,6 +24,7 @@ import { defineProps, defineEmits, ref } from 'vue'
 import { API_BASE } from '../config'
 import type { ApiResponse, ApiResponseComment } from '../types'
 import { isLoggedIn, userData } from '../utils'
+import UserLink from './UserLink.vue'
 
 const props = defineProps<{
   target_type: 'post' | 'user' | 'comment'
@@ -33,6 +43,9 @@ const emits = defineEmits({
 })
 
 function handleSubmit() {
+  if (submitLoading.value || !content.value) {
+    return
+  }
   submitLoading.value = true
   axios
     .post(`${API_BASE}/comment/${props.target_type}/${props.target_uuid}`, {
@@ -55,5 +68,6 @@ function handleSubmit() {
 .edit-area
   textarea
     width: 100%
+    min-height: 4em
     resize: vertical
 </style>

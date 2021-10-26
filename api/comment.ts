@@ -30,7 +30,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
   router.endpoint('/api/comment')
   router.setCollection(COLNAME.COMMENT)
 
-  // Get comments for user or post
+  // Get comments for target
   router
     .addRoute()
     .method('GET')

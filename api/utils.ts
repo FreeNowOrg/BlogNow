@@ -32,14 +32,13 @@ declare module '../node_modules/serverless-kit/lib/modules/HandleRouter' {
 }
 
 HandleRouter.prototype.setCollection = function (colName) {
-  this.beforeEach((ctx) => {
+  return this.beforeEach((ctx) => {
     ctx.col = ctx.db.collection(colName)
   })
-  return this
 }
 
 Route.prototype.checkAuth = function (required) {
-  this.check((ctx) => {
+  return this.check((ctx) => {
     if (ctx.user.authority < required) {
       ctx.status = 403
       ctx.message = 'Permission denied'
@@ -52,27 +51,24 @@ Route.prototype.checkAuth = function (required) {
       return false
     }
   })
-  return this
 }
 
 Route.prototype.checkLogin = function () {
-  this.check((ctx) => {
+  return this.check((ctx) => {
     if (!ctx.user.uuid || ctx.user.uid < 0) {
       ctx.status = 401
       ctx.message = 'Please login'
       return false
     }
   })
-  return this
 }
 
 Route.prototype.parseOffsetLimitSort = function () {
-  this.check((ctx) => {
+  return this.check((ctx) => {
     ctx.offset = parseInt((ctx.req.query.offset as string) || '0')
     ctx.limit = Math.min(25, parseInt((ctx.req.query.limit as string) || '10'))
-    ctx.sort = getProjectSrotFromStr((ctx.req.sort as string) || '')
+    ctx.sort = getProjectSrotFromStr((ctx.req.query.sort as string) || '')
   })
-  return this
 }
 
 // Constuct a router

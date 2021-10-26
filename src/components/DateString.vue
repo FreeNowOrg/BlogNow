@@ -4,7 +4,7 @@ time
 
 <script setup lang="ts">
 import {} from 'vue'
-import {} from '../../api/utils'
+import {} from '../utils'
 </script>
 
 <style scoped lang="sass"></style>
