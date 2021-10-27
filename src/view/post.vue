@@ -215,26 +215,27 @@ function handleContentUpdated(text: string, html: string) {
 
   const hTags = Array.from(new Set(list.map((title) => title.tagName))).sort()
 
-  titles.value = list.map((el) => {
-    return {
-      title: el.innerText,
-      line: el.getAttribute('data-v-md-line') as string,
-      indent: hTags.indexOf(el.tagName),
-    }
-  })
+  titles.value = list.map((el) => ({
+    title: el.innerText,
+    line: el.getAttribute('data-v-md-line') as string,
+    indent: hTags.indexOf(el.tagName),
+  }))
 
   // handle internal links
-  document
-    .getElementById('post-content')
-    ?.querySelector('a')
-    ?.addEventListener('click', function (e) {
-      const href = this.href
+  const $content = document.getElementById('post-content')
+  const $links = $content?.querySelectorAll('a')
+  console.info('Content change', { $content, $links })
+  $links?.forEach((item) => {
+    console.info('Link in article', item)
+    item.addEventListener('click', function (e) {
+      const href = this.getAttribute('href') || ''
       const target = this.target
       if (target !== '_blank' && href.startsWith('/')) {
         e.preventDefault()
         router.push(href)
       }
     })
+  })
 }
 
 function handleAnchorClick(line: string) {
@@ -440,6 +441,4 @@ article
     box-shadow: none
     a
       --color: #fff
-    .logo-placeholder
-      background-color: rgba(0, 0, 0, 0.25)
 </style>
