@@ -10,7 +10,14 @@
     p
       margin: 0.2rem
 
-  // Headers
+#edit-post-container .v-md-editor__preview-wrapper
+  padding: 1rem
+  font-size: 14px
+
+// Headers
+#post-content,
+#edit-post-container .v-md-editor__preview-wrapper,
+.site-style
   h1
     @include header-shared(rgba(var(--theme-accent-color--rgb), 0.5))
     margin-top: 1rem
@@ -30,6 +37,8 @@
     margin: 0.4rem 0
     padding: 0 0.4rem
 
-#edit-post-container .v-md-editor__preview-wrapper
-  padding: 1rem
-  font-size: 14px
+  h4
+    @include header-shared(rgba(var(--theme-accent-color--rgb), 0.2))
+    display: inline-block
+    margin: 0.4rem 0
+    padding: 0 0.4rem

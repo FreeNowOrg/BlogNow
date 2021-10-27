@@ -1,6 +1,6 @@
 {
   "name": "blog-now",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "author": "Dragon-Fish <824399619@qq.com>",
   "license": "MIT",
   "private": true,
@@ -15,8 +15,8 @@
     "bump": "bump --nopublish"
   },
   "dependencies": {
-    "axios": "^0.22.0",
-    "highlight.js": "^11.2.0",
+    "axios": "^0.24.0",
+    "highlight.js": "^11.3.1",
     "js-cookie": "^3.0.1",
     "tslib": "^2.3.1",
     "uuid": "^8.3.2",

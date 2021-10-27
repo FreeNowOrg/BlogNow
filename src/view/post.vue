@@ -2,12 +2,12 @@
 #post-container
   header#post-header
     .inner
-      h1#post-title {{ post ? post.title : notFound ? "Post Not Found" : "Post title" }}
+      h1#post-title {{ post ? post.title : notFound ? "Post Not Found" : "Blog Post" }}
       #post-meta(v-if='post')
         .create-date Created at <time>{{ new Date(post.created_at).toLocaleString() }}</time>
         .edited-date(v-if='post.edited_at !== post.created_at') Edited at <time>{{ new Date(post.edited_at).toLocaleString() }}</time>
       #post-meta(v-if='!post')
-        .desc {{ notFound ? "Oops..." : "Loading post..." }}
+        .desc {{ notFound ? "Oops..." : "Now loading" + dots }}
 
   main#post-main.body-inner
     .bread-crumb.card
@@ -15,17 +15,12 @@
         home
       router-link(to='/') 
         | Home
-      | &nbsp;|&nbsp;
+      icon
+        grip-lines-vertical
       router-link(to='/archive') Posts
       icon 
         angle-right
-      | yyyy
-      icon 
-        angle-right
-      | MM
-      icon 
-        angle-right
-      | dd
+      | {{ notFound ? "404" : post ? post.title : "loading" + dots }}
 
     .main-flex
       article.card
@@ -126,14 +121,25 @@
             :editor='post.editor'
           )
         template(#default)
-          .card 123
-    .card
-      details
-        pre {{ post }}
+          .card.site-style(v-if='post')
+            h4 Meta data
+            .flex-list
+              .list-item
+                .key UUID
+                .val {{ post.uuid }}
+              .list-item
+                .key Post ID
+                .val {{ post.pid }}
+              .list-item
+                .key Slug
+                .val {{ post.slug }}
+              .list-item
+                .key Created at
+                .val {{ new Date(post.created_at).toLocaleString() }}
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   AngleRight,
@@ -141,6 +147,7 @@ import {
   Code as CodeIcon,
   Edit,
   FolderOpen,
+  GripLinesVertical,
   Home,
   Pen,
   TrashAlt,
@@ -161,8 +168,16 @@ import axios from 'axios'
 import { API_BASE } from '../config'
 import Placeholder from '../components/Placeholder.vue'
 
-const route = useRoute()
-const router = useRouter()
+const [route, router] = [useRoute(), useRouter()]
+
+const dots = ref('.')
+setInterval(() => {
+  if (dots.value.length >= 6) {
+    dots.value = '.'
+  } else {
+    dots.value += '.'
+  }
+}, 1000)
 
 const post = ref<ApiResponsePost>()
 const bgImg = computed(
@@ -206,7 +221,7 @@ function init() {
 
 // TOC
 const titles = ref<{ title: string; line: string; indent: number }[]>([])
-function handleContentUpdated(text: string, html: string) {
+async function handleContentUpdated(text: string, html: string) {
   // handle update menu
   const el = document.createElement('div')
   el.innerHTML = html
@@ -222,11 +237,10 @@ function handleContentUpdated(text: string, html: string) {
   }))
 
   // handle internal links
+  await nextTick()
   const $content = document.getElementById('post-content')
   const $links = $content?.querySelectorAll('a')
-  console.info('Content change', { $content, $links })
   $links?.forEach((item) => {
-    console.info('Link in article', item)
     item.addEventListener('click', function (e) {
       const href = this.getAttribute('href') || ''
       const target = this.target
@@ -330,7 +344,7 @@ article
   position: relative
 
 #post-content
-  min-height: 400px
+  min-height: 8em
   position: relative
 
 #post-not-found

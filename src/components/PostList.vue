@@ -35,7 +35,6 @@ ul.posts-list
           icon
             pen
         router-link.delete-btn(
-          :to='{ name: "edit-post", params: { uuid: item.uuid } }',
           v-if='userData.uuid === item.author_uuid || userData.authority >= 3'
         )
           icon
@@ -94,6 +93,7 @@ const props = defineProps<{ posts: ApiResponsePost[] }>()
         width: 100%
         height: 100%
         transition: all 0.24s ease
+        object-fit: cover
       &:hover img
         transform: scale(1.1)
     .right
@@ -114,4 +114,11 @@ const props = defineProps<{ posts: ApiResponsePost[] }>()
         margin-right: 0.5em
       a
         vertical-align: middle
+    .actions
+      display: flex
+      flex-direction: column
+      gap: 0.4rem
+      justify-content: center
+      .delete-btn
+        --color: #b00
 </style>

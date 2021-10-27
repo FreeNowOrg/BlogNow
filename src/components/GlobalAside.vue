@@ -19,9 +19,9 @@ aside#global-aside
       .flex-1
         .key Users
         .val {{ siteMeta?.total_users || "-" }}
-  .card
+  .card.site-style
     h4 Announcement
-    p Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    p Lorem ipsum dolor sit amet, consectetur adipisicing elit.
 
   slot(name='default')
 </template>

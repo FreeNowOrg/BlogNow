@@ -2,8 +2,8 @@
 #archive-container
   main#archive-main
     .main-flex.body-inner
-      #archive-post-list.flex-1
-        .card
+      article#archive-post-list
+        #post-content.card
           h1 Recent posts
           .loading(v-if='posts.length < 1')
             placeholder

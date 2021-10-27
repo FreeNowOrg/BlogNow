@@ -27,6 +27,8 @@
             router-link.title(
               :to='{ name: item.slug ? "post-slug" : "post-uuid", params: { slug: item.slug, uuid: item.uuid } }'
             ) {{ item.title }}
+            .author
+              user-link(:user='item.author')
             .time Created at {{ new Date(item.created_at).toLocaleString() }}
             p.preview {{ item.content.length > 120 ? item.content.slice(0, 120) + "..." : item.content }}
       #home-post-list.flex-1.no-data(v-else)
@@ -42,8 +44,10 @@ import { setTitle, getRecentPosts } from '../utils'
 import { AngleDown } from '@vicons/fa'
 import scrollTo from 'animated-scroll-to'
 import GlobalAside from '../components/GlobalAside.vue'
+import UserLink from '../components/UserLink.vue'
+import type { ApiResponsePost } from '../types'
 
-const recents = ref<any[]>([])
+const recents = ref<ApiResponsePost[]>([])
 
 function handleJumpToMain() {
   scrollTo(document.getElementById('home-main') as HTMLElement, {

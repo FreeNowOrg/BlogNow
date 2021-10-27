@@ -7,7 +7,7 @@
   #init-view(v-else)
     global-placeholder
   global-footer
-  #fluttering_ribbon
+  float-toolbox
 </template>
 
 <script setup lang="ts">
@@ -20,6 +20,7 @@ import GlobalFooter from './components/GlobalFooter.vue'
 import { initUserData, getSiteMeta, globalInitDone } from './utils'
 import GlobalPlaceholder from './components/GlobalPlaceholder.vue'
 import NProgress from './components/NProgress.vue'
+import FloatToolbox from './components/FloatToolbox.vue'
 
 onMounted(() => {
   initUserData()
