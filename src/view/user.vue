@@ -182,4 +182,6 @@ pre
     box-shadow: none
     a
       --color: #fff
+    .logo-placeholder
+      background-color: rgba(0, 0, 0, 0.25)
 </style>

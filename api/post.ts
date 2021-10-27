@@ -207,7 +207,7 @@ export default (req: VercelRequest, res: VercelResponse) => {
     })
     // User authentication
     .check((ctx) => {
-      if (ctx.post.author_uuid !== ctx.user.uuid && ctx.user.authority <= 4) {
+      if (ctx.post.author_uuid !== ctx.user.uuid && ctx.user.authority < 4) {
         ctx.status = 403
         ctx.message = 'Permission denied'
         return false

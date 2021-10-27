@@ -37,7 +37,7 @@
             v-if='post',
             v-model='post.content',
             mode='preview',
-            @change='updateMenu'
+            @change='handleContentUpdated'
           )
 
         #post-not-found(v-if='notFound')
@@ -206,7 +206,8 @@ function init() {
 
 // TOC
 const titles = ref<{ title: string; line: string; indent: number }[]>([])
-function updateMenu(text: string, html: string) {
+function handleContentUpdated(text: string, html: string) {
+  // handle update menu
   const el = document.createElement('div')
   el.innerHTML = html
   const anchors = el.querySelectorAll('h1, h2, h3, h4, h5, h6')
@@ -219,6 +220,21 @@ function updateMenu(text: string, html: string) {
       title: el.innerText,
       line: el.getAttribute('data-v-md-line') as string,
       indent: hTags.indexOf(el.tagName),
+    }
+  })
+
+  // handle internal links
+  const $content = document.getElementById('#post-content') as HTMLDivElement
+  const links = $content.querySelector('a')
+  links?.addEventListener('click', function (e) {
+    const href = this.href
+    const target = this.target
+    if (target === '_blank') {
+      return
+    }
+    if (href.startsWith('/')) {
+      e.preventDefault()
+      router.push(href)
     }
   })
 }
@@ -426,4 +442,6 @@ article
     box-shadow: none
     a
       --color: #fff
+    .logo-placeholder
+      background-color: rgba(0, 0, 0, 0.25)
 </style>

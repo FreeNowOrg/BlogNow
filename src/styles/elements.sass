@@ -18,17 +18,20 @@
     z-index: -1
 
 h1
-  font-size: 2.2rem
+  @include header-shared(2.2rem, rgba(var(--theme-accent-color--rgb), 0.5))
 
 h2,
 h2.align-center
-  @include header-shared(1.4rem, rgba(var(--theme-accent-color--rgb), 0.3))
+  @include header-shared(1.5rem, rgba(var(--theme-accent-color--rgb), 0.35))
   display: inline-block
   position: relative
   left: 50%
   transform: translateX(-50%)
   /* margin: 0.4rem auto */
   padding: 0 0.4rem
+
+h3
+  @include header-shared(1.2rem, rgba(var(--theme-accent-color--rgb), 0.25))
 
 .align-center,
 #post-content,

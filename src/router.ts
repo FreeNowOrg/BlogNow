@@ -1,17 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import scrollTo from 'animated-scroll-to'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [],
-  scrollBehavior(to, from) {
-    if (to === from) return
-    return { top: 0 }
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return {
+        top: 0,
+        left: 0,
+        behavior: 'smooth',
+      }
+    }
   },
 })
 
 router.afterEach(({ name }) => {
   document.body.setAttribute('data-route', name as string)
-  // Fix route when modal opened
   document.body.style.overflow = 'visible'
 })
 

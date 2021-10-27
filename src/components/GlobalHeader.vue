@@ -237,10 +237,6 @@ onMounted(() => {
   .global-header
     .nav-links > .item
       display: none
-
-[data-at-top='true']
-  .logo-placeholder
-    background-color: rgba(0, 0, 0, 0.25)
 </style>
 
 <style lang="sass">
