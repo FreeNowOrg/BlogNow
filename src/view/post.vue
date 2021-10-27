@@ -224,19 +224,17 @@ function handleContentUpdated(text: string, html: string) {
   })
 
   // handle internal links
-  const $content = document.getElementById('#post-content') as HTMLDivElement
-  const links = $content.querySelector('a')
-  links?.addEventListener('click', function (e) {
-    const href = this.href
-    const target = this.target
-    if (target === '_blank') {
-      return
-    }
-    if (href.startsWith('/')) {
-      e.preventDefault()
-      router.push(href)
-    }
-  })
+  document
+    .getElementById('post-content')
+    ?.querySelector('a')
+    ?.addEventListener('click', function (e) {
+      const href = this.href
+      const target = this.target
+      if (target !== '_blank' && href.startsWith('/')) {
+        e.preventDefault()
+        router.push(href)
+      }
+    })
 }
 
 function handleAnchorClick(line: string) {

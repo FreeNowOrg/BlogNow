@@ -9,12 +9,26 @@
     color: #888
     p
       margin: 0.2rem
+
+  // Headers
   h1
-    @include header-shared(2.2rem, rgba(var(--theme-accent-color--rgb), 0.5))
+    @include header-shared(rgba(var(--theme-accent-color--rgb), 0.5))
     margin-top: 1rem
     margin-bottom: 1rem
-    padding-bottom: none
+    padding: 0 0.4rem
     border: none
+
+  h2
+    @include header-shared(rgba(var(--theme-accent-color--rgb), 0.35))
+    display: inline-block
+    margin: 0.4rem 0
+    padding: 0 0.4rem
+
+  h3
+    @include header-shared(rgba(var(--theme-accent-color--rgb), 0.25))
+    display: inline-block
+    margin: 0.4rem 0
+    padding: 0 0.4rem
 
 #edit-post-container .v-md-editor__preview-wrapper
   padding: 1rem

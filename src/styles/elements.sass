@@ -1,7 +1,6 @@
 // Header
-@mixin header-shared($font-size, $shadow-color)
+@mixin header-shared($shadow-color)
   position: relative
-  font-size: $font-size
   text-shadow: 0px 2px 0 var(--theme-text-shadow-color)
   z-index: 1
   &::after
@@ -17,28 +16,16 @@
     bottom: 0px
     z-index: -1
 
+h1, h2, h3, h4, h5, h6
+  font-weight: 600
 h1
-  @include header-shared(2.2rem, rgba(var(--theme-accent-color--rgb), 0.5))
-
-h2,
-h2.align-center
-  @include header-shared(1.5rem, rgba(var(--theme-accent-color--rgb), 0.35))
-  display: inline-block
-  position: relative
-  left: 50%
-  transform: translateX(-50%)
-  /* margin: 0.4rem auto */
-  padding: 0 0.4rem
-
+  font-size: 2.2rem
+h2
+  font-size: 1.6rem
 h3
-  @include header-shared(1.2rem, rgba(var(--theme-accent-color--rgb), 0.25))
-
-.align-center,
-#post-content,
-#post-edit-container .v-md-editor__preview-wrapper
-  h2
-    left: unset
-    transform: unset
+  font-size: 1.2rem
+h4, h5, h6
+  font-size: 1.125rem
 
 // Links
 a
