@@ -1,12 +1,12 @@
 // Header
-@mixin header-shared($shadow-color)
+@mixin header-shared($shadow-color, $bg-width)
   position: relative
   text-shadow: 0px 2px 0 var(--theme-text-shadow-color)
   z-index: 1
   &::after
-    width: 50%
-    height: 0.5em
     content: ""
+    width: $bg-width
+    height: 0.5em
     display: block
     position: absolute
     background-color: $shadow-color

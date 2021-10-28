@@ -52,8 +52,14 @@
 import { onMounted, ref } from 'vue'
 import { getAvatar, userData, isLoggedIn } from '../utils'
 import { AngleDown } from '@vicons/fa'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const userDropdownShow = ref(false)
+
+router.beforeEach(() => {
+  userDropdownShow.value = false
+})
 
 onMounted(() => {
   document.body.addEventListener('click', () => {

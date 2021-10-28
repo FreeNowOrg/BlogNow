@@ -8,11 +8,7 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition
     } else {
-      return {
-        top: 0,
-        left: 0,
-        behavior: 'smooth',
-      }
+      scrollTo(0, { maxDuration: 800 })
     }
   },
 })
@@ -20,6 +16,7 @@ const router = createRouter({
 router.afterEach(({ name }) => {
   document.body.setAttribute('data-route', name as string)
   document.body.style.overflow = 'visible'
+  document.documentElement.style.overflow = 'visible'
 })
 
 // Home

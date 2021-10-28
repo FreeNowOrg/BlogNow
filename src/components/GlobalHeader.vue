@@ -14,16 +14,8 @@ nav#global-header.flex.gap-1
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted } from 'vue'
 import GlobalHeaderUserDropdown from './GlobalHeaderUserDropdown.vue'
-
-const userDropdownShow = ref(false)
-const router = useRouter()
-
-router.beforeEach(() => {
-  userDropdownShow.value = false
-})
 
 onMounted(() => {
   document.addEventListener('scroll', () => {

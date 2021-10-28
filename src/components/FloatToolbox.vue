@@ -60,6 +60,7 @@ import {
 import QuickEdit from './QuickEdit.vue'
 import { useRouter } from 'vue-router'
 import { userData } from '../utils'
+import scrollTo from 'animated-scroll-to'
 
 const router = useRouter()
 
@@ -81,12 +82,13 @@ watch(isHide, (val) => {
   }
 })
 
+function backToTop() {
+  scrollTo(0, { maxDuration: 800 })
+}
+
 onMounted(() => {
   isHide.value = localStorage.getItem('BLOGNOW_TOOLBOX_STATE') === 'hide'
 })
-function backToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
 </script>
 
 <style scoped lang="sass">
@@ -156,6 +158,12 @@ function backToTop() {
 [data-at-top='true']
   #back-to-top
     display: none !important
+
+@media screen and (max-width: 800px)
+  #float-toolbox
+    .fixed-container
+      right: 50%
+      transform: translateX(50%)
 </style>
 
 <style lang="sass">
