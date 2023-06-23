@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import { DbCommentDoc, DbUserDoc } from '../src/types'
+import { DbCommentDoc, DbUserDoc } from '../types'
 import { COLNAME } from './config'
 import { v4 as UUID } from 'uuid'
 import { attachUsers, router } from './utils'

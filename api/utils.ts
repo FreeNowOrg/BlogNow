@@ -6,9 +6,9 @@ import {
   Route,
   getProjectSrotFromStr,
 } from 'serverless-kit'
-import { SITE_ENV } from '../src/config'
-import { ApiAttachedUser } from '../src/types'
-import { DbPostDoc, DbUserDoc } from '../src/types/Database'
+import { SITE_ENV } from '../config'
+import { ApiAttachedUser } from '../types'
+import { DbPostDoc, DbUserDoc } from '../types/Database'
 import { COLNAME, getLocalConfig } from './config'
 import { getUserModel, TOKEN_COOKIE_NAME } from './user'
 

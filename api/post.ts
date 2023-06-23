@@ -1,5 +1,5 @@
 import { v4 as UUID } from 'uuid'
-import { DbPostDoc, DbUserDoc } from '../src/types/Database'
+import { DbPostDoc, DbUserDoc } from '../types/Database'
 import { COLNAME } from './config'
 import { attachUsers, router, sortKeys } from './utils'
 import slugify from 'slugify'
@@ -279,7 +279,7 @@ async function checkCanView(
       display_reason = 'author'
     } else if (ctx.post.allowed_users.includes(ctx.user.uuid)) {
       display_reason = 'allowed_user'
-    } else if (ctx.user.authority = 4) {
+    } else if ((ctx.user.authority = 4)) {
       display_reason = 'moderator'
     } else {
       ctx.status = 404

@@ -1,4 +1,4 @@
-import { DbAuthorityKeys, DbUserDoc } from '../src/types/Database'
+import { DbAuthorityKeys, DbUserDoc } from '../types/Database'
 import { COLNAME } from './config'
 import { attachUsers, router, unique } from './utils'
 import * as crypto from 'crypto'

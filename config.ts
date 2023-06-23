@@ -1,4 +1,4 @@
-import { version } from '../package.json'
+import { version } from './package.json'
 
 export const SITE_ENV = process.env.NODE_ENV === 'development' ? 'dev' : 'prod'
 export const API_BASE =
